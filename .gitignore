@@ -1,0 +1,32 @@
+# Ignore node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+jspm_packages/
+
+# Optional build output
+dist/
+build/
+
+# dotenv environment files
+.env
+.env.local
+.env.*.local
+
+# IDE folders
+.vscode/
+.idea/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Optional: ignore test coverage output
+coverage/
