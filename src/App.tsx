@@ -16,8 +16,7 @@ function App() {
   return (
     <div className="container">
       <Header onToggleGenerateCss={handleToggleGenerateCss} />
-      <p>jnedhnehn</p>
-
+      
       <main className="main">
         <Sidebar />
         <Canvas />
