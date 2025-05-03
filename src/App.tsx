@@ -5,9 +5,12 @@ import GenerateCss from "./components/GenerateCss/GenerateCss";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
 import { useState } from "react";
+import { useAppSelector } from "./redux/store";
+import Alert from "./components/GenerateCss/Alert/Alert";
 
 function App() {
   const [showGenerateCss, setShowGenerateCss] = useState(false);
+  const alertOpen = useAppSelector((state) => state.alert.isOpen);
 
   const handleToggleGenerateCss = () => {
     setShowGenerateCss((prev) => !prev);
@@ -16,7 +19,8 @@ function App() {
   return (
     <div className="container">
       <Header onToggleGenerateCss={handleToggleGenerateCss} />
-      
+      {alertOpen && <Alert message="Url Copied" />}
+
       <main className="main">
         <Sidebar />
         <Canvas />

@@ -1,13 +1,14 @@
 import style from "./GenerateCss.module.css";
-import { useAnimationStore } from "../../redux/store";
-import { Code, Copy } from "lucide-react";
+import { useAppSelector } from "../../redux/store";
+import { SquareX } from "lucide-react";
+import CopyToClipboard from "./CopyToClipboard/CopyToClipboard";
 
 type GenerateCssProps = {
   onClose: () => void;
 };
 
 const GenerateCss = ({ onClose }: GenerateCssProps) => {
-  const { config } = useAnimationStore();
+  const { config } = useAppSelector((state) => state.animation);
 
   const generateCSS = () => {
     return `
@@ -33,30 +34,14 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
 
   return (
     <div id="generated-css" className={style.container}>
-      <div className={style.close}>
-        <button onClick={onClose} className={style.closeButton}>
-          ✖
-        </button>
-      </div>
-      <div className={style.copyCss}>
-        <div className="sectionHeader">
-          <div className="logo">
-            <Code className="logoIcon" />
-            <h2 className="sectionTitle">Generated CSS</h2>
-          </div>
-          <button
-            onClick={() => {
-              const code =
-                document.querySelector("#generated-css")?.textContent;
-              if (code) navigator.clipboard.writeText(code);
-            }}
-            className="primaryButton"
-          >
-            <Copy className="buttonIcon" />
-            Copy
-          </button>
+      <SquareX onClick={onClose} className={style.closeButton} />
+      <div className={style.titleContainer}>
+        <div className={style.generateCss}>
+          <CopyToClipboard css={generateCSS()} />
+          <h2>Generated CSS</h2>
         </div>
       </div>
+
       <div className={style.code}>{generateCSS()}</div>
     </div>
   );

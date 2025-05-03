@@ -1,12 +1,14 @@
 import { useEffect, useRef } from "react";
-import { useAnimationStore } from "../../redux/store";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
+import { setIsPlaying } from "../../redux/slices/animationSlice";
 import styles from "./Canvas.module.css";
 import { Pause, Play } from "lucide-react";
 
 const Canvas = () => {
   const elementRef = useRef<HTMLDivElement>(null);
-  const { config, isPlaying } = useAnimationStore();
-  const { setIsPlaying, TestAnimation } = useAnimationStore();
+  const dispatch = useAppDispatch();
+
+  const { config, isPlaying } = useAppSelector((state) => state.animation);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -63,13 +65,17 @@ const Canvas = () => {
   return (
     <div className={styles.canvasContainer}>
       <div className={styles.animatedElementContainer}>
-        <div ref={elementRef} className={styles.animatedElement} />
+        <div
+          ref={elementRef}
+          className={styles.animatedElement}
+          style={style}
+        />
       </div>
 
       <div className={styles.playSection}>
         <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="primaryButton"
+          onClick={() => dispatch(setIsPlaying(!isPlaying))}
+          className={styles.primaryButton}
         >
           {isPlaying ? (
             <Pause className={styles.buttonIcon} />

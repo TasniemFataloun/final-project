@@ -1,9 +1,10 @@
 #root {
   --header: #030712;
   --pr: #111827;
-  --white: #f3f4f6;
+  --white: #e0e0e0;
   --panel-bg: #1e1e1e;
   --bg: #2c2c2c;
+  --warning: #ff9500;
   width: 100%;
 }
 
@@ -25,12 +26,13 @@ h3 {
   margin-bottom: 0.5rem;
 }
 
-label{
+label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--white);}
+  color: var(--white);
+}
 
-button {
+set {
   outline: none;
 }
 button:focus {
@@ -41,4 +43,3 @@ button:focus {
   display: flex;
   width: 100%;
 }
-

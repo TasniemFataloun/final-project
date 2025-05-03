@@ -1,6 +1,8 @@
 .exportCss{
-    padding: 1rem;
-    width: 10rem;
-    background-color: green;
-    border-radius: 4rem
+    padding: 1rem 3rem;
+    background-color: var(--panel-bg);
+    border-radius: 4rem;
+    color: var(--white);
+    text-align: center;
+    cursor: pointer;
 }

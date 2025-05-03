@@ -3,11 +3,16 @@
 }
 
 .headerContent {
-  max-width: 1200px;
+  padding: 0 3rem;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.logoTitleContainer {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
@@ -15,19 +20,6 @@
   height: 5rem;
 }
 
-.primaryButton {
-  display: flex;
-  align-items: center;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  color: #f3f4f6;
-  background-color: var(--panel-bg);
-  outline: none;
-}
-
-.primaryButton:focus {
-    outline: none;
-}
 .buttonIcon {
   width: 1rem;
   height: 1rem;

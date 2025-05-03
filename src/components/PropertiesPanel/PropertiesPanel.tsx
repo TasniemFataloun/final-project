@@ -1,16 +1,17 @@
 import style from "./PropertiesPanel.module.css";
-import { useAnimationStore } from "../../redux/store";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
+import { setConfig } from "../../redux/slices/animationSlice";
+
 const PropertiesPanel = () => {
-  const { config, setConfig } = useAnimationStore();
+  const dispatch = useAppDispatch();
+  const { config } = useAppSelector((state) => state.animation);
 
   /*  const updateTransform = (key: string, value: string) => {
     setConfig({...config,transform: {...config.transform,[key]: value,}})
   } */
 
   return (
-    <aside
-      className={style.container}
-    >
+    <aside className={style.container}>
       <h2>Properties</h2>
       <div className={style.section}>
         <h3>Animation</h3>
@@ -23,7 +24,7 @@ const PropertiesPanel = () => {
               step="0.1"
               value={config.duration}
               onChange={(e) =>
-                setConfig({ ...config, duration: e.target.value })
+                dispatch(setConfig({ ...config, duration: e.target.value }))
               }
               className={style.input}
             />
@@ -34,7 +35,9 @@ const PropertiesPanel = () => {
             <select
               value={config.timingFunction}
               onChange={(e) =>
-                setConfig({ ...config, timingFunction: e.target.value })
+                dispatch(
+                  setConfig({ ...config, timingFunction: e.target.value })
+                )
               }
               className={style.select}
             >
@@ -53,7 +56,9 @@ const PropertiesPanel = () => {
               min="0"
               step="0.1"
               value={config.delay}
-              onChange={(e) => setConfig({ ...config, delay: e.target.value })}
+              onChange={(e) =>
+                dispatch(setConfig({ ...config, delay: e.target.value }))
+              }
               className={style.input}
             />
           </div>
@@ -63,7 +68,9 @@ const PropertiesPanel = () => {
             <select
               value={config.iterationCount}
               onChange={(e) =>
-                setConfig({ ...config, iterationCount: e.target.value })
+                dispatch(
+                  setConfig({ ...config, iterationCount: e.target.value })
+                )
               }
               className={style.select}
             >
@@ -89,7 +96,7 @@ const PropertiesPanel = () => {
                 step="1"
                 value={config.width}
                 onChange={(e) =>
-                  setConfig({ ...config, width: e.target.value })
+                  dispatch(setConfig({ ...config, width: e.target.value }))
                 }
                 className={style.input}
               />
@@ -103,7 +110,7 @@ const PropertiesPanel = () => {
                 step="1"
                 value={config.height}
                 onChange={(e) =>
-                  setConfig({ ...config, height: e.target.value })
+                  dispatch(setConfig({ ...config, height: e.target.value }))
                 }
                 className={style.input}
               />
@@ -121,10 +128,12 @@ const PropertiesPanel = () => {
               step="0.1"
               value={config.transform.scale}
               onChange={(e) =>
-                setConfig({
-                  ...config,
-                  transform: { ...config.transform, scale: e.target.value },
-                })
+                dispatch(
+                  setConfig({
+                    ...config,
+                    transform: { ...config.transform, scale: e.target.value },
+                  })
+                )
               }
               className={style.input}
             />
@@ -136,10 +145,12 @@ const PropertiesPanel = () => {
               type="number"
               value={config.transform.rotate}
               onChange={(e) =>
-                setConfig({
-                  ...config,
-                  transform: { ...config.transform, rotate: e.target.value },
-                })
+                dispatch(
+                  setConfig({
+                    ...config,
+                    transform: { ...config.transform, rotate: e.target.value },
+                  })
+                )
               }
               className={style.input}
             />
@@ -151,13 +162,15 @@ const PropertiesPanel = () => {
               type="number"
               value={config.transform.translateX}
               onChange={(e) =>
-                setConfig({
-                  ...config,
-                  transform: {
-                    ...config.transform,
-                    translateX: e.target.value,
-                  },
-                })
+                dispatch(
+                  setConfig({
+                    ...config,
+                    transform: {
+                      ...config.transform,
+                      translateX: e.target.value,
+                    },
+                  })
+                )
               }
               className={style.input}
             />
@@ -169,13 +182,15 @@ const PropertiesPanel = () => {
               type="number"
               value={config.transform.translateY}
               onChange={(e) =>
-                setConfig({
-                  ...config,
-                  transform: {
-                    ...config.transform,
-                    translateY: e.target.value,
-                  },
-                })
+                dispatch(
+                  setConfig({
+                    ...config,
+                    transform: {
+                      ...config.transform,
+                      translateY: e.target.value,
+                    },
+                  })
+                )
               }
               className={style.input}
             />
@@ -191,7 +206,9 @@ const PropertiesPanel = () => {
           max="1"
           step="0.1"
           value={config.opacity}
-          onChange={(e) => setConfig({ ...config, opacity: e.target.value })}
+          onChange={(e) =>
+            dispatch(setConfig({ ...config, opacity: e.target.value }))
+          }
           className={style.input}
         />
       </div>

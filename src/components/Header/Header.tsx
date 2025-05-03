@@ -3,15 +3,16 @@ import ExportCss from "../ExportCss/ExportCss";
 
 type HeaderProps = {
   onToggleGenerateCss: () => void;
-}
+};
 
 const Header = ({ onToggleGenerateCss }: HeaderProps) => {
-
   return (
     <header className={style.header}>
       <div className={style.headerContent}>
-        <img src="/logo.png" className={style.logo} />
-        <h1>CSS Motion Studio</h1>
+        <div className={style.logoTitleContainer}>
+          <img src="/logo.png" className={style.logo} />
+          <h1>CSS Motion Studio</h1>
+        </div>
 
         <ExportCss onClick={onToggleGenerateCss} />
       </div>
