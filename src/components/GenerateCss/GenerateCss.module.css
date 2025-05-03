@@ -1,0 +1,37 @@
+.container {
+  height: 100%;
+  overflow: auto;
+  background-color: var(--panel-bg);
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: #d1d5db;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  animation: slideInRight 0.5s ease-in-out forwards;
+}
+
+.code {
+  font-family: monospace;
+  white-space: pre;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    visibility: visible;
+  }
+  to {
+    transform: translateX(0);
+  }
+}
