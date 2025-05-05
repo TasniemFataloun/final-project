@@ -26,7 +26,7 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
 }
 
 .animated-element {
-  animation: transform ${config.duration}s ${config.timingFunction} ${config.delay}s ${config.iterationCount};
+  animation: transform ${config.animation.duration}s ${config.animation.timingFunction} ${config.animation.delay}s ${config.animation.iterationCount};
 }
 
 `.trim();

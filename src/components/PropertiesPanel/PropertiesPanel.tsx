@@ -1,10 +1,18 @@
 import style from "./PropertiesPanel.module.css";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { setConfig } from "../../redux/slices/animationSlice";
+import { updateElementConfig } from "../../redux/slices/elementsSlice";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
-  const { config } = useAppSelector((state) => state.animation);
+  const { selectedElementId, elements } = useAppSelector(
+    (state) => state.elements
+  );
+
+  const selectedElement = elements.find((el) => el.id === selectedElementId);
+
+  if (!selectedElement) return null;
+
+  const config = selectedElement.config;
 
   /*  const updateTransform = (key: string, value: string) => {
     setConfig({...config,transform: {...config.transform,[key]: value,}})
@@ -22,9 +30,20 @@ const PropertiesPanel = () => {
               type="number"
               min="0"
               step="0.1"
-              value={config.duration}
+              value={config.animation.duration}
               onChange={(e) =>
-                dispatch(setConfig({ ...config, duration: e.target.value }))
+                dispatch(
+                  updateElementConfig({
+                    id: selectedElementId,
+                    config: {
+                      ...config,
+                      animation: {
+                        ...config.animation,
+                        duration: e.target.value,
+                      },
+                    },
+                  })
+                )
               }
               className={style.input}
             />
@@ -33,10 +52,19 @@ const PropertiesPanel = () => {
           <div className={style.option}>
             <label className={style.label}>Timing Function</label>
             <select
-              value={config.timingFunction}
+              value={config.animation.timingFunction}
               onChange={(e) =>
                 dispatch(
-                  setConfig({ ...config, timingFunction: e.target.value })
+                  updateElementConfig({
+                    id: selectedElementId,
+                    config: {
+                      ...config,
+                      animation: {
+                        ...config.animation,
+                        timingFunction: e.target.value,
+                      },
+                    },
+                  })
                 )
               }
               className={style.select}
@@ -55,9 +83,17 @@ const PropertiesPanel = () => {
               type="number"
               min="0"
               step="0.1"
-              value={config.delay}
+              value={config.animation.delay}
               onChange={(e) =>
-                dispatch(setConfig({ ...config, delay: e.target.value }))
+                dispatch(
+                  updateElementConfig({
+                    id: selectedElementId,
+                    config: {
+                      ...config,
+                      animation: { ...config.animation, delay: e.target.value },
+                    },
+                  })
+                )
               }
               className={style.input}
             />
@@ -66,10 +102,19 @@ const PropertiesPanel = () => {
           <div className={style.option}>
             <label className={style.label}>Iteration Count</label>
             <select
-              value={config.iterationCount}
+              value={config.animation.iterationCount}
               onChange={(e) =>
                 dispatch(
-                  setConfig({ ...config, iterationCount: e.target.value })
+                  updateElementConfig({
+                    id: selectedElementId,
+                    config: {
+                      ...config,
+                      animation: {
+                        ...config.animation,
+                        iterationCount: e.target.value,
+                      },
+                    },
+                  })
                 )
               }
               className={style.select}
@@ -94,9 +139,17 @@ const PropertiesPanel = () => {
                 type="number"
                 min="0"
                 step="1"
-                value={config.width}
+                value={config.size.width}
                 onChange={(e) =>
-                  dispatch(setConfig({ ...config, width: e.target.value }))
+                  dispatch(
+                    updateElementConfig({
+                      id: selectedElementId,
+                      config: {
+                        ...config,
+                        size: { ...config.size, width: e.target.value },
+                      },
+                    })
+                  )
                 }
                 className={style.input}
               />
@@ -108,9 +161,17 @@ const PropertiesPanel = () => {
                 type="number"
                 min="0"
                 step="1"
-                value={config.height}
+                value={config.size.height}
                 onChange={(e) =>
-                  dispatch(setConfig({ ...config, height: e.target.value }))
+                  dispatch(
+                    updateElementConfig({
+                      id: selectedElementId,
+                      config: {
+                        ...config,
+                        size: { ...config.size, height: e.target.value },
+                      },
+                    })
+                  )
                 }
                 className={style.input}
               />
@@ -129,9 +190,12 @@ const PropertiesPanel = () => {
               value={config.transform.scale}
               onChange={(e) =>
                 dispatch(
-                  setConfig({
-                    ...config,
-                    transform: { ...config.transform, scale: e.target.value },
+                  updateElementConfig({
+                    id: selectedElementId,
+                    config: {
+                      ...config,
+                      transform: { ...config.transform, scale: e.target.value },
+                    },
                   })
                 )
               }
@@ -146,9 +210,15 @@ const PropertiesPanel = () => {
               value={config.transform.rotate}
               onChange={(e) =>
                 dispatch(
-                  setConfig({
-                    ...config,
-                    transform: { ...config.transform, rotate: e.target.value },
+                  updateElementConfig({
+                    id: selectedElementId,
+                    config: {
+                      ...config,
+                      transform: {
+                        ...config.transform,
+                        rotate: e.target.value,
+                      },
+                    },
                   })
                 )
               }
@@ -161,17 +231,20 @@ const PropertiesPanel = () => {
             <input
               type="number"
               value={config.transform.translateX}
-              onChange={(e) =>
+              onChange={(e) => {
                 dispatch(
-                  setConfig({
-                    ...config,
-                    transform: {
-                      ...config.transform,
-                      translateX: e.target.value,
+                  updateElementConfig({
+                    id: selectedElementId, // This will only be passed if it's not null
+                    config: {
+                      ...config,
+                      transform: {
+                        ...config.transform,
+                        translateX: e.target.value,
+                      },
                     },
                   })
-                )
-              }
+                );
+              }}
               className={style.input}
             />
           </div>
@@ -183,11 +256,14 @@ const PropertiesPanel = () => {
               value={config.transform.translateY}
               onChange={(e) =>
                 dispatch(
-                  setConfig({
-                    ...config,
-                    transform: {
-                      ...config.transform,
-                      translateY: e.target.value,
+                  updateElementConfig({
+                    id: selectedElementId, // This will only be passed if it's not null
+                    config: {
+                      ...config,
+                      transform: {
+                        ...config.transform,
+                        translateY: e.target.value,
+                      },
                     },
                   })
                 )
@@ -207,7 +283,15 @@ const PropertiesPanel = () => {
           step="0.1"
           value={config.opacity}
           onChange={(e) =>
-            dispatch(setConfig({ ...config, opacity: e.target.value }))
+            dispatch(
+              updateElementConfig({
+                id: selectedElementId,
+                config: {
+                  ...config,
+                  opacity: e.target.value,
+                },
+              })
+            )
           }
           className={style.input}
         />

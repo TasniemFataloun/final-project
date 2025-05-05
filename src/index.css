@@ -33,16 +33,18 @@ h1 {
   line-height: 1.1;
 }
 
-
-
-
 @keyframes animation {
   from {
-      transform: scale(1) rotate(0deg) translate(0px, 0px);
-      opacity: 1;
+    width: 200px;
+    height: 200px;
+    transform: scale(1) rotate(0deg) translate(0px, 0px);
+    opacity: 1;
   }
   to {
-      transform: scale(var(--scale)) rotate(var(--rotate)) translate(var(--translate-x), var(--translate-y));
-      opacity: var(--opacity);
+    width: var(--width);
+    height: var(--height);
+    transform: scale(var(--scale)) rotate(var(--rotate))
+      translate(var(--translate-x), var(--translate-y));
+    opacity: var(--opacity);
   }
 }
