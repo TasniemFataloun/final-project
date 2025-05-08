@@ -1,11 +1,12 @@
 .container {
   padding: 1rem;
-  width: 35rem;
+  min-width: 20rem;
+  max-width: 20rem;
+  width: 20rem;
   height: 100%;
   background-color: var(--bg);
   box-shadow: var(--box-shadow);
-  color: #f0f0f0;
-  font-family: "Inter", sans-serif;
+  color: var(--white);
   position: relative;
 }
 

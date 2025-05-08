@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import { useState } from "react";
 import { useAppSelector } from "./redux/store";
 import Alert from "./components/GenerateCss/Alert/Alert";
+import Timeline from "./components/Timeline/Timeline";
 
 function App() {
   const [showGenerateCss, setShowGenerateCss] = useState(false);
@@ -17,13 +18,17 @@ function App() {
   };
 
   return (
-    <div className="container">
+    <div className="appContainer">
       <Header onToggleGenerateCss={handleToggleGenerateCss} />
       {alertOpen && <Alert message="Url Copied" />}
 
       <main className="main">
         <Sidebar />
-        <Canvas />
+        <div className="canvasTimelineContainer">
+          <Canvas />
+          <Timeline />
+        </div>
+
         <PropertiesPanel />
         {showGenerateCss && <GenerateCss onClose={handleToggleGenerateCss} />}
       </main>

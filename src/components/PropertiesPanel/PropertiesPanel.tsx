@@ -1,11 +1,10 @@
 import style from "./PropertiesPanel.module.css";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { updateElementConfig } from "../../redux/slices/elementsSlice";
-import {
-  defaultConfig,
-  propertiesSchema,
-} from "../../config/propertiespanel.config";
+import { propertiesSchema } from "../../config/propertiespanel.config";
 import ColorPicker from "../ColorPicker/ColorPicker";
+import { getSelectedConfig } from "../../utils/useGetConfig";
+import { deepEqual } from "../../helpers/DeepEqual";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -13,44 +12,68 @@ const PropertiesPanel = () => {
     (state) => state.elements
   );
   const selectedElement = elements.find((el) => el.id === selectedElementId);
-  const config = selectedElement ? selectedElement.config : defaultConfig;
 
+  const { selectedKeyframe } = useAppSelector((state) => state.timeline);
+
+  const defaultElementValue = selectedElement?.defaultConfig;
+  const currentElementValue = selectedElement
+    ? deepEqual(selectedElement.currentConfig, selectedElement.defaultConfig)
+      ? {}
+      : selectedElement.currentConfig
+    : {};
+
+  const selectedConfig = getSelectedConfig(
+    selectedKeyframe ?? "default",
+    defaultElementValue ?? {},
+    currentElementValue ?? {},
+    selectedElement?.keyframes ?? {}
+  );
+
+  console.log("currentElementValue", currentElementValue);
+
+  // Handle changes in the properties panel
   const handleChange = (section: string, key: string, value: string) => {
-    if (!selectedElementId) return;
-  
-    const sectionConfig = config[section as keyof typeof config] as Record<string, string>;
-  
+    if (!selectedElementId || !selectedKeyframe) return;
+
+    // Get the current configuration for the selected keyframe
+    const config = selectedConfig;
+
+    // Make sure the section exists, and get the current section data
+    const sectionConfig = config[section as keyof typeof config] as Record<
+      string,
+      string
+    >;
+
     const updatedSection = {
       ...sectionConfig,
       [key]: value,
     };
-  
+
+    // Update only the specific section in the config without affecting other fields
     dispatch(
       updateElementConfig({
         id: selectedElementId,
+        keyframe: selectedKeyframe,
         config: {
           ...config,
-          [section]: updatedSection,
+          [section]: updatedSection, // Only the section you're modifying gets updated
         },
       })
     );
   };
 
-
-  
   return (
     <aside className={style.container}>
       <h2>Properties</h2>
-      {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => {        
-        return (
-        
+      {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => (
         <div key={sectionKey} className={style.section}>
           <h3>{sectionData.title}</h3>
           <div className={style.optionsContainer}>
             {Object.entries(sectionData.fields).map(
               ([fieldKey, fieldProps]) => {
+                // Ensure we safely access the field values and handle undefined cases
                 const currentValue =
-                  (config[sectionKey as keyof typeof config] as any)?.[
+                  selectedConfig?.[sectionKey as keyof typeof selectedConfig]?.[
                     fieldKey
                   ] ?? "";
 
@@ -113,8 +136,7 @@ const PropertiesPanel = () => {
             )}
           </div>
         </div>
-      );
-      })}
+      ))}
     </aside>
   );
 };

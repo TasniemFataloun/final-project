@@ -9,12 +9,16 @@ import {
 export type ElementType = "rectangle" | "circle" | "square";
 export type ElementItem = {
   id: string;
-  config: AnimationType;
+  type: ElementType;
+  defaultConfig: AnimationType;
+  currentConfig: AnimationType;
+  keyframes?: Record<string, AnimationType>;
 };
 
 type ElementsState = {
   elements: ElementItem[];
   selectedElementId: string | null;
+  defaultConfig?: AnimationType;
 };
 
 const initialState: ElementsState = {
@@ -43,7 +47,9 @@ const elementsSlice = createSlice({
 
       const newElement: ElementItem = {
         id: Date.now().toString(),
-        config: { ...config }, // copy to avoid mutation
+        type: action.payload, // store type so we know what it is
+        defaultConfig: { ...config }, // default (from) values
+        currentConfig: { ...config }, // initial current (to) values (same at first)
       };
 
       state.elements.push(newElement);
@@ -53,18 +59,32 @@ const elementsSlice = createSlice({
       state.selectedElementId = action.payload;
     },
 
-    updateElementConfig: (state, action) => {
-      const { id, config } = action.payload;
-      const index = state.elements.findIndex((el) => el.id === id);
-      if (index !== -1) {
-        state.elements[index].config = config;
+    updateElementConfig: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        keyframe: string;
+        config: AnimationType;
+      }>
+    ) => {
+      const { id, keyframe, config } = action.payload;
+      const element = state.elements.find((el) => el.id === id);
+    
+      if (element) {
+        // Update only the relevant config field without overwriting the whole config
+        if (keyframe === "default") {
+          element.defaultConfig = {
+            ...element.defaultConfig,
+            ...config,  // Only update the relevant properties
+          };
+        } else if (keyframe === "current") {
+          element.currentConfig = {
+            ...element.currentConfig,
+            ...config,  // Only update the relevant properties
+          };
+        }
       }
-      
-      console.log("Updated element config:", 
-        state.elements[index].config
-      );
-      
-    },
+    }, 
 
     removeElement: (state, action: PayloadAction<string>) => {
       state.elements = state.elements.filter((el) => el.id !== action.payload);

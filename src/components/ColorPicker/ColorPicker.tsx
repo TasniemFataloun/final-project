@@ -26,7 +26,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
           cursor: "pointer",
         }}
       >
-        {color ? `Color: ${color} ` : ""}
+        {" "}
       </button>
 
       {showPicker && (

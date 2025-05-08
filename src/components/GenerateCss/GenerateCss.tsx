@@ -14,7 +14,7 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
   );
   const selectedElement = elements.find((el) => el.id === selectedElementId);
 
-  const config = selectedElement?.config;
+  const config = selectedElement?.currentConfig;
 
   const generateCSS = () => {
     if (!selectedElement || !config) {
