@@ -26,11 +26,13 @@ export const initialState: AnimationState = {
       translateX: "",
       translateY: "",
     },
-    opacity:{
+    opacity: {
       opacity: "",
       borderRadius: "",
     },
-    backgroundColor: "",
+    backgroundColor: {
+      backgroundColor: "",
+    },
   },
   isPlaying: true,
 };
