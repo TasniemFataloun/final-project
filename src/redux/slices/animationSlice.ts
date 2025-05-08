@@ -7,28 +7,31 @@ export type AnimationState = {
 };
 
 export const initialState: AnimationState = {
-  config:
-    {
-      id: "square",
-      type: "square",
-      animation: {
-        duration: "1",
-        timingFunction: "ease-in-out",
-        delay: "0",
-        iterationCount: "infinite",
-      },
-      size: {
-        width: "200",
-        height: "200",
-      },
-      transform: {
-        scale: "1",
-        rotate: "0",
-        translateX: "0",
-        translateY: "0",
-      },
-      opacity: "1",
+  config: {
+    id: "",
+    type: "",
+    animation: {
+      duration: "",
+      timingFunction: "",
+      delay: "",
+      iterationCount: "",
     },
+    size: {
+      width: "",
+      height: "",
+    },
+    transform: {
+      scale: "",
+      rotate: "",
+      translateX: "",
+      translateY: "",
+    },
+    opacity:{
+      opacity: "",
+      borderRadius: "",
+    },
+    backgroundColor: "",
+  },
   isPlaying: true,
 };
 
@@ -41,14 +44,11 @@ const animationSlice = createSlice({
     },
     setIsPlaying: (state, action: PayloadAction<boolean>) => {
       state.isPlaying = action.payload;
-    }
+    },
   },
 });
 
-export const { setConfig, setIsPlaying } =
-  animationSlice.actions;
-export type AnimationActionType =
-  | typeof setConfig
-  | typeof setIsPlaying
+export const { setConfig, setIsPlaying } = animationSlice.actions;
+export type AnimationActionType = typeof setConfig | typeof setIsPlaying;
 
 export default animationSlice.reducer;

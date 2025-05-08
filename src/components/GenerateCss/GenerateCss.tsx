@@ -2,34 +2,26 @@ import style from "./GenerateCss.module.css";
 import { useAppSelector } from "../../redux/store";
 import { SquareX } from "lucide-react";
 import CopyToClipboard from "./CopyToClipboard/CopyToClipboard";
+import { UseGenerateKeyframes } from "../../utils/useGenerateKeyframe";
 
 type GenerateCssProps = {
   onClose: () => void;
 };
 
 const GenerateCss = ({ onClose }: GenerateCssProps) => {
-  const { config } = useAppSelector((state) => state.animation);
+  const { elements, selectedElementId } = useAppSelector(
+    (state) => state.elements
+  );
+  const selectedElement = elements.find((el) => el.id === selectedElementId);
+
+  const config = selectedElement?.config;
 
   const generateCSS = () => {
-    return `
-@keyframes animation {
-  from {
-    transform: scale(1) rotate(0deg) translate(0px, 0px);
-    opacity: 1;
-  }
-  to {
-    transform: scale(${config.transform.scale})
-             rotate(${config.transform.rotate}deg)
-             translate(${config.transform.translateX}px, ${config.transform.translateY}px);
-    opacity: ${config.opacity};
-  }
-}
+    if (!selectedElement || !config) {
+      return `/* No element selected */`;
+    }
 
-.animated-element {
-  animation: transform ${config.animation.duration}s ${config.animation.timingFunction} ${config.animation.delay}s ${config.animation.iterationCount};
-}
-
-`.trim();
+    return UseGenerateKeyframes(config);
   };
 
   return (

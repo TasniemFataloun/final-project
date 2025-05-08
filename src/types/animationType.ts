@@ -3,11 +3,13 @@ export type AnimationConfigType = {
   timingFunction: string;
   delay: string;
   iterationCount: string;
+  [key: string]: string;
 };
 
 export type sizeType = {
   width: string;
   height: string;
+  [key: string]: string;
 };
 
 export type TransformType = {
@@ -15,6 +17,18 @@ export type TransformType = {
   rotate: string;
   translateX: string;
   translateY: string;
+  [key: string]: string;
+};
+
+export type OpacityType = {
+  opacity: string;
+  borderRadius: string;
+  [key: string]: string;
+};
+
+export type BackgroundColorType = {
+  backgroundColor: string;
+  [key: string]: string;
 };
 
 export type AnimationType = {
@@ -23,6 +37,7 @@ export type AnimationType = {
   animation: AnimationConfigType;
   size: sizeType;
   transform: TransformType;
-  opacity: string;
-  borderRadius?: string;
+  opacity: OpacityType;
+  backgroundColor: BackgroundColorType;
+  [key: string]: any;
 };

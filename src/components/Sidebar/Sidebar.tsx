@@ -7,18 +7,19 @@ const Sidebar = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === "rectangle" || value === "circle") {
+    if (value === "rectangle" || value === "circle" || value === "square") {
       dispatch(addElement(value));
     }
   };
 
   return (
     <div className={style.sidebar}>
-      <p>Import elements</p>
+      <p>Add</p>
       <select className={style.select} onChange={handleChange}>
         <option value="">-- Select --</option>
         <option value="rectangle">Rectangle</option>
         <option value="circle">Circle</option>
+        <option value="square">Square</option>
       </select>
     </div>
   );

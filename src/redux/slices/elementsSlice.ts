@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AnimationType } from "../../types/animationType";
 import {
   importCircle,
+  importRectangle,
   importSquare,
 } from "../../config/importElementsProperties.config";
 
 export type ElementType = "rectangle" | "circle" | "square";
 export type ElementItem = {
   id: string;
-  type: ElementType;
   config: AnimationType;
 };
 
@@ -34,19 +34,15 @@ const elementsSlice = createSlice({
           config = importCircle;
           break;
         case "rectangle":
-          config = importSquare;
+          config = importRectangle;
           break;
         case "square":
           config = importSquare;
           break;
-        default:
-          // fallback to square if unknown (optional)
-          config = importSquare;
       }
 
       const newElement: ElementItem = {
         id: Date.now().toString(),
-        type: action.payload,
         config: { ...config }, // copy to avoid mutation
       };
 
@@ -59,10 +55,15 @@ const elementsSlice = createSlice({
 
     updateElementConfig: (state, action) => {
       const { id, config } = action.payload;
-      const element = state.elements.find((el) => el.id === id);
-      if (element) {
-        element.config = config;
+      const index = state.elements.findIndex((el) => el.id === id);
+      if (index !== -1) {
+        state.elements[index].config = config;
       }
+      
+      console.log("Updated element config:", 
+        state.elements[index].config
+      );
+      
     },
 
     removeElement: (state, action: PayloadAction<string>) => {
