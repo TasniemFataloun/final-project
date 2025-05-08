@@ -21,7 +21,7 @@ export const importCircle: AnimationType = {
   },
   opacity: {
     opacity: "1",
-    borderRadius: "50",
+    borderRadius: "100",
   },
   backgroundColor: { backgroundColor: "#FFFFFF" },
 };
