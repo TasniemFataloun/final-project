@@ -14,8 +14,6 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
   );
   const selectedElement = elements.find((el) => el.id === selectedElementId);
 
-  const config = selectedElement?.keyframes;
-
   const generateCSS = () => {
     if (!selectedElement || !selectedElement.keyframes) {
       return `/* No element selected or missing keyframes */`;
