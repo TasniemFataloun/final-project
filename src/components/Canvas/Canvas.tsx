@@ -5,6 +5,7 @@ import styles from "./Canvas.module.css";
 import { AnimationType } from "../../types/animationType";
 import { UseGenerateKeyframes } from "../../utils/useGenerateKeyframe";
 import PlayAnimation from "../PlayAnimation/PlayAnimation";
+import { setOpenLayer } from "../../redux/slices/timelineSlice";
 
 const Canvas = () => {
   const dispatch = useAppDispatch();
@@ -29,13 +30,11 @@ const Canvas = () => {
 
   // Inject all keyframes for current elements
   useEffect(() => {
-    // Remove old <style> if exists
     if (styleRef.current) {
       styleRef.current.remove();
     }
 
     const styleTag = document.createElement("style");
-    styleTag.type = "text/css";
 
     const allKeyframes = elements
       .map((el) => injectKeyframes(el.currentConfig))
@@ -83,7 +82,9 @@ const Canvas = () => {
         {elements.map((el) => (
           <div
             key={el.id}
-            onClick={() => dispatch(setSelectedElementId(el.id))}
+            onClick={() => {
+              dispatch(setOpenLayer(el.id));
+            }}
             style={generateAnimationStyle(el.currentConfig)}
             className={styles.animatedElement}
           />

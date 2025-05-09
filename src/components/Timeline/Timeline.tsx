@@ -8,19 +8,12 @@ import {
 
 const Timeline = () => {
   const dispatch = useDispatch();
-  const { isOpenLayer } = useAppSelector(
-    (state) => state.timeline
-  );
-  const { elements } = useAppSelector(
-    (state) => state.elements
-  );
-
+  const { openLayers } = useAppSelector((state) => state.timeline); 
+  const { elements } = useAppSelector((state) => state.elements);
 
   const seconds = Array.from({ length: 7 }, (_, i) => i * 10);
 
-  // Handler for clicking a keyframe
   const handleKeyframeClick = (type: "default" | "current") => {
-    // Update the selected keyframe in the Redux store
     dispatch(setSelectedKeyframe(type));
   };
 
@@ -32,11 +25,13 @@ const Timeline = () => {
           <div
             key={layer.id}
             className={`${style.layerItem} ${
-              isOpenLayer ? style.layerItemOpen : ""
+              openLayers[layer.id] ? style.layerItemOpen : ""
             }`}
-            onClick={() => dispatch(toggleLayer())}
+            onClick={() => dispatch(toggleLayer(layer.id))}
           >
-            <span className={style.arrow}>{isOpenLayer ? "▼" : "▶"}</span>
+            <span className={style.arrow}>
+              {openLayers[layer.id] ? "▼" : "▶"}
+            </span>
             {layer.currentConfig.type}
           </div>
         ))}
@@ -55,10 +50,10 @@ const Timeline = () => {
           <div
             key={layer.id}
             className={`${style.trackRow} ${
-              isOpenLayer ? style.openTrackRow : ""
+              openLayers[layer.id] ? style.openTrackRow : ""
             }`}
           >
-            {isOpenLayer && (
+            {openLayers[layer.id] && (
               <div className={style.keyframesContainer}>
                 <img
                   src="./keyframe.png"

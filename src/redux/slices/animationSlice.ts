@@ -34,7 +34,7 @@ export const initialState: AnimationState = {
       backgroundColor: "",
     },
   },
-  isPlaying: true,
+  isPlaying: false,
 };
 
 const animationSlice = createSlice({

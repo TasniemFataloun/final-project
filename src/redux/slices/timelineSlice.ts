@@ -1,14 +1,13 @@
-// timelineSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type TimelineState = {
   selectedKeyframe: "default" | "current" | null;
-  isOpenLayer: boolean;
+  openLayers: Record<string, boolean>; // key = element ID
 };
 
 const initialState: TimelineState = {
   selectedKeyframe: null,
-  isOpenLayer: false,
+  openLayers: {},
 };
 
 const timelineSlice = createSlice({
@@ -21,15 +20,22 @@ const timelineSlice = createSlice({
     ) => {
       state.selectedKeyframe = action.payload;
     },
-    toggleLayer: (state) => {
-      state.isOpenLayer = !state.isOpenLayer;
+    toggleLayer: (state, action) => {
+      const elementId = action.payload;
+      state.openLayers[elementId] = !state.openLayers[elementId];
+    },
+    setOpenLayer: (state, action) => {
+      const elementId = action.payload;
+      state.openLayers[elementId] = true;
     },
   },
 });
 
-export const { setSelectedKeyframe, toggleLayer } = timelineSlice.actions;
+export const { setSelectedKeyframe, toggleLayer, setOpenLayer } =
+  timelineSlice.actions;
 export type TimelineActionType =
   | typeof setSelectedKeyframe
-  | typeof toggleLayer;
+  | typeof toggleLayer
+  | typeof setOpenLayer;
 
 export default timelineSlice.reducer;
