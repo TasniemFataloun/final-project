@@ -11,7 +11,6 @@ export type ElementItem = {
   id: string;
   type: ElementType;
   defaultConfig: AnimationType;
-  currentConfig: AnimationType;
   keyframes?: Record<string, AnimationType>;
 };
 
@@ -47,9 +46,9 @@ const elementsSlice = createSlice({
 
       const newElement: ElementItem = {
         id: Date.now().toString(),
-        type: action.payload, // store type so we know what it is
-        defaultConfig: { ...config }, // default (from) values
-        currentConfig: { ...config }, // initial current (to) values (same at first)
+        type: action.payload,
+        defaultConfig: { ...config },
+        keyframes: {},
       };
 
       state.elements.push(newElement);
@@ -69,22 +68,31 @@ const elementsSlice = createSlice({
     ) => {
       const { id, keyframe, config } = action.payload;
       const element = state.elements.find((el) => el.id === id);
-    
+
       if (element) {
-        // Update only the relevant config field without overwriting the whole config
         if (keyframe === "default") {
           element.defaultConfig = {
-            ...element.defaultConfig,
-            ...config,  // Only update the relevant properties
+            ...element.defaultConfig, // Spread the existing config
+            ...config, // Spread the new config on top
           };
-        } else if (keyframe === "current") {
-          element.currentConfig = {
-            ...element.currentConfig,
-            ...config,  // Only update the relevant properties
+        } else {
+          // Ensure keyframes is correctly initialized
+          if (!element.keyframes) {
+            element.keyframes = {};
+          }
+
+          const existingKeyframe = element.keyframes[keyframe] ?? {};
+
+          element.keyframes[keyframe] = {
+            ...existingKeyframe,
+            ...config,
           };
+
+          console.log("existingKeyframe", element.keyframes[keyframe]);
+          
         }
       }
-    }, 
+    },
 
     removeElement: (state, action: PayloadAction<string>) => {
       state.elements = state.elements.filter((el) => el.id !== action.payload);

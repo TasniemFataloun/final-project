@@ -4,7 +4,6 @@ import { updateElementConfig } from "../../redux/slices/elementsSlice";
 import { propertiesSchema } from "../../config/propertiespanel.config";
 import ColorPicker from "../ColorPicker/ColorPicker";
 import { getSelectedConfig } from "../../utils/useGetConfig";
-import { deepEqual } from "../../helpers/DeepEqual";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -16,11 +15,7 @@ const PropertiesPanel = () => {
   const { selectedKeyframe } = useAppSelector((state) => state.timeline);
 
   const defaultElementValue = selectedElement?.defaultConfig;
-  const currentElementValue = selectedElement
-    ? deepEqual(selectedElement.currentConfig, selectedElement.defaultConfig)
-      ? {}
-      : selectedElement.currentConfig
-    : {};
+  const currentElementValue = selectedElement?.keyframes?.current ?? {};
 
   const selectedConfig = getSelectedConfig(
     selectedKeyframe ?? "default",
@@ -28,8 +23,6 @@ const PropertiesPanel = () => {
     currentElementValue ?? {},
     selectedElement?.keyframes ?? {}
   );
-
-  console.log("currentElementValue", currentElementValue);
 
   // Handle changes in the properties panel
   const handleChange = (section: string, key: string, value: string) => {

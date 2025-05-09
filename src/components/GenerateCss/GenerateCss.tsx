@@ -14,14 +14,23 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
   );
   const selectedElement = elements.find((el) => el.id === selectedElementId);
 
-  const config = selectedElement?.currentConfig;
+  const config = selectedElement?.keyframes;
 
   const generateCSS = () => {
-    if (!selectedElement || !config) {
-      return `/* No element selected */`;
+    if (!selectedElement || !selectedElement.keyframes) {
+      return `/* No element selected or missing keyframes */`;
     }
 
-    return UseGenerateKeyframes(config);
+    console.log(
+      "helllllooeooe",
+      Object.values(selectedElement.keyframes)
+        .map((animation) => UseGenerateKeyframes(animation, selectedElement.defaultConfig))
+        .join("\n")
+    );
+
+    return Object.values(selectedElement.keyframes)
+      .map((animation) => UseGenerateKeyframes(animation,  selectedElement.defaultConfig))
+      .join("\n");
   };
 
   return (

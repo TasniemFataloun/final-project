@@ -1,3 +1,5 @@
+// Canvas.tsx
+
 import { useEffect, useRef, useMemo } from "react";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { setSelectedElementId } from "../../redux/slices/elementsSlice";
@@ -6,13 +8,12 @@ import { AnimationType } from "../../types/animationType";
 import { UseGenerateKeyframes } from "../../utils/useGenerateKeyframe";
 import PlayAnimation from "../PlayAnimation/PlayAnimation";
 import { setOpenLayer } from "../../redux/slices/timelineSlice";
+import { getCurrentConfig } from "../../utils/UseGetCurrentConfig";
 
 const Canvas = () => {
   const dispatch = useAppDispatch();
   const { isPlaying } = useAppSelector((state) => state.animation);
-  const { elements, selectedElementId } = useAppSelector(
-    (state) => state.elements
-  );
+  const { elements, selectedElementId } = useAppSelector((state) => state.elements);
 
   const styleRef = useRef<HTMLStyleElement | null>(null);
 
@@ -24,8 +25,8 @@ const Canvas = () => {
   }, [elements, selectedElementId, dispatch]);
 
   // Generate keyframes CSS and inject it into <style>
-  const injectKeyframes = (config: AnimationType) => {
-    return UseGenerateKeyframes(config);
+  const injectKeyframes = (config: AnimationType, defaultConfig: AnimationType) => {
+    return UseGenerateKeyframes(config, defaultConfig);
   };
 
   // Inject all keyframes for current elements
@@ -37,8 +38,16 @@ const Canvas = () => {
     const styleTag = document.createElement("style");
 
     const allKeyframes = elements
-      .map((el) => injectKeyframes(el.currentConfig))
+      .map((el) =>
+        injectKeyframes(
+          getCurrentConfig(el, "current"),
+          getCurrentConfig(el, "default")
+        )
+      )
       .join("\n");
+
+    console.log("canvas", allKeyframes);
+
     styleTag.appendChild(document.createTextNode(allKeyframes));
     document.head.appendChild(styleTag);
 
@@ -49,7 +58,7 @@ const Canvas = () => {
     };
   }, [elements]);
 
-  // Memoized function to generate CSS properties for animation style
+  // Memoized function to generate dynamic animation style
   const generateAnimationStyle = useMemo(() => {
     return (config: AnimationType): React.CSSProperties => {
       const width = Number(config.size.width);
@@ -60,35 +69,43 @@ const Canvas = () => {
       const timingFunction = config.animation.timingFunction;
       const iterationCount = config.animation.iterationCount;
       const bgColor = config.backgroundColor.backgroundColor;
-
-      console.log(config);
-
+  
       return {
         width: `${width}px`,
         height: `${height}px`,
         backgroundColor: bgColor,
         borderRadius: `${borderRadius}px`,
-        animation: `animation-${config.type} ${duration}s ${timingFunction} ${delay}s ${iterationCount}`,
+        animationName: `animation-${config.type}`,
+        animationDuration: `${duration}s`,
+        animationTimingFunction: timingFunction,
+        animationDelay: `${delay}s`,
+        animationIterationCount: iterationCount,
         animationPlayState: isPlaying ? "running" : "paused",
         animationFillMode: "forwards",
         position: "absolute",
       };
     };
   }, [isPlaying]);
+  
 
   return (
     <div className={styles.canvasContainer}>
       <div className={styles.animatedElementContainer}>
-        {elements.map((el) => (
-          <div
-            key={el.id}
-            onClick={() => {
-              dispatch(setOpenLayer(el.id));
-            }}
-            style={generateAnimationStyle(el.currentConfig)}
-            className={styles.animatedElement}
-          />
-        ))}
+        {elements.map((el) => {
+          const currentConfig = getCurrentConfig(el, "current");
+          const defaultConfig = getCurrentConfig(el, "default");
+
+          return (
+            <div
+              key={el.id}
+              onClick={() => {
+                dispatch(setOpenLayer(el.id));
+              }}
+              style={generateAnimationStyle(currentConfig)}
+              className={`${styles.animatedElement} ${defaultConfig.type}`}
+            />
+          );
+        })}
       </div>
       {elements.length > 0 && <PlayAnimation />}
     </div>

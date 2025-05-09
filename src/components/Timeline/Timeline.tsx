@@ -5,10 +5,11 @@ import {
   setSelectedKeyframe,
   toggleLayer,
 } from "../../redux/slices/timelineSlice";
+import { getCurrentConfig } from "../../utils/UseGetCurrentConfig";
 
 const Timeline = () => {
   const dispatch = useDispatch();
-  const { openLayers } = useAppSelector((state) => state.timeline); 
+  const { openLayers } = useAppSelector((state) => state.timeline);
   const { elements } = useAppSelector((state) => state.elements);
 
   const seconds = Array.from({ length: 7 }, (_, i) => i * 10);
@@ -32,7 +33,7 @@ const Timeline = () => {
             <span className={style.arrow}>
               {openLayers[layer.id] ? "▼" : "▶"}
             </span>
-            {layer.currentConfig.type}
+            {getCurrentConfig(layer, "default").type}
           </div>
         ))}
       </div>

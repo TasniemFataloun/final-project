@@ -1,116 +1,197 @@
-import {
-  importCircle,
-  importRectangle,
-  importSquare,
-} from "../config/importElementsProperties.config";
 import { AnimationType } from "../types/animationType";
 
-export const UseGenerateKeyframes = (config: AnimationType) => {
-  const {
-    type, // Used as class name
-    size,
-    transform,
-    opacity,
-    backgroundColor,
-  } = config;
+export const UseGenerateKeyframes = (
+  updatedConfig: AnimationType,
+  defaultConfigFull: AnimationType
+) => {
+  if (!updatedConfig || !defaultConfigFull) {
+    return "";
+  }
 
-  // Default values for each type (to use in the "from" state)
-  const defaultValues = {
-    circle: {
-      size: {
-        width: importCircle.size.width,
-        height: importCircle.size.height,
-      },
-      transform: {
-        scale: importCircle.transform.scale,
-        rotate: importCircle.transform.rotate,
-        translateX: importCircle.transform.translateX,
-        translateY: importCircle.transform.translateY,
-      },
-      opacity: {
-        opacity: importCircle.opacity.opacity,
-        borderRadius: importCircle.opacity.borderRadius,
-      },
-      backgroundColor: importCircle.backgroundColor.backgroundColor,
+  const cssPropertyMap: Record<
+    string,
+    (val: any, defaultVal: any) => { key: string; from: string; to: string }[]
+  > = {
+    size: (val, defaultVal) => {
+      const props: any[] = [];
+      if (val.width !== undefined) {
+        props.push({
+          key: "width",
+          from: `${defaultVal.width}px`,
+          to: `${val.width}px`,
+        });
+      }
+      if (val.height !== undefined) {
+        props.push({
+          key: "height",
+          from: `${defaultVal.height}px`,
+          to: `${val.height}px`,
+        });
+      }
+      return props;
     },
-    rectangle: {
-      size: {
-        width: importRectangle.size.width,
-        height: importRectangle.size.height,
-      },
-      transform: {
-        scale: importRectangle.transform.scale,
-        rotate: importRectangle.transform.rotate,
-        translateX: importRectangle.transform.translateX,
-        translateY: importRectangle.transform.translateY,
-      },
-      opacity: {
-        opacity: importRectangle.opacity.opacity,
-        borderRadius: importRectangle.opacity.borderRadius,
-      },
-      backgroundColor: importRectangle.backgroundColor.backgroundColor,
+    transform: (val, defaultVal) => {
+      const fromParts: string[] = [];
+      const toParts: string[] = [];
+
+      if (val.scale !== undefined) {
+        fromParts.push(`scale(${defaultVal.scale})`);
+        toParts.push(`scale(${val.scale})`);
+      }
+      if (val.rotate !== undefined) {
+        fromParts.push(`rotate(${defaultVal.rotate}deg)`);
+        toParts.push(`rotate(${val.rotate}deg)`);
+      }
+      if (val.translateX !== undefined || val.translateY !== undefined) {
+        const defaultX = defaultVal.translateX ?? 0;
+        const defaultY = defaultVal.translateY ?? 0;
+        const newX = val.translateX ?? defaultX;
+        const newY = val.translateY ?? defaultY;
+
+        fromParts.push(`translate(${defaultX}px, ${defaultY}px)`);
+        toParts.push(`translate(${newX}px, ${newY}px)`);
+      }
+
+      if (fromParts.length > 0) {
+        return [
+          {
+            key: "transform",
+            from: fromParts.join(" "),
+            to: toParts.join(" "),
+          },
+        ];
+      }
+
+      return [];
     },
-    square: {
-      size: {
-        width: importSquare.size.width,
-        height: importSquare.size.height,
-      },
-      transform: {
-        scale: importSquare.transform.scale,
-        rotate: importSquare.transform.rotate,
-        translateX: importSquare.transform.translateX,
-        translateY: importSquare.transform.translateY,
-      },
-      opacity: {
-        opacity: importSquare.opacity.opacity,
-        borderRadius: importSquare.opacity.borderRadius,
-      },
-      backgroundColor: importSquare.backgroundColor.backgroundColor,
+    opacity: (val, defaultVal) => {
+      const props: any[] = [];
+      if (val.opacity !== undefined) {
+        props.push({
+          key: "opacity",
+          from: `${defaultVal.opacity}`,
+          to: `${val.opacity}`,
+        });
+      }
+      if (val.borderRadius !== undefined) {
+        props.push({
+          key: "border-radius",
+          from: `${defaultVal.borderRadius}px`,
+          to: `${val.borderRadius}px`,
+        });
+      }
+      return props;
+    },
+    backgroundColor: (val, defaultVal) => {
+      const props: any[] = [];
+      if (val.backgroundColor !== undefined) {
+        props.push({
+          key: "background-color",
+          from: `${defaultVal.backgroundColor}`,
+          to: `${val.backgroundColor}`,
+        });
+      }
+      return props;
     },
   };
 
-  // Select the default configuration based on the element type
-  const defaultConfig =
-    defaultValues[config.type as keyof typeof defaultValues];
+  const fromLines: string[] = [];
+  const toLines: string[] = [];
 
-  // "From" state (initial state - default values)
-  const fromWidth = defaultConfig.size.width;
-  const fromHeight = defaultConfig.size.height;
-  const fromTransform = `transform: scale(${defaultConfig.transform.scale}) rotate(${defaultConfig.transform.rotate}deg) translate(${defaultConfig.transform.translateX}px, ${defaultConfig.transform.translateY}px)`;
-  const fromOpacity = defaultConfig.opacity.opacity;
-  const fromBgColor = defaultConfig.backgroundColor;
-  const fromBorderRadius = defaultConfig.opacity.borderRadius;
+  // Loop through updated config and collect keyframe changes
+  Object.entries(updatedConfig).forEach(([groupKey, val]) => {
+    if (val && cssPropertyMap[groupKey]) {
+      const defaultVal = defaultConfigFull[groupKey as keyof AnimationType];
+      const propsList = cssPropertyMap[groupKey](val, defaultVal);
 
-  // "To" state (modified state)
-  const toWidth = size.width;
-  const toHeight = size.height;
-  const toTransform = `transform: scale(${transform.scale}) rotate(${transform.rotate}deg) translate(${transform.translateX}px, ${transform.translateY}px)`;
-  const toOpacity = opacity.opacity;
-  const toBgColor = backgroundColor || defaultConfig.backgroundColor;
-  const toBorderRadius =
-    opacity.borderRadius || defaultConfig.opacity.borderRadius;
+      propsList.forEach(({ key, from, to }) => {
+        fromLines.push(`    ${key}: ${from};`);
+        toLines.push(`    ${key}: ${to};`);
+      });
+    }
+  });
 
-  return `
-/* Keyframes */
-@keyframes animation-${type} {
+  // Generate the full base class CSS
+  const baseStyles: string[] = [];
+
+  const defaultConf = defaultConfigFull;
+  if (defaultConf.size) {
+    if (defaultConf.size.width !== undefined) {
+      baseStyles.push(`  width: ${defaultConf.size.width}px;`);
+    }
+    if (defaultConf.size.height !== undefined) {
+      baseStyles.push(`  height: ${defaultConf.size.height}px;`);
+    }
+  }
+  if (defaultConf.opacity) {
+    if (defaultConf.opacity.opacity !== undefined) {
+      baseStyles.push(`  opacity: ${defaultConf.opacity.opacity};`);
+    }
+    if (defaultConf.opacity.borderRadius !== undefined) {
+      baseStyles.push(
+        `  border-radius: ${defaultConf.opacity.borderRadius}px;`
+      );
+    }
+  }
+  if (defaultConf.backgroundColor) {
+    if (defaultConf.backgroundColor.backgroundColor !== undefined) {
+      baseStyles.push(
+        `  background-color: ${defaultConf.backgroundColor.backgroundColor};`
+      );
+    }
+  }
+  if (defaultConf.transform) {
+    const t = defaultConf.transform;
+    const transformParts: string[] = [];
+    if (t.scale !== undefined) transformParts.push(`scale(${t.scale})`);
+    if (t.rotate !== undefined) transformParts.push(`rotate(${t.rotate}deg)`);
+    if (t.translateX !== undefined || t.translateY !== undefined) {
+      const tx = t.translateX ?? 0;
+      const ty = t.translateY ?? 0;
+      transformParts.push(`translate(${tx}px, ${ty}px)`);
+    }
+    if (transformParts.length > 0) {
+      baseStyles.push(`  transform: ${transformParts.join(" ")};`);
+    }
+  }
+
+  // Add the animation property (new part)
+  const animationConfig =
+    updatedConfig.animation || defaultConfigFull.animation;
+  const animationName = `animation-${defaultConfigFull.type}`;
+  const animationDuration = animationConfig?.duration || "3s";
+  const animationTimingFunction = animationConfig?.timingFunction || "linear";
+  const animationDelay = animationConfig?.delay || "0s";
+  const animationIterationCount = animationConfig?.iterationCount || "infinite";
+
+  baseStyles.push(`
+  animation: ${animationName} ${animationDuration}s ${animationTimingFunction} ${animationDelay}s ${animationIterationCount}s;
+  `);
+
+  const className = `.${defaultConfigFull.type}`;
+
+  const baseClassCss = `
+${className} {
+${baseStyles.join("\n")}
+}
+`.trim();
+
+  const keyframesCss =
+    fromLines.length > 0
+      ? `
+@keyframes animation-${defaultConfigFull.type} {
   0% {
-    /* This is the FROM state: always the default (initial state) */
-    width: ${fromWidth}px;
-    height: ${fromHeight}px;
-    ${fromTransform};
-    opacity: ${fromOpacity};
-    background-color: ${fromBgColor};
-    border-radius: ${fromBorderRadius}px;
+${fromLines.join("\n")}
   }
   100% {
-    /* TO state: reflects the current config */
-    width: ${toWidth}px;
-    height: ${toHeight}px;
-    ${toTransform};
-    opacity: ${toOpacity};
-    background-color: ${toBgColor};
-    border-radius: ${toBorderRadius}px;
+${toLines.join("\n")}
   }
-}
+}`.trim()
+      : `/* No changes to animate */`;
+
+  return `
+${baseClassCss}
+
+${keyframesCss}
 `.trim();
 };
