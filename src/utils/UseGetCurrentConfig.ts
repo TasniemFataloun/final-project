@@ -10,9 +10,3 @@ export const getCurrentConfig = (
   }
   return { ...el.defaultConfig, ...el.keyframes[keyframe] };
 };
-
-export const getActiveConfig = (element: ElementItem): AnimationType => {
-  const activeConfig = element.keyframes?.["current"] ?? element.defaultConfig;
-
-  return activeConfig;
-};

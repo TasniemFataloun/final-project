@@ -19,13 +19,6 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
       return `/* No element selected or missing keyframes */`;
     }
 
-    console.log(
-      "helllllooeooe",
-      Object.values(selectedElement.keyframes)
-        .map((animation) => UseGenerateKeyframes(animation, selectedElement.defaultConfig))
-        .join("\n")
-    );
-
     return Object.values(selectedElement.keyframes)
       .map((animation) => UseGenerateKeyframes(animation,  selectedElement.defaultConfig))
       .join("\n");

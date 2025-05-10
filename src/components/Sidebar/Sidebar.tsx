@@ -14,9 +14,9 @@ const Sidebar = () => {
 
   return (
     <div className={style.sidebar}>
-      <p>Add</p>
+      <h2>Add</h2>
       <select className={style.select} onChange={handleChange}>
-        <option value="">-- Select --</option>
+        <option value="">-- Select element --</option>
         <option value="rectangle">Rectangle</option>
         <option value="circle">Circle</option>
         <option value="square">Square</option>

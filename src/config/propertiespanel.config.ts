@@ -49,7 +49,7 @@ export const propertiesSchema = {
       iterationCount: {
         label: "Iteration Count",
         type: "select",
-        options: ["1", "2", "3", "infinite"],
+        options: ["infinite", "2", "3", "1"],
       },
     },
   },

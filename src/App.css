@@ -5,6 +5,9 @@
   --panel-bg: #1e1e1e;
   --bg: #2c2c2c;
   --warning: #ff9500;
+
+  /*Padding*/
+  --padding: 1rem;
   width: 100%;
 }
 

@@ -159,13 +159,13 @@ export const UseGenerateKeyframes = (
   const animationConfig =
     updatedConfig.animation || defaultConfigFull.animation;
   const animationName = `animation-${defaultConfigFull.type}`;
-  const animationDuration = animationConfig?.duration || "3s";
-  const animationTimingFunction = animationConfig?.timingFunction || "linear";
-  const animationDelay = animationConfig?.delay || "0s";
+  const animationDuration = animationConfig?.duration;
+  const animationTimingFunction = animationConfig?.timingFunction || "0";
+  const animationDelay = animationConfig?.dela || "0";
   const animationIterationCount = animationConfig?.iterationCount || "infinite";
 
   baseStyles.push(`
-  animation: ${animationName} ${animationDuration}s ${animationTimingFunction} ${animationDelay}s ${animationIterationCount}s;
+  animation: ${animationName} ${animationDuration}s ${animationTimingFunction}s ${animationDelay}s ${animationIterationCount};
   `);
 
   const className = `.${defaultConfigFull.type}`;

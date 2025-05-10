@@ -3,4 +3,5 @@
   max-width: 20rem;
   width: 20rem;
   background-color: var(--bg);
+  padding: var(--padding);
 }
