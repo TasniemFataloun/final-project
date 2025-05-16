@@ -1,0 +1,52 @@
+.timelineHeader {
+  display: flex;
+  height: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.currentProgressTime {
+  width: 220px;
+  background: var(--panel-bg);
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  margin-right: 0.2rem;
+}
+.timeLable {
+  font-family: monospace;
+  background: var(--timeline-bg);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--text-color);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 30%;
+}
+.rulerSection {
+  flex: 1;
+  background: var(--timeline-bg);
+  position: relative;
+}
+.ruler {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.tick {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 8px;
+  background: var(--text-muted);
+}
+.tickLabel {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--text-muted);
+}

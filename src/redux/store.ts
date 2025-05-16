@@ -2,15 +2,15 @@ import { configureStore, Store } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import animationReducer, { AnimationActionType } from "./slices/animationSlice";
 import alertReducer from "./slices/alertSlice";
-import elementsReducer from "./slices/elementsSlice";
-import timelineReducer from "./slices/timelineSlice";
+/* import elementsReducer from "./slices/elementsSlice";
+ */import timelineReducer from "./slices/timelineSlice";
 
 const store = configureStore({
   reducer: {
     animation: animationReducer,
     alert: alertReducer,
-    elements: elementsReducer,
-    timeline: timelineReducer,
+/*     elements: elementsReducer,
+ */    timeline: timelineReducer,
   },
 });
 

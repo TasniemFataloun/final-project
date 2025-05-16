@@ -1,13 +1,13 @@
-.header {
-  background-color: var(--bg);
-}
-
 .headerContent {
   padding: 0 3rem;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: var(--header-bg);
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 5px 15px;
+  z-index: 10;
+  color: var(--text-color);
 }
 
 .logoTitleContainer {
@@ -23,4 +23,8 @@
 .buttonIcon {
   width: 1rem;
   height: 1rem;
+}
+
+.cssAndToggleContainer {
+  display: flex;
 }

@@ -1,0 +1,38 @@
+.container {
+  background: var(--timeline-bg);
+  color: var(--text-color);
+  font-family: "Inter", sans-serif;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: auto;
+  height: 100%;
+}
+
+.timelineBody {
+  display: flex;
+  box-sizing: border-box;
+  position: relative;
+  background-color: var(--timeline-bg);
+}
+
+.scrole::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrole::-webkit-scrollbar-thumb {
+  background: var(--button-hover-bg);
+  border-radius: 4px;
+}
+
+.scrole::-webkit-scrollbar-thumb:hover {
+  background: var(--highlight-color);
+}
+
+@supports (-moz-appearance: none) {
+  .scrole {
+    scrollbar-width: thin;
+    scrollbar-color: var(--button-hover-bg) var(--panel-bg);
+  }
+}

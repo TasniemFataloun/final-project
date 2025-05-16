@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+/* import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AnimationType } from "../../types/animationType";
 import {
   importCircle,
@@ -6,7 +6,7 @@ import {
   importSquare,
 } from "../../config/importElementsProperties.config";
 
-export type ElementType = "rectangle" | "circle" | "square";
+export type ElementType = "rectangle" | "circle" | "square" | "code";
 export type ElementItem = {
   id: string;
   type: ElementType;
@@ -89,7 +89,6 @@ const elementsSlice = createSlice({
           };
 
           console.log("existingKeyframe", element.keyframes[keyframe]);
-          
         }
       }
     },
@@ -114,3 +113,4 @@ export type ElementsActionType =
   | typeof removeElement;
 
 export default elementsSlice.reducer;
+ */

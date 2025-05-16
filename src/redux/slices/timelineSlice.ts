@@ -1,41 +1,77 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Propertykeyframes } from "../types/animations.type";
 
-type TimelineState = {
-  selectedKeyframe: "default" | "current" | null;
-  openLayers: Record<string, boolean>; // key = element ID
-};
+interface TimelineState {
+  expandedLayers: Record<string, boolean>;
+  expandedProperties: Record<string, boolean>;
+  isDragging: boolean;
+  isSelectedKeyframe: {
+    layerId: string;
+    property: string;
+    keyframeId: string;
+  } | null;
+}
 
 const initialState: TimelineState = {
-  selectedKeyframe: null,
-  openLayers: {},
+  expandedLayers: {},
+  expandedProperties: {} as Record<string, boolean>,
+  isDragging: false,
+  isSelectedKeyframe: null,
 };
 
 const timelineSlice = createSlice({
   name: "timeline",
   initialState,
   reducers: {
-    setSelectedKeyframe: (
+    toggleLayer(state, action: PayloadAction<string>) {
+      const layerId = action.payload;
+      state.expandedLayers[layerId] = !state.expandedLayers[layerId];
+    },
+    togglePropertyGroup: (
       state,
-      action: PayloadAction<"default" | "current" | null>
+      action: PayloadAction<{ layerId: string; groupName: string }>
     ) => {
-      state.selectedKeyframe = action.payload;
+      const { layerId, groupName } = action.payload;
+      const key = `${layerId}-${groupName}`;
+      state.expandedProperties[key] = !state.expandedProperties[key];
     },
-    toggleLayer: (state, action) => {
-      const elementId = action.payload;
-      state.openLayers[elementId] = !state.openLayers[elementId];
+    setIsDragging(state, action: PayloadAction<boolean>) {
+      state.isDragging = action.payload;
     },
-    setOpenLayer: (state, action) => {
-      const elementId = action.payload;
-      state.openLayers[elementId] = true;
+    resetTimelineUI(state) {
+      state.expandedLayers = {};
+      state.expandedProperties = {};
+      state.isDragging = false;
+    },
+    setRemoveKeyframe(state, action: PayloadAction<Propertykeyframes>) {},
+    setIsSelectedKeyframe(
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        property: string;
+        keyframeId: string;
+      } | null>
+    ) {
+      state.isSelectedKeyframe = action.payload;
     },
   },
 });
 
-export const { setSelectedKeyframe, toggleLayer, setOpenLayer } =
-  timelineSlice.actions;
-export type TimelineActionType =
-  | typeof setSelectedKeyframe
+export const {
+  toggleLayer,
+  togglePropertyGroup,
+  setIsDragging,
+  resetTimelineUI,
+  setRemoveKeyframe,
+  setIsSelectedKeyframe,
+} = timelineSlice.actions;
+
+export type TimelineStateType =
   | typeof toggleLayer
-  | typeof setOpenLayer;
+  | typeof togglePropertyGroup
+  | typeof setIsDragging
+  | typeof resetTimelineUI
+  | typeof setRemoveKeyframe
+  | typeof setIsSelectedKeyframe;
 
 export default timelineSlice.reducer;

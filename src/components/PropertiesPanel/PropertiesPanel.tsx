@@ -1,64 +1,56 @@
 import style from "./PropertiesPanel.module.css";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { updateElementConfig } from "../../redux/slices/elementsSlice";
 import { propertiesSchema } from "../../config/propertiespanel.config";
 import ColorPicker from "../ColorPicker/ColorPicker";
-import { getSelectedConfig } from "../../utils/useGetConfig";
 import { useState } from "react";
 import { PanelRightClose } from "lucide-react";
-getSelectedConfig
-const PropertiesPanel = () => {
-  const [isPropertiesPanelOpen, setIsPropertiesPanelOpen] = useState(true);
-  const dispatch = useAppDispatch();
-  const { selectedElementId, elements } = useAppSelector(
-    (state) => state.elements
-  );
-  const { selectedKeyframe } = useAppSelector((state) => state.timeline);
-  const selectedElement = elements.find((el) => el.id === selectedElementId);
+import { addKeyframe, setConfig } from "../../redux/slices/animationSlice";
+import { toggleLayer } from "../../redux/slices/timelineSlice";
 
-  const defaultElementValue = selectedElement?.defaultConfig;
-  const currentElementValue = selectedElement?.keyframes?.current ?? {};
+const PropertiesPanel = () => {
+  const dispatch = useAppDispatch();
+  const [isPropertiesPanelOpen, setIsPropertiesPanelOpen] = useState(true);
+  const { selectedLayerId, layers, currentPosition } = useAppSelector(
+    (state) => state.animation
+  );
+
+  const selectedLayer = layers.find((el) => el.id === selectedLayerId);
+  const selectedLayerConfig = selectedLayer?.config;
+  const selectedKeyframe = useAppSelector(
+    (state) => state.animation.selectedKeyframe
+  );
 
   const handleTogglePropertiesPanel = () => {
     setIsPropertiesPanelOpen((prev) => !prev);
-    console.log(isPropertiesPanelOpen);
   };
 
-  const selectedConfig = getSelectedConfig(
-    selectedKeyframe ?? "default",
-    defaultElementValue ?? {},
-    currentElementValue ?? {},
-    selectedElement?.keyframes ?? {}
-  );
-
   // Handle changes in the properties panel
-  const handleChange = (section: string, key: string, value: string) => {
-    if (!selectedElementId || !selectedKeyframe) return;
-
-    // Get the current configuration for the selected keyframe
-    const config = selectedConfig;
-
-    // Make sure the section exists, and get the current section data
-    const sectionConfig = config[section as keyof typeof config] as Record<
-      string,
-      string
-    >;
-
-    const updatedSection = {
-      ...sectionConfig,
-      [key]: value,
-    };
+  const handlePropertyChange = (
+    propertyName: string,
+    newValue: any,
+    groupName: string
+  ) => {
+    if (!selectedLayerId) return;
 
     dispatch(
-      updateElementConfig({
-        id: selectedElementId,
-        keyframe: selectedKeyframe,
-        config: {
-          ...config,
-          [section]: updatedSection, // Only the section you're modifying gets updated
-        },
+      setConfig({
+        section: groupName,
+        field: propertyName,
+        value: newValue,
       })
     );
+
+    dispatch(
+      addKeyframe({
+        layerId: selectedLayerId,
+        groupName,
+        propertyName,
+        percentage: Math.round(currentPosition),
+        value: newValue,
+      })
+    );
+
+    dispatch(toggleLayer(selectedLayerId));
   };
 
   return (
@@ -67,23 +59,59 @@ const PropertiesPanel = () => {
         isPropertiesPanelOpen ? style.openContainer : style.closeContainer
       }`}
     >
-      <button onClick={handleTogglePropertiesPanel} className={style.iconClosePanel}>
-        <PanelRightClose />
-      </button>
+      <div className={style.iconh2}>
+        <button
+          onClick={handleTogglePropertiesPanel}
+          className={style.iconClosePanel}
+        >
+          <PanelRightClose color="var(--white)" />
+        </button>
+        {isPropertiesPanelOpen ? <h2>Properties</h2> : ""}
+      </div>
 
       {isPropertiesPanelOpen && (
         <>
-          <h2>Properties</h2>
           {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => (
             <div key={sectionKey} className={style.section}>
               <h3>{sectionData.title}</h3>
               <div className={style.optionsContainer}>
                 {Object.entries(sectionData.fields).map(
                   ([fieldKey, fieldProps]) => {
-                    const currentValue =
-                      selectedConfig?.[
-                        sectionKey as keyof typeof selectedConfig
-                      ]?.[fieldKey] ?? "";
+                    const keyframeValue = (() => {
+                      if (!selectedKeyframe || !selectedLayer) return undefined;
+
+                      if (selectedKeyframe.property !== fieldKey)
+                        return undefined;
+
+                      const group = selectedLayer.editedPropertiesGroup?.find(
+                        (g) =>
+                          g.propertiesList.some(
+                            (p) => p.propertyName === fieldKey
+                          )
+                      );
+                      if (!group) return undefined;
+
+                      const property = group.propertiesList.find(
+                        (p) => p.propertyName === fieldKey
+                      );
+                      if (!property) return undefined;
+
+                      const keyframe = property.keyframes.find(
+                        (kf) => kf.id === selectedKeyframe.keyframeId
+                      );
+                      if (!keyframe) return undefined;
+
+                      return keyframe.value;
+                    })();
+
+                    const configValue =
+                      selectedLayerConfig?.[
+                        sectionKey as keyof typeof selectedLayerConfig
+                      ]?.[fieldKey];
+
+                    console.log("keyframeValue", keyframeValue);
+
+                    const currentValue = keyframeValue ?? configValue ?? "";
 
                     return (
                       <div className={style.option} key={fieldKey}>
@@ -95,7 +123,11 @@ const PropertiesPanel = () => {
                           <select
                             value={currentValue}
                             onChange={(e) =>
-                              handleChange(sectionKey, fieldKey, e.target.value)
+                              handlePropertyChange(
+                                fieldKey,
+                                e.target.value,
+                                sectionKey
+                              )
                             }
                             className={style.input}
                           >
@@ -111,9 +143,7 @@ const PropertiesPanel = () => {
                         ) : fieldProps.type === "color" ? (
                           <ColorPicker
                             color={currentValue}
-                            onChange={(newColor) =>
-                              handleChange(sectionKey, fieldKey, newColor)
-                            }
+                            onChange={() => console.log("color")}
                           />
                         ) : (
                           <input
@@ -147,7 +177,11 @@ const PropertiesPanel = () => {
                                 : undefined
                             }
                             onChange={(e) =>
-                              handleChange(sectionKey, fieldKey, e.target.value)
+                              handlePropertyChange(
+                                fieldKey,
+                                e.target.value,
+                                sectionKey
+                              )
                             }
                             className={style.input}
                           />

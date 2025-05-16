@@ -6,8 +6,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 400px;
+  height: 100%;
   background-color: var(--panel-bg);
   position: relative;
   overflow: hidden;
+  box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.15),
+    /* bottom-right */ inset -3px 3px 8px rgba(0, 0, 0, 0.15),
+    /* bottom-left */ inset 3px -3px 8px rgba(0, 0, 0, 0.15),
+    /* top-right */ inset -3px -3px 8px rgba(0, 0, 0, 0.15); /* top-left */
 }

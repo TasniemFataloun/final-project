@@ -1,7 +1,6 @@
 import { AnimationType } from "../types/animationType";
 
 export const importCircle: AnimationType = {
-  id: "circle",
   type: "circle",
   animation: {
     duration: "1",
@@ -10,8 +9,8 @@ export const importCircle: AnimationType = {
     iterationCount: "infinite",
   },
   size: {
-    width: "200",
-    height: "200",
+    width: "50",
+    height: "50",
   },
   transform: {
     scale: "1",
@@ -27,7 +26,6 @@ export const importCircle: AnimationType = {
 };
 
 export const importRectangle: AnimationType = {
-  id: "rectangle",
   type: "rectangle",
   animation: {
     duration: "1",
@@ -36,8 +34,8 @@ export const importRectangle: AnimationType = {
     iterationCount: "infinite",
   },
   size: {
-    width: "400",
-    height: "200",
+    width: "70",
+    height: "50",
   },
   transform: {
     scale: "1",
@@ -53,7 +51,6 @@ export const importRectangle: AnimationType = {
 };
 
 export const importSquare: AnimationType = {
-  id: "square",
   type: "square",
   animation: {
     duration: "1",
@@ -62,8 +59,8 @@ export const importSquare: AnimationType = {
     iterationCount: "infinite",
   },
   size: {
-    width: "200",
-    height: "200",
+    width: "50",
+    height: "50",
   },
   transform: {
     scale: "1",

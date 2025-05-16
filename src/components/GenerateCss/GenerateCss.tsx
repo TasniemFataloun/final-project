@@ -9,18 +9,20 @@ type GenerateCssProps = {
 };
 
 const GenerateCss = ({ onClose }: GenerateCssProps) => {
-  const { elements, selectedElementId } = useAppSelector(
-    (state) => state.elements
+  const { layers, selectedLayerId } = useAppSelector(
+    (state) => state.animation
   );
-  const selectedElement = elements.find((el) => el.id === selectedElementId);
+  const selectedElement = layers.find((el) => el.id === selectedLayerId);
 
   const generateCSS = () => {
-    if (!selectedElement || !selectedElement.keyframes) {
+    if (!selectedElement || !selectedElement.config) {
       return `/* No element selected or missing keyframes */`;
     }
 
-    return Object.values(selectedElement.keyframes)
-      .map((animation) => UseGenerateKeyframes(animation,  selectedElement.defaultConfig))
+    return Object.values(selectedElement.config)
+      .map((animation) =>
+        UseGenerateKeyframes(animation)
+      )
       .join("\n");
   };
 

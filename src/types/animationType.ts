@@ -32,8 +32,6 @@ export type BackgroundColorType = {
 };
 
 export type AnimationType = {
-  id: string;
-  type: string;
   animation: AnimationConfigType;
   size: sizeType;
   transform: TransformType;

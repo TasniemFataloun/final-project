@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+/* import { useDispatch } from "react-redux";
 import style from "./Timeline.module.css";
 import { useAppSelector } from "../../redux/store";
 import {
@@ -10,7 +10,7 @@ import { getCurrentConfig } from "../../utils/UseGetCurrentConfig";
 const Timeline = () => {
   const dispatch = useDispatch();
   const { openLayers } = useAppSelector((state) => state.timeline);
-  const { elements } = useAppSelector((state) => state.elements);
+  const { layers } = useAppSelector((state) => state.animation);  
 
   const seconds = Array.from({ length: 7 }, (_, i) => i * 10);
 
@@ -22,7 +22,7 @@ const Timeline = () => {
     <div className={style.container}>
       <div className={style.sidebar}>
         <div className={style.layerItem}></div>
-        {elements.map((layer) => (
+        {layers.map((layer) => (
           <div
             key={layer.id}
             className={`${style.layerItem} ${
@@ -33,7 +33,7 @@ const Timeline = () => {
             <span className={style.arrow}>
               {openLayers[layer.id] ? "▼" : "▶"}
             </span>
-            {getCurrentConfig(layer, "default").type}
+
           </div>
         ))}
       </div>
@@ -47,7 +47,7 @@ const Timeline = () => {
           ))}
         </div>
 
-        {elements.map((layer) => (
+        {layers.map((layer) => (
           <div
             key={layer.id}
             className={`${style.trackRow} ${
@@ -78,3 +78,4 @@ const Timeline = () => {
 };
 
 export default Timeline;
+ */

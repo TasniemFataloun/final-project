@@ -1,5 +1,6 @@
 import style from "./Header.module.css";
 import ExportCss from "../ExportCss/ExportCss";
+import ToggleSwitch from "../ToggleSwitch/ToggleSwitch";
 
 type HeaderProps = {
   onToggleGenerateCss: () => void;
@@ -14,7 +15,10 @@ const Header = ({ onToggleGenerateCss }: HeaderProps) => {
           <h1>CSS Motion Studio</h1>
         </div>
 
-        <ExportCss onClick={onToggleGenerateCss} />
+        <div className={style.cssAndToggleContainer}>
+          <ExportCss onClick={onToggleGenerateCss} />
+        <ToggleSwitch />
+        </div>
       </div>
     </header>
   );

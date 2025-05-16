@@ -1,54 +1,121 @@
-#root {
-  --header: #030712;
-  --pr: #111827;
-  --white: #e0e0e0;
-  --panel-bg: #1e1e1e;
-  --bg: #2c2c2c;
-  --warning: #ff9500;
+:root {
+  --white: #f8eaea; /* lighter pinkish-white */
+  --panel-bg: #6b6b78; /* lighter gray */
+  --bg: #373742; /* lighter near-black */
+  --warning: #ff8730;
+  --header-bg: #23232a; /* slightly lighter orange */
 
-  /*Padding*/
+  --text-color: var(--white);
+  --background-color: var(--bg);
+  --timeline-bg: #23232a; /* lighter than before */
+
+  --button-bg: #1f2633; /* lighter than #111827 */
+  --button-hover-bg: #2c2c36; /* lighter than #374151 */
+  --highlight-color: #f87171; /* lighter red */
+
+  --playhead: #f8eaea;
+  --border: #27303c;
+  --text-muted: #94a3b8;
+  --keyframe-color: green;
+
+  /* Padding */
   --padding: 1rem;
+
+  /* Font Sizes */
+  --font-size-h1: 1.5rem;
+  --font-size-h2: 1.3rem;
+  --font-size-h3: 1rem;
+  --font-size-label: 0.9rem;
+
+  /* Font Weights */
+  --font-weight-bold: bold;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+}
+
+/* LIGHT THEME */
+body[data-theme="light"] {
+  --header-bg: #79798a; /* lighter pinkish-white */
+  --white: #3a3a3a;
+  --panel-bg: #e4e1ec;
+  --bg: #a9a9b8;
+  --text-color: #3a3a3a;
+  --timeline-bg: #c0c0cc;
+
+  --border: #a0a0b0;
+  --text-muted: #6b7280;
+  --keyframe-color: #38a169; /* a greenish tone for light theme */
+  --button-hover-bg: #8d8da0; /* light gray */
+}
+
+body {
+  font-family: "Source Sans Pro", sans-serif;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+#root {
   width: 100%;
+  height: 100%;
 }
 
-h1 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--white);
+.appContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--background-color);
 }
 
-h2 {
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-h3 {
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: 16px;
-  margin-bottom: 0.5rem;
-}
-
-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--white);
-}
-
-set {
-  outline: none;
-}
-button:focus {
-  outline: none;
-}
-
+/* Main Content */
 .main {
   display: flex;
-  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .canvasTimelineContainer {
   display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.canvasPropertiesTimeline {
   width: 100%;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  margin-top: 16px;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+}
+
+button:focus {
+  outline: none;
 }

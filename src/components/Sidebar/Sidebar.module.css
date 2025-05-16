@@ -3,5 +3,15 @@
   max-width: 20rem;
   width: 20rem;
   background-color: var(--bg);
-  padding: var(--padding);
+  padding: var(--padding);  
+}
+
+.iconContainer {
+  display: flex;
+}
+
+.iconButton {
+  background-color: transparent;
+  width: 100%;
+  border: none;
 }
