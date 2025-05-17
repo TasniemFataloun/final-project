@@ -109,8 +109,6 @@ const PropertiesPanel = () => {
                         sectionKey as keyof typeof selectedLayerConfig
                       ]?.[fieldKey];
 
-                    console.log("keyframeValue", keyframeValue);
-
                     const currentValue = keyframeValue ?? configValue ?? "";
 
                     return (

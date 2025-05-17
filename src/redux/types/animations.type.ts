@@ -1,4 +1,4 @@
-import { AnimationType } from "../../types/animationType";
+import { AnimationConfigType, AnimationType } from "../../types/animationType";
 
 export type ElementType = "rectangle" | "circle" | "square" | "code";
 
@@ -31,4 +31,5 @@ export interface Layer {
   customHtml?: string;
   customCss?: string;
   config?: AnimationType;
+  globalconfig?: AnimationConfigType; 
 }

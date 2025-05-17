@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AnimationType } from "../../types/animationType";
+import { AnimationConfigType, AnimationType } from "../../types/animationType";
 import { Layer, Propertykeyframes } from "../types/animations.type";
 import { getDefaultPropertiesGroup } from "../../helpers/GetDefaultPropertiesGroup";
 
@@ -23,9 +23,9 @@ export const initialState: AnimationState = {
     id: "",
     type: "",
     animation: {
-      duration: "",
+      duration: 0,
       timingFunction: "",
-      delay: "",
+      delay: 0,
       iterationCount: "",
     },
     size: {
@@ -192,7 +192,7 @@ const animationSlice = createSlice({
     setConfig: (
       state,
       action: PayloadAction<{
-        section: keyof AnimationType;
+        section: keyof AnimationConfigType;
         field: string;
         value: string;
       }>
@@ -204,10 +204,14 @@ const animationSlice = createSlice({
 
       // Update config value
       if (!layer.config) return;
-      layer.config[section] = {
-        ...layer.config[section],
-        [field]: value,
-      };
+      if (
+        typeof layer.config[section] === "object" &&
+        layer.config[section] !== null
+      ) {
+        layer.config[section] = { ...layer.config[section], [field]: value };
+      } else {
+        layer.config[section] = value;
+      }
 
       const propertyExists = layer.editedPropertiesGroup?.some((group) =>
         group.propertiesList.some((p) => p.propertyName === field)
@@ -249,9 +253,6 @@ const animationSlice = createSlice({
         property: action.payload.property,
         keyframeId: action.payload.keyframeId,
       };
-      console.log(
-        `Selected keyframe: ${action.payload.keyframeId} for layer: ${action.payload.layerId} and property: ${action.payload.property}`
-      );
     },
     setCurrentPosition: (state, action: PayloadAction<number>) => {
       state.currentPosition = action.payload;

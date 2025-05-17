@@ -34,7 +34,7 @@ const TimelineKeyframes = () => {
     // If click target is a keyframe, do NOT reset
     const target = e.target as HTMLElement;
     if (target.closest(`.${style.keyframe}`)) {
-      return; 
+      return;
     }
 
     // Else reset selected keyframe
@@ -120,7 +120,6 @@ const TimelineKeyframes = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isPlaying, dispatch]);
-  console.log("laeyers", layers);
 
   return (
     <div
@@ -163,13 +162,6 @@ const TimelineKeyframes = () => {
                           className={`${style.row} ${style.keyframeRow}`}
                         >
                           {prop.keyframes.map((kf) => {
-                            console.log(
-                              "currently selected keyframe",
-                              isSelectedKeyframe
-                            );
-                            console.log("current kf id:", kf.id);
-                            console.log("current layer id:", layer.id);
-
                             return (
                               <Diamond
                                 size={15}

@@ -1,9 +1,9 @@
 export type AnimationConfigType = {
-  duration: string;
+  duration: number;
   timingFunction: string;
-  delay: string;
+  delay: number;
   iterationCount: string;
-  [key: string]: string;
+  [key: string]: string | number;
 };
 
 export type sizeType = {
@@ -32,7 +32,7 @@ export type BackgroundColorType = {
 };
 
 export type AnimationType = {
-  animation: AnimationConfigType;
+  animation: AnimationConfigType; 
   size: sizeType;
   transform: TransformType;
   opacity: OpacityType;

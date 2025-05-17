@@ -3,9 +3,9 @@ import { AnimationType } from "../types/animationType";
 export const importCircle: AnimationType = {
   type: "circle",
   animation: {
-    duration: "1",
+    duration: 1,
     timingFunction: "ease-in-out",
-    delay: "0",
+    delay: 0,
     iterationCount: "infinite",
   },
   size: {
@@ -28,9 +28,9 @@ export const importCircle: AnimationType = {
 export const importRectangle: AnimationType = {
   type: "rectangle",
   animation: {
-    duration: "1",
+    duration: 1,
     timingFunction: "ease-in-out",
-    delay: "0",
+    delay: 0,
     iterationCount: "infinite",
   },
   size: {
@@ -53,9 +53,9 @@ export const importRectangle: AnimationType = {
 export const importSquare: AnimationType = {
   type: "square",
   animation: {
-    duration: "1",
+    duration: 1,
     timingFunction: "ease-in-out",
-    delay: "0",
+    delay: 0,
     iterationCount: "infinite",
   },
   size: {
