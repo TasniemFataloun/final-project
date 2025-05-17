@@ -5,7 +5,7 @@
 }
 .currentProgressTime {
   width: 220px;
-  background: var(--panel-bg);
+  background: var(--timeline-bg);
   display: flex;
   align-items: center;
   margin: 0 auto;

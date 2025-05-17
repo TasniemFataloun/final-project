@@ -3,6 +3,7 @@ import style from "./TimelineLayers.module.css";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import {
   removeLayer,
+  removeSelectedKeyframe,
   setSelectedLayer,
   updateLayer,
 } from "../../../redux/slices/animationSlice";
@@ -29,7 +30,7 @@ const TimelineLayers = () => {
   const { expandedLayers, expandedProperties } = useAppSelector(
     (state) => state.timeline
   );
-  
+
   useEffect(() => {
     layers.forEach((layer) => {
       if (
@@ -153,11 +154,7 @@ const TimelineLayers = () => {
                                 <button
                                   className={style.deleteButton}
                                   onClick={() => {
-                                    console.log(
-                                      `Property ${prop.keyframes.map(
-                                        (kf) => kf.id
-                                      )} deleted`
-                                    );
+                                    dispatch(removeSelectedKeyframe());
                                   }}
                                 >
                                   <Trash2 size={14} />

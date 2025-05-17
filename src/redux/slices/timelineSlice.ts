@@ -43,7 +43,11 @@ const timelineSlice = createSlice({
       state.expandedProperties = {};
       state.isDragging = false;
     },
-    setRemoveKeyframe(state, action: PayloadAction<Propertykeyframes>) {},
+    setRemoveKeyframe(state, action: PayloadAction<Propertykeyframes[]>) {
+      const layer = state.isSelectedKeyframe?.keyframeId;
+      console.log("layer", layer);
+      
+    },
     setIsSelectedKeyframe(
       state,
       action: PayloadAction<{

@@ -1,5 +1,4 @@
 .container {
-  background: var(--timeline-bg);
   color: var(--text-color);
   font-family: "Inter", sans-serif;
   display: flex;
@@ -7,6 +6,7 @@
   flex: 1;
   overflow: auto;
   height: 100%;
+  background: var(--timeline-bg);
 }
 
 .timelineBody {

@@ -1,6 +1,6 @@
 :root {
   --white: #f8eaea; /* lighter pinkish-white */
-  --panel-bg: #6b6b78; /* lighter gray */
+  --panel-bg: #c4c4d3; /* lighter gray */
   --bg: #373742; /* lighter near-black */
   --warning: #ff8730;
   --header-bg: #23232a; /* slightly lighter orange */
@@ -32,10 +32,38 @@
   --font-weight-semibold: 600;
   --font-weight-medium: 500;
 }
-
 /* LIGHT THEME */
 body[data-theme="light"] {
-  --header-bg: #79798a; /* lighter pinkish-white */
+  --white: #1b1e25;
+  --panel-bg: #f7f9fc;
+  --bg: #f3f4f6;
+  --header-bg: #e4e7ec;
+
+  --text-color: #1e2025;
+  --timeline-bg: #e4e7ec;
+
+  --button-bg: #e0e0e6;
+  --button-hover-bg: #c9ccd3;
+  --highlight-color: #cf316b;
+
+  --playhead: #0066cc;
+  --border: #d1d5db;
+  --text-muted: #6b7280;
+  --keyframe-color: #38a169;
+
+  /*  --header-bg: #79798a;
+  --white: #014921;
+  --panel-bg: #E8E5E5;
+  --bg: #E8E5E5;
+  --text-color: #3a3a3a;
+  --timeline-bg: #c0c0cc;
+
+  --border: #a0a0b0;
+  --text-muted: #6b7280;
+  --keyframe-color: #38a169;
+  --button-hover-bg: #8d8da0;*/
+
+  /*  --header-bg: #79798a; 
   --white: #3a3a3a;
   --panel-bg: #e4e1ec;
   --bg: #a9a9b8;
@@ -44,8 +72,8 @@ body[data-theme="light"] {
 
   --border: #a0a0b0;
   --text-muted: #6b7280;
-  --keyframe-color: #38a169; /* a greenish tone for light theme */
-  --button-hover-bg: #8d8da0; /* light gray */
+  --keyframe-color: #38a169;
+  --button-hover-bg: #8d8da0; */
 }
 
 body {

@@ -110,7 +110,7 @@ const TimelineKeyframes = () => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        e.preventDefault(); // Prevent page scrolling
+        e.preventDefault();
         dispatch(setIsPlaying(!isPlaying));
       }
     };
@@ -186,6 +186,7 @@ const TimelineKeyframes = () => {
                                     keyframeId: kf.id,
                                   };
                                   dispatch(setSelectedKeyframe(payload));
+                                  dispatch(setCurrentPosition(kf.percentage));
                                 }}
                               />
                             );

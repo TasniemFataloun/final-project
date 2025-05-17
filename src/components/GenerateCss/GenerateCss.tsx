@@ -16,14 +16,10 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
 
   const generateCSS = () => {
     if (!selectedElement || !selectedElement.config) {
-      return `/* No element selected or missing keyframes */`;
+      return /* No element selected or missing keyframes */;
     }
 
-    return Object.values(selectedElement.config)
-      .map((animation) =>
-        UseGenerateKeyframes(animation)
-      )
-      .join("\n");
+    return layers.map((layer) => UseGenerateKeyframes(layer)).join("\n\n");
   };
 
   return (
@@ -31,7 +27,7 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
       <SquareX onClick={onClose} className={style.closeButton} />
       <div className={style.titleContainer}>
         <div className={style.generateCss}>
-          <CopyToClipboard css={generateCSS()} />
+          <CopyToClipboard css={generateCSS() || ""} />
           <h2>Generated CSS</h2>
         </div>
       </div>

@@ -1,7 +1,6 @@
 .toggleSwitch {
   position: relative;
   width: 100px;
-  --bg: #2c2c2c;
 }
 
 .switchLabel {

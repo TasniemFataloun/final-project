@@ -3,7 +3,7 @@ import { Layer } from "../redux/types/animations.type";
 export const UseGenerateKeyframes = (layer: Layer) => {
   if (!layer || !layer.editedPropertiesGroup) return "";
 
-  const className = `.layer-${layer.id}`; // ⬅️ Unique class name
+  const className = `.${layer.type}`;
   const baseStyles: string[] = [];
   const keyframeSteps: Record<number, string[]> = {};
 
@@ -25,18 +25,18 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     });
   });
 
-  const animationName = `animation-${layer.id}`; // ⬅️ Also use unique animation name
+  const animationName = `animation-${layer.type}`;
   const anim = layer.config;
-  const animationCss = `
-  animation: ${animationName} ${anim?.duration || "1"}s ${
-    anim?.timingFunction || "ease"
-  } ${anim?.delay || "0"}s ${anim?.iterationCount || "infinite"};
-  `;
+  const animationCss = `  animation: ${animationName} ${
+    anim?.duration || "1"
+  }s ${anim?.timingFunction || "ease"} ${anim?.delay || "0"}s ${
+    anim?.iterationCount || "infinite"
+  };`;
 
   const baseClassCss = `
 ${className} {
 ${baseStyles.join("\n")}
-${animationCss.trim()}
+${animationCss}
 }`.trim();
 
   const sortedPercentages = Object.keys(keyframeSteps)

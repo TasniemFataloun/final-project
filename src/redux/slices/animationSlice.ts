@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AnimationConfigType } from "../../types/animationType";
-import { Layer, PropertiesGroup } from "../types/animations.type";
+import { Layer } from "../types/animations.type";
 import {
   getDefaultConfig,
   getDefaultPropertiesGroup,
@@ -132,93 +132,6 @@ const animationSlice = createSlice({
 
       prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
-
-    /*     updatePropertyValue: (
-      state,
-      action: PayloadAction<{
-        layerId: string;
-        groupName: string;
-        propertyName: string;
-        percentage: number;
-        newValue: string;
-      }>
-    ) => {
-      const { layerId, groupName, propertyName, percentage, newValue } =
-        action.payload;
-      const layer = state.layers.find((l) => l.id === layerId);
-      if (!layer) return;
-
-      const group = layer.editedPropertiesGroup?.find(
-        (g) => g.name === groupName
-      );
-      if (!group) return;
-
-      const property = group.propertiesList.find(
-        (p) => p.propertyName === propertyName
-      );
-      if (!property) return;
-
-      const keyframe = property.keyframes.find(
-        (kf) => kf.percentage === percentage
-      );
-      if (!keyframe) return;
-
-      keyframe.value = newValue;
-    }, */
-    // when select a layer, set the config to the selected layer's config
-    /*    setConfig: (
-      state,
-      action: PayloadAction<{
-        section: keyof ConfigType;
-        field: string;
-        value: string;
-      }>
-    ) => {
-      const { section, field, value } = action.payload;
-      const layer = state.layers.find((l) => l.id === state.selectedLayerId);
-
-      if (!layer) return;
-
-      // Update config value
-      if (!layer.config) return;
-      if (
-        typeof layer.config[section] === "object" &&
-        layer.config[section] !== null
-      ) {
-       // layer.config[section] = { ...layer.config[section], [field]: value };
-      } else {
-        layer.config[section] = value;
-      }
-
-      const propertyExists = layer.editedPropertiesGroup?.some((group) =>
-        group.propertiesList.some((p) => p.propertyName === field)
-      );
-
-      if (!propertyExists) {
-        const newProperty = {
-          propertyName: field,
-          keyframes: [],
-        };
-
-        // Determine group name
-        const groupName = section;
-
-        // Find or create the group
-        const group = layer.editedPropertiesGroup?.find(
-          (g) => g.name === groupName
-        );
-        if (group) {
-          group.propertiesList.push(newProperty);
-        } else {
-          layer.editedPropertiesGroup?.push({
-            name: section as string,
-            propertiesList: [newProperty],
-          });
-        }
-      }
-    },
- */
-
     updatePropertyValue: (
       state,
       action: PayloadAction<{
@@ -230,8 +143,11 @@ const animationSlice = createSlice({
       const { section, field, value } = action.payload;
       const layer = state.layers.find((l) => l.id === state.selectedLayerId);
       if (!layer || !layer.layerPropertiesValue) return;
-      layer.layerPropertiesValue[section] = value;
-
+      // Update the layer properties value
+      layer.layerPropertiesValue[section] = {
+        ...(layer.layerPropertiesValue[section] || {}),
+        [field]: value,
+      };
       const propertyExists = layer.editedPropertiesGroup?.some((group) =>
         group.propertiesList.some((p) => p.propertyName === field)
       );
@@ -285,8 +201,40 @@ const animationSlice = createSlice({
         keyframeId: action.payload.keyframeId,
       };
     },
+
     setCurrentPosition: (state, action: PayloadAction<number>) => {
       state.currentPosition = action.payload;
+    },
+    removeSelectedKeyframe: (state) => {
+      const selected = state.selectedKeyframe;
+      if (!selected) return;
+
+      const { layerId, property, keyframeId } = selected;
+
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer || !layer.editedPropertiesGroup) return;
+
+      // Remove the keyframe from the selected layer's edited properties group
+      for (const group of layer.editedPropertiesGroup) {
+        const prop = group.propertiesList.find(
+          (p) => p.propertyName === property
+        );
+        // If the property exists, filter out the keyframe
+        if (prop) {
+          prop.keyframes = prop.keyframes.filter((kf) => kf.id !== keyframeId);
+        }
+      }
+
+      if (layer.layerPropertiesValue) {
+        for (const groupName in layer.layerPropertiesValue) {
+          if (layer.layerPropertiesValue[groupName].hasOwnProperty(property)) {
+            layer.layerPropertiesValue[groupName][property] = ""; // or undefined if you prefer
+            break;
+          }
+        }
+      }
+
+      state.selectedKeyframe = null;
     },
   },
 });
@@ -302,6 +250,7 @@ export const {
   setConfig,
   setSelectedKeyframe,
   setCurrentPosition,
+  removeSelectedKeyframe,
 } = animationSlice.actions;
 
 export type AnimationActionType =
@@ -314,6 +263,7 @@ export type AnimationActionType =
   | typeof setIsPlaying
   | typeof setConfig
   | typeof setSelectedKeyframe
-  | typeof setCurrentPosition;
+  | typeof setCurrentPosition
+  | typeof removeSelectedKeyframe;
 
 export default animationSlice.reducer;

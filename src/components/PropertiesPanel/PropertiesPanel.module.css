@@ -77,7 +77,6 @@
   font-size: 14px;
   border-radius: 8px;
   background-color: var(--panel-bg);
-  color: #fff;
   outline: none;
   transition: border 0.2s ease;
 }
