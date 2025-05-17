@@ -32,7 +32,7 @@ export type BackgroundColorType = {
 };
 
 export type AnimationType = {
-  animation: AnimationConfigType; 
+  /*   animation: AnimationConfigType; */
   size: sizeType;
   transform: TransformType;
   opacity: OpacityType;

@@ -1,3 +1,4 @@
+
 import { AnimationConfigType, AnimationType } from "../../types/animationType";
 
 export type ElementType = "rectangle" | "circle" | "square" | "code";
@@ -30,6 +31,6 @@ export interface Layer {
   editedPropertiesGroup?: PropertiesGroup[];
   customHtml?: string;
   customCss?: string;
-  config?: AnimationType;
-  globalconfig?: AnimationConfigType; 
+  config?: AnimationConfigType;
+  layerPropertiesValue?: AnimationType;
 }

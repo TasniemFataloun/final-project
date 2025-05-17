@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AnimationConfigType, AnimationType } from "../../types/animationType";
-import { Layer, Propertykeyframes } from "../types/animations.type";
-import { getDefaultPropertiesGroup } from "../../helpers/GetDefaultPropertiesGroup";
+import { AnimationConfigType } from "../../types/animationType";
+import { Layer, PropertiesGroup } from "../types/animations.type";
+import {
+  getDefaultConfig,
+  getDefaultPropertiesGroup,
+} from "../../helpers/GetDefaultPropertiesGroup";
 
 export interface AnimationState {
   layers: Layer[];
   selectedLayerId: string | null;
-  config: AnimationType;
   isPlaying: boolean;
   currentPosition: number;
   selectedKeyframe: {
@@ -19,33 +21,6 @@ export interface AnimationState {
 export const initialState: AnimationState = {
   layers: [],
   selectedLayerId: null,
-  config: {
-    id: "",
-    type: "",
-    animation: {
-      duration: 0,
-      timingFunction: "",
-      delay: 0,
-      iterationCount: "",
-    },
-    size: {
-      width: "",
-      height: "",
-    },
-    transform: {
-      scale: "",
-      rotate: "",
-      translateX: "",
-      translateY: "",
-    },
-    opacity: {
-      opacity: "",
-      borderRadius: "",
-    },
-    backgroundColor: {
-      backgroundColor: "",
-    },
-  },
   isPlaying: false,
   currentPosition: 0,
   selectedKeyframe: null,
@@ -59,6 +34,7 @@ const animationSlice = createSlice({
       const newLayer = {
         ...action.payload,
         editedPropertiesGroup: [],
+        config: getDefaultConfig(action.payload.type),
       };
       state.layers.push(newLayer);
       state.selectedLayerId = newLayer.id;
@@ -81,6 +57,7 @@ const animationSlice = createSlice({
       );
       state.layers = layer;
     },
+
     setSelectedLayer: (state, action: PayloadAction<string | null>) => {
       state.selectedLayerId = action.payload;
     },
@@ -156,7 +133,7 @@ const animationSlice = createSlice({
       prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
 
-    updatePropertyValue: (
+    /*     updatePropertyValue: (
       state,
       action: PayloadAction<{
         layerId: string;
@@ -187,12 +164,12 @@ const animationSlice = createSlice({
       if (!keyframe) return;
 
       keyframe.value = newValue;
-    },
+    }, */
     // when select a layer, set the config to the selected layer's config
-    setConfig: (
+    /*    setConfig: (
       state,
       action: PayloadAction<{
-        section: keyof AnimationConfigType;
+        section: keyof ConfigType;
         field: string;
         value: string;
       }>
@@ -208,7 +185,7 @@ const animationSlice = createSlice({
         typeof layer.config[section] === "object" &&
         layer.config[section] !== null
       ) {
-        layer.config[section] = { ...layer.config[section], [field]: value };
+       // layer.config[section] = { ...layer.config[section], [field]: value };
       } else {
         layer.config[section] = value;
       }
@@ -240,6 +217,60 @@ const animationSlice = createSlice({
         }
       }
     },
+ */
+
+    updatePropertyValue: (
+      state,
+      action: PayloadAction<{
+        section: keyof AnimationConfigType;
+        field: string;
+        value: string;
+      }>
+    ) => {
+      const { section, field, value } = action.payload;
+      const layer = state.layers.find((l) => l.id === state.selectedLayerId);
+      if (!layer || !layer.layerPropertiesValue) return;
+      layer.layerPropertiesValue[section] = value;
+
+      const propertyExists = layer.editedPropertiesGroup?.some((group) =>
+        group.propertiesList.some((p) => p.propertyName === field)
+      );
+
+      if (!propertyExists) {
+        const newProperty = {
+          propertyName: field,
+          keyframes: [],
+        };
+
+        const group = layer.editedPropertiesGroup?.find(
+          (g) => g.name === section
+        );
+
+        if (group) {
+          group.propertiesList.push(newProperty);
+        } else {
+          layer.editedPropertiesGroup?.push({
+            name: section as string,
+            propertiesList: [newProperty],
+          });
+        }
+      }
+    },
+
+    setConfig: (
+      state,
+      action: PayloadAction<{
+        section: keyof AnimationConfigType;
+        field: string;
+        value: string;
+      }>
+    ) => {
+      const { field, value } = action.payload;
+      const layer = state.layers.find((l) => l.id === state.selectedLayerId);
+      if (!layer || !layer.config) return;
+      layer.config = { ...layer.config, [field]: value };
+    },
+
     setSelectedKeyframe: (
       state,
       action: PayloadAction<{

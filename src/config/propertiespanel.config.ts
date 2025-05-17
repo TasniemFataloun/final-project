@@ -1,10 +1,10 @@
 export const defaultConfig = {
-  animation: {
+  /*   animation: {
     duration: "",
     timingFunction: "",
     delay: "",
     iterationCount: "",
-  },
+  }, */
   size: {
     width: "",
     height: "",
@@ -24,8 +24,7 @@ export const defaultConfig = {
   },
 };
 
-
-export const propertiesSchema = {
+export const ConfigSchema = {
   animation: {
     title: "Animation",
     fields: {
@@ -53,6 +52,9 @@ export const propertiesSchema = {
       },
     },
   },
+};
+
+export const propertiesSchema = {
   size: {
     title: "Size",
     fields: {

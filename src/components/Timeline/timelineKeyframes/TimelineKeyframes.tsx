@@ -78,7 +78,11 @@ const TimelineKeyframes = () => {
 
   //useEffect
   useEffect(() => {
-    const duration = 1000;
+    const selectedLayer = layers.find(
+      (layer) => layer.id === selectedLayerId
+    )?.config;
+    const duration = selectedLayer ? selectedLayer.duration * 1000 : 1;
+
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) {
         const time = (endTimeRef.current / 100) * duration;
@@ -135,7 +139,7 @@ const TimelineKeyframes = () => {
       {layers.length > 0 && (
         <div
           className={style.playHead}
-          style={{ left: `${Math.round(currentPosition)}%` }}
+          style={{ left: `${currentPosition}%` }}
         />
       )}
       {/* Keyframes */}

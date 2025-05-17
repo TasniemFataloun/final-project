@@ -1,13 +1,33 @@
-import { AnimationType } from "../types/animationType";
+import { AnimationConfigType, AnimationType } from "../types/animationType";
 
-export const importCircle: AnimationType = {
+//animation config
+export const importCircleConfig: AnimationConfigType = {
   type: "circle",
-  animation: {
-    duration: 1,
-    timingFunction: "ease-in-out",
-    delay: 0,
-    iterationCount: "infinite",
-  },
+  duration: 1,
+  timingFunction: "ease-in-out",
+  delay: 0,
+  iterationCount: "infinite",
+};
+
+export const importRectangleConfig: AnimationConfigType = {
+  type: "rectangle",
+  duration: 1,
+  timingFunction: "ease-in-out",
+  delay: 0,
+  iterationCount: "infinite",
+};
+
+export const importSquareConfig: AnimationConfigType = {
+  type: "square",
+  duration: 1,
+  timingFunction: "ease-in-out",
+  delay: 0,
+  iterationCount: "infinite",
+};
+
+//animation properties
+export const importCircleProps: AnimationType = {
+  type: "circle",
   size: {
     width: "50",
     height: "50",
@@ -25,14 +45,8 @@ export const importCircle: AnimationType = {
   backgroundColor: { backgroundColor: "#FFFFFF" },
 };
 
-export const importRectangle: AnimationType = {
+export const importRectangleProps: AnimationType = {
   type: "rectangle",
-  animation: {
-    duration: 1,
-    timingFunction: "ease-in-out",
-    delay: 0,
-    iterationCount: "infinite",
-  },
   size: {
     width: "70",
     height: "50",
@@ -50,14 +64,8 @@ export const importRectangle: AnimationType = {
   backgroundColor: { backgroundColor: "#000000" },
 };
 
-export const importSquare: AnimationType = {
+export const importSquareProps: AnimationType = {
   type: "square",
-  animation: {
-    duration: 1,
-    timingFunction: "ease-in-out",
-    delay: 0,
-    iterationCount: "infinite",
-  },
   size: {
     width: "50",
     height: "50",

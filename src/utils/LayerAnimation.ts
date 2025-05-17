@@ -64,8 +64,6 @@ export const animateLayer = (
 
   const properties =
     layer.editedPropertiesGroup?.flatMap((g: any) => g.propertiesList) || [];
-
-    console.log("Properties: ", properties);
     
   for (const prop of properties) {
     const kfs = [...prop.keyframes].sort((a, b) => a.percentage - b.percentage);

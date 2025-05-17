@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import style from "./TimelineLayers.module.css";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import {
@@ -29,6 +29,17 @@ const TimelineLayers = () => {
   const { expandedLayers, expandedProperties } = useAppSelector(
     (state) => state.timeline
   );
+  
+  useEffect(() => {
+    layers.forEach((layer) => {
+      if (
+        (layer.editedPropertiesGroup?.length ?? 0) > 0 &&
+        !expandedLayers[layer.id]
+      ) {
+        dispatch(toggleLayer(layer.id));
+      }
+    });
+  }, [layers, dispatch]);
 
   return (
     <>
@@ -53,7 +64,6 @@ const TimelineLayers = () => {
                     <ChevronRight size={14} />
                   ))}
               </button>
-
               <button
                 className={`${style.layerButtons} ${
                   !layer.visible && style.iconAction
@@ -69,7 +79,6 @@ const TimelineLayers = () => {
               >
                 {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
               </button>
-
               <button
                 className={`${style.layerButtons} ${
                   layer.locked && style.iconAction

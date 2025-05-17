@@ -26,7 +26,7 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   });
 
   const animationName = `animation-${layer.id}`; // ⬅️ Also use unique animation name
-  const anim = layer.config?.animation;
+  const anim = layer.config;
   const animationCss = `
   animation: ${animationName} ${anim?.duration || "1"}s ${
     anim?.timingFunction || "ease"

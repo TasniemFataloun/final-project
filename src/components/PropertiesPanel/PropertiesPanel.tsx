@@ -1,11 +1,17 @@
 import style from "./PropertiesPanel.module.css";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { propertiesSchema } from "../../config/propertiespanel.config";
+import {
+  ConfigSchema,
+  propertiesSchema,
+} from "../../config/propertiespanel.config";
 import ColorPicker from "../ColorPicker/ColorPicker";
 import { useState } from "react";
 import { PanelRightClose } from "lucide-react";
-import { addKeyframe, setConfig } from "../../redux/slices/animationSlice";
-import { toggleLayer } from "../../redux/slices/timelineSlice";
+import {
+  addKeyframe,
+  setConfig,
+  updatePropertyValue,
+} from "../../redux/slices/animationSlice";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -15,7 +21,7 @@ const PropertiesPanel = () => {
   );
 
   const selectedLayer = layers.find((el) => el.id === selectedLayerId);
-  const selectedLayerConfig = selectedLayer?.config;
+
   const selectedKeyframe = useAppSelector(
     (state) => state.animation.selectedKeyframe
   );
@@ -31,9 +37,8 @@ const PropertiesPanel = () => {
     groupName: string
   ) => {
     if (!selectedLayerId) return;
-
     dispatch(
-      setConfig({
+      updatePropertyValue({
         section: groupName,
         field: propertyName,
         value: newValue,
@@ -49,8 +54,21 @@ const PropertiesPanel = () => {
         value: newValue,
       })
     );
+  };
 
-    dispatch(toggleLayer(selectedLayerId));
+  const handleConfigChange = (
+    propertyName: string,
+    newValue: any,
+    groupName: string
+  ) => {
+    if (!selectedLayerId) return;
+    dispatch(
+      setConfig({
+        section: groupName,
+        field: propertyName,
+        value: newValue,
+      })
+    );
   };
 
   return (
@@ -71,45 +89,99 @@ const PropertiesPanel = () => {
 
       {isPropertiesPanelOpen && (
         <>
+          {Object.entries(ConfigSchema).map(([sectionKey, sectionData]) => (
+            <div key={sectionKey} className={style.section}>
+              <h3>{sectionData.title}</h3>
+              <div className={style.optionsContainer}>
+                {Object.entries(sectionData.fields).map(
+                  ([fieldKey, fieldProps]) => {
+                    const configValue = selectedLayer?.config?.[fieldKey];
+                    return (
+                      <div className={style.option} key={fieldKey}>
+                        <label className={style.label}>
+                          {fieldProps.label}
+                        </label>
+
+                        {fieldProps.type === "select" ? (
+                          <select
+                            value={configValue}
+                            onChange={(e) =>
+                              handleConfigChange(
+                                fieldKey,
+                                e.target.value,
+                                sectionKey
+                              )
+                            }
+                            className={style.input}
+                          >
+                            {"options" in fieldProps &&
+                              (fieldProps.options as string[]).map(
+                                (opt: string) => (
+                                  <option key={opt} value={opt}>
+                                    {opt}
+                                  </option>
+                                )
+                              )}
+                          </select>
+                        ) : (
+                          <input
+                            type={fieldProps.type}
+                            value={configValue}
+                            step={
+                              fieldProps.type === "number" &&
+                              "step" in fieldProps
+                                ? (fieldProps.step as
+                                    | string
+                                    | number
+                                    | undefined)
+                                : undefined
+                            }
+                            min={
+                              fieldProps.type === "number" &&
+                              "min" in fieldProps
+                                ? (fieldProps.min as
+                                    | string
+                                    | number
+                                    | undefined)
+                                : undefined
+                            }
+                            max={
+                              fieldProps.type === "number" &&
+                              "max" in fieldProps
+                                ? (fieldProps.max as
+                                    | string
+                                    | number
+                                    | undefined)
+                                : undefined
+                            }
+                            onChange={(e) =>
+                              handleConfigChange(
+                                fieldKey,
+                                e.target.value,
+                                sectionKey
+                              )
+                            }
+                            className={style.input}
+                          />
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </div>
+          ))}
           {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => (
             <div key={sectionKey} className={style.section}>
               <h3>{sectionData.title}</h3>
               <div className={style.optionsContainer}>
                 {Object.entries(sectionData.fields).map(
                   ([fieldKey, fieldProps]) => {
-                    const keyframeValue = (() => {
-                      if (!selectedKeyframe || !selectedLayer) return undefined;
-
-                      if (selectedKeyframe.property !== fieldKey)
-                        return undefined;
-
-                      const group = selectedLayer.editedPropertiesGroup?.find(
-                        (g) =>
-                          g.propertiesList.some(
-                            (p) => p.propertyName === fieldKey
-                          )
-                      );
-                      if (!group) return undefined;
-
-                      const property = group.propertiesList.find(
-                        (p) => p.propertyName === fieldKey
-                      );
-                      if (!property) return undefined;
-
-                      const keyframe = property.keyframes.find(
-                        (kf) => kf.id === selectedKeyframe.keyframeId
-                      );
-                      if (!keyframe) return undefined;
-
-                      return keyframe.value;
-                    })();
-
-                    const configValue =
+                    const selectedLayerConfig = selectedLayer?.layerPropertiesValue;
+                    const layerPropsValue =
                       selectedLayerConfig?.[
                         sectionKey as keyof typeof selectedLayerConfig
                       ]?.[fieldKey];
-
-                    const currentValue = keyframeValue ?? configValue ?? "";
 
                     return (
                       <div className={style.option} key={fieldKey}>
@@ -119,7 +191,7 @@ const PropertiesPanel = () => {
 
                         {fieldProps.type === "select" ? (
                           <select
-                            value={currentValue}
+                            value={layerPropsValue}
                             onChange={(e) =>
                               handlePropertyChange(
                                 fieldKey,
@@ -138,15 +210,10 @@ const PropertiesPanel = () => {
                                 )
                               )}
                           </select>
-                        ) : fieldProps.type === "color" ? (
-                          <ColorPicker
-                            color={currentValue}
-                            onChange={() => console.log("color")}
-                          />
                         ) : (
                           <input
                             type={fieldProps.type}
-                            value={currentValue}
+                            value={layerPropsValue}
                             step={
                               fieldProps.type === "number" &&
                               "step" in fieldProps

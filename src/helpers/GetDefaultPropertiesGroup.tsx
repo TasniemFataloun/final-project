@@ -1,18 +1,36 @@
 import {
-  importCircle,
-  importRectangle,
-  importSquare,
+  importCircleProps,
+  importCircleConfig,
+  importRectangleProps,
+  importRectangleConfig,
+  importSquareProps,
+  importSquareConfig,
 } from "../config/importElementsProperties.config";
 
+//props
 export const getDefaultPropertiesGroup = (type: string) => {
   switch (type) {
     case "circle":
-      return importCircle;
+      return importCircleProps;
     case "rectangle":
-      return importRectangle;
+      return importRectangleProps;
     case "square":
-      return importSquare;
+      return importSquareProps;
     default:
-      return importSquare;
+      return importSquareProps;
+  }
+};
+
+//config
+export const getDefaultConfig = (type: string) => {
+  switch (type) {
+    case "circle":
+      return importCircleConfig;
+    case "rectangle":
+      return importRectangleConfig;
+    case "square":
+      return importSquareConfig;
+    default:
+      return importSquareConfig;
   }
 };

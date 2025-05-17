@@ -13,7 +13,7 @@ const Canvas = () => {
     (state) => state.animation
   );
 
-  useEffect(() => {
+  /*   useEffect(() => {
     if (!layerRef.current) {
       const style = document.createElement("style");
       layerRef.current = style;
@@ -28,7 +28,7 @@ const Canvas = () => {
     if (layerRef.current) {
       layerRef.current.innerHTML = css;
     }
-  }, [layers]);
+  }, [layers]); */
 
   //this useEffect is used to animate the layers when the current position changes (playhead)
   useEffect(() => {
@@ -56,12 +56,12 @@ const Canvas = () => {
         if (!el || !layer.visible) return;
 
         /* const layerDuration = layer.config?.animation.duration || 1; */
-        const layerDuration = layer.config?.animation.duration || 1;
+        const layerDuration = layer.config?.duration || 1;
 
         const iterations =
-          layer.config?.animation.iterationCount === "infinite"
+          layer.config?.iterationCount === "infinite"
             ? Infinity
-            : parseInt(layer.config?.animation.iterationCount || "infinite");
+            : parseInt(layer.config?.iterationCount || "infinite");
 
         const totalDuration = layerDuration * iterations;
 
@@ -89,22 +89,27 @@ const Canvas = () => {
 
   return (
     <div className={styles.canvasContainer}>
+      <div className={styles.grid}></div>
       <div className={styles.animatedElementContainer}>
         {layers.map((layer) => {
           return (
-            <div
-              ref={(el) => {
-                if (el) layerRef.current[layer.id] = el;
-              }}
-              key={layer.id}
-              onClick={() => dispatch(toggleLayer(layer.id))}
-              style={{
-                ...layer.style,
-                visibility: layer.visible ? "visible" : "hidden",
-                animationPlayState: isPlaying ? "running" : "paused",
-              }}
-              className={`${styles.animatedElement} layer-${layer.id}`}
-            />
+            <>
+              <div
+                ref={(el) => {
+                  if (el) layerRef.current[layer.id] = el;
+                }}
+                key={layer.id}
+                onClick={() => dispatch(toggleLayer(layer.id))}
+                style={{
+                  ...layer.style,
+                  visibility: layer.visible ? "visible" : "hidden",
+                  animationPlayState: isPlaying ? "running" : "paused",
+                }}
+                className={`${styles.animatedElement} layer-${layer.id}`}
+              />
+              
+
+            </>
           );
         })}
       </div>

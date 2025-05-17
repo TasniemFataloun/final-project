@@ -28,7 +28,7 @@ const Sidebar = () => {
       visible: true,
       locked: false,
       style,
-      config,
+      layerPropertiesValue: config,
     };
 
     dispatch(addLayer(newLayer));
