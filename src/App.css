@@ -1,22 +1,31 @@
+/* 848484 */
 :root {
-  --white: #f8eaea; /* lighter pinkish-white */
-  --panel-bg: #c4c4d3; /* lighter gray */
-  --bg: #373742; /* lighter near-black */
-  --warning: #ff8730;
-  --header-bg: #23232a; /* slightly lighter orange */
+  --white: #ffffff;
+  --panel-bg: #e2e2e2;
+  --bg: #3a3a3a;
+  --header-bg: #2a2a2a;
+  --timeline-bg: #2d2d2f;
+  --button-bg: #5a5b60;
 
-  --text-color: var(--white);
-  --background-color: var(--bg);
-  --timeline-bg: #23232a; /* lighter than before */
+  --border: #ffffff;
+  /*
+    --white: #ffffff;
+  --panel-bg: #d0d3d8;
+  --bg: #3c4049;
+  --header-bg: #2a2e36;
 
-  --button-bg: #1f2633; /* lighter than #111827 */
-  --button-hover-bg: #2c2c36; /* lighter than #374151 */
-  --highlight-color: #f87171; /* lighter red */
+  --timeline-bg: #343841;
 
-  --playhead: #f8eaea;
-  --border: #27303c;
-  --text-muted: #94a3b8;
-  --keyframe-color: green;
+  --button-bg: #5a5f6b;
+  --button-hover-bg: #6a7080;
+
+  --border: #ffffff;*/
+
+  --highlight-color: #ff4f75;
+  --selectedLayer: #f0b8b8;
+
+  --playhead: var(--selectedLayer);
+  --keyframe-color: #7dd68c;
 
   /* Padding */
   --padding: 1rem;
@@ -34,22 +43,42 @@
 }
 /* LIGHT THEME */
 body[data-theme="light"] {
+  /*  --white: #000000;
+  --panel-bg: #fbf1e1;
+  --bg: #ece9d4;
+  --header-bg: #80aa84;
+  --warning: #ff8730;
+
+  --text-color: var(--white);
+  --background-color: var(--bg);
+  --timeline-bg: #efe5d1;
+  --border: #000000;
+  --selectedLayer: #d3d9be;
+  --text-muted: #000000;
+
+  --button-hover-bg: #ddb892;
+  --highlight-color: #f87171;
+
+  --playhead: #097662;
+  --keyframe-color: green;*/
+
   --white: #1b1e25;
-  --panel-bg: #f7f9fc;
+  --panel-bg: #dbdde0;
   --bg: #f3f4f6;
-  --header-bg: #e4e7ec;
+  --header-bg: #b5b8bd;
 
   --text-color: #1e2025;
-  --timeline-bg: #e4e7ec;
+  --timeline-bg: #d7d8dd;
 
   --button-bg: #e0e0e6;
   --button-hover-bg: #c9ccd3;
   --highlight-color: #cf316b;
 
   --playhead: #0066cc;
-  --border: #d1d5db;
-  --text-muted: #6b7280;
+  --border: #000000;
+  --text-muted: #000000;
   --keyframe-color: #38a169;
+  --selectedLayer: #f7d5d5;
 
   /*  --header-bg: #79798a;
   --white: #014921;
@@ -96,26 +125,27 @@ body {
 .appContainer {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: var(--background-color);
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Main Content */
 .main {
-  display: flex;
   flex: 1;
-  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
 .canvasTimelineContainer {
-  display: flex;
   flex: 1;
-  min-height: 0;
+  display: flex;
+  overflow: hidden;
 }
 
 .canvasPropertiesTimeline {
-  width: 100%;
+  display: flex;
+  overflow: hidden;
 }
 
 h1 {

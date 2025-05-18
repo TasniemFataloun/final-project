@@ -57,11 +57,9 @@
 .layerName {
   flex: 1;
   font-size: 0.875rem;
-  color: var(--white);
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  color: var(--text-color);
 }
 
 .layerName:hover {
@@ -69,8 +67,9 @@
 }
 
 .selectedLayer {
-  background-color: var(--button-hover-bg) !important;
+  background-color: var(--selectedLayer) !important;
   width: 100%;
+  color: black !important;
 }
 
 .LayerProperties {

@@ -1,7 +1,7 @@
 .container {
   height: 100%;
   overflow: auto;
-  background-color: var(--panel-bg);
+  background-color: var(--bg);
   padding: 1rem 2rem;
   font-size: 0.875rem;
   color: var(--white);

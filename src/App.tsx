@@ -36,16 +36,12 @@ function App() {
           {alertOpen && <Alert message="Url Copied" />}
 
           <main className="main">
-            <Sidebar />
             <div className="canvasPropertiesTimeline">
-              <div className="canvasTimelineContainer">
-                <Canvas />
-                <div className="timeline">
-                  <PropertiesPanel />
-                </div>
-              </div>
-              <TimelineEditor />
+              <Sidebar />
+              <Canvas />
+              <PropertiesPanel />
             </div>
+            <TimelineEditor />
             {showGenerateCss && (
               <GenerateCss onClose={handleToggleGenerateCss} />
             )}

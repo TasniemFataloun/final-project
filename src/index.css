@@ -22,22 +22,3 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
-
- /* @keyframes animation {
-  0% {
-    width: 200px;
-    height: 200px;
-    transform: scale(1) rotate(0deg) translate(0px, 0px);
-    opacity: 1;
-    background-color: #000;
-  }
-  100% {
-    width: var(--width);
-    height: var(--height);
-    transform: scale(var(--scale)) rotate(var(--rotate))
-      translate(var(--translate-x), var(--translate-y));
-    opacity: var(--opacity);
-    background-color: var(--background-color);
-  }
-} 
- */

@@ -1,12 +1,11 @@
 .container {
-  color: var(--text-color);
-  font-family: "Inter", sans-serif;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  overflow: auto;
-  height: 100%;
-  background: var(--timeline-bg);
+  background-color: var(--timeline-bg);
 }
 
 .timelineBody {
@@ -16,23 +15,27 @@
   background-color: var(--timeline-bg);
 }
 
-.scrole::-webkit-scrollbar {
+.timelineEditorContainer::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.scrole::-webkit-scrollbar-thumb {
+.timelineEditorContainer::-webkit-scrollbar-track {
+  background: var(--panel-bg); 
+}
+
+.timelineEditorContainer::-webkit-scrollbar-thumb {
   background: var(--button-hover-bg);
   border-radius: 4px;
 }
 
-.scrole::-webkit-scrollbar-thumb:hover {
+.timelineEditorContainer::-webkit-scrollbar-thumb:hover {
   background: var(--highlight-color);
 }
 
 @supports (-moz-appearance: none) {
-  .scrole {
+  .timelineEditorContainer {
     scrollbar-width: thin;
-    scrollbar-color: var(--button-hover-bg) var(--panel-bg);
+    scrollbar-color: var(--button-hover-bg) var(--panel-bg); /* thumb color + track color */
   }
 }

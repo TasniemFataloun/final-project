@@ -1,18 +1,17 @@
 .input,
 .select {
-  border: 0.2px var(--text-color) solid;
+  border: 0.2px var(--white) solid;
 }
 
 .container {
   transition: width 0.3s ease;
-  min-height: 400px;
-  height: 450px;
   background-color: var(--bg);
   box-shadow: var(--box-shadow);
   color: var(--white);
   overflow: auto;
   width: 20rem;
   padding: var(--padding);
+  height: 35rem;
 }
 
 .iconh2 {
@@ -76,7 +75,6 @@
   padding: 10px;
   font-size: 14px;
   border-radius: 8px;
-  background-color: var(--panel-bg);
   outline: none;
   transition: border 0.2s ease;
 }

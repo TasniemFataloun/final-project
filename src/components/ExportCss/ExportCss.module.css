@@ -1,6 +1,6 @@
 .exportCss {
   padding: 1rem 3rem;
-  background-color: var(--panel-bg);
+  background-color: var(--selectedLayer);
   border-radius: 4rem;
   color: black;
   text-align: center;
