@@ -29,8 +29,8 @@ function App() {
 
   return (
     <div className="appContainer">
-      {showSplash && <SplashScreen />}
-      {!showSplash && (
+     {/*  {showSplash && <SplashScreen />}
+      {!showSplash && */} {/* ( */}
         <>
           <Header onToggleGenerateCss={handleToggleGenerateCss} />
           {alertOpen && <Alert message="Url Copied" />}
@@ -47,7 +47,7 @@ function App() {
             )}
           </main>
         </>
-      )}
+    {/*   )} */}
     </div>
   );
 }
