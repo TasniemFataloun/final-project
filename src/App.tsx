@@ -8,24 +8,23 @@ import { useEffect, useState } from "react";
 import { useAppSelector } from "./redux/store";
 import Alert from "./components/GenerateCss/Alert/Alert";
 import TimelineEditor from "./components/Timeline/TimelineEditor";
-import SplashScreen from "./components/SplashScreen/SplashScreen";
 
 function App() {
   const [showGenerateCss, setShowGenerateCss] = useState(false);
   const alertOpen = useAppSelector((state) => state.alert.isOpen);
-  const [showSplash, setShowSplash] = useState(true);
-
+/*   const [showSplash, setShowSplash] = useState(true);
+ */
   const handleToggleGenerateCss = () => {
     setShowGenerateCss((prev) => !prev);
   };
 
-  useEffect(() => {
+/*   useEffect(() => {
     const endTimeout = setTimeout(() => {
       setShowSplash(false);
     }, 1000);
 
     return () => clearTimeout(endTimeout);
-  }, []);
+  }, []); */
 
   return (
     <div className="appContainer">
