@@ -1,36 +1,20 @@
 import { useEffect, useRef } from "react";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import styles from "./Canvas.module.css";
-import { UseGenerateKeyframes } from "../../utils/useGenerateKeyframe";
 import { toggleLayer } from "../../redux/slices/timelineSlice";
 import { animateLayer } from "../../utils/LayerAnimation";
+import { setSelectedLayer } from "../../redux/slices/animationSlice";
 
 const Canvas = () => {
   const dispatch = useAppDispatch();
   const layerRef = useRef<{ [id: string]: HTMLDivElement | null }>({});
-  const { layers } = useAppSelector((state) => state.animation);
+  const { layers, selectedLayerId } = useAppSelector(
+    (state) => state.animation
+  );
   const { isPlaying, currentPosition } = useAppSelector(
     (state) => state.animation
   );
 
-  /*   useEffect(() => {
-    if (!layerRef.current) {
-      const style = document.createElement("style");
-      layerRef.current = style;
-      document.head.appendChild(style);
-    }
-
-    const css = layers
-      .map((layer) => UseGenerateKeyframes(layer))
-      .filter(Boolean)
-      .join("\n");
-
-    if (layerRef.current) {
-      layerRef.current.innerHTML = css;
-    }
-  }, [layers]); */
-
-  //this useEffect is used to animate the layers when the current position changes (playhead)
   useEffect(() => {
     if (!isPlaying) {
       layers.forEach((layer) => {
@@ -41,6 +25,7 @@ const Canvas = () => {
       });
     }
   }, [currentPosition, isPlaying, layers]);
+
 
   //this useEffect is used to animate the layers when the play button is pressed (animate request)
   useEffect(() => {
@@ -55,7 +40,6 @@ const Canvas = () => {
         const el = layerRef.current[layer.id];
         if (!el || !layer.visible) return;
 
-        /* const layerDuration = layer.config?.animation.duration || 1; */
         const layerDuration = layer.config?.duration || 1;
 
         const iterations =
@@ -99,16 +83,19 @@ const Canvas = () => {
                   if (el) layerRef.current[layer.id] = el;
                 }}
                 key={layer.id}
-                onClick={() => dispatch(toggleLayer(layer.id))}
+                onClick={() => {
+                  dispatch(toggleLayer(layer.id));
+                  dispatch(setSelectedLayer(layer.id));
+                }}
                 style={{
                   ...layer.style,
                   visibility: layer.visible ? "visible" : "hidden",
                   animationPlayState: isPlaying ? "running" : "paused",
                 }}
-                className={`${styles.animatedElement} layer-${layer.id}`}
+                className={`${styles.animatedElement} layer-${layer.id} ${
+                  layer.id === selectedLayerId ? styles.selected : ""
+                }`}
               />
-              
-
             </>
           );
         })}

@@ -1,11 +1,43 @@
+function zeroValueCheck(val: string): boolean {
+  val = val.trim().toLowerCase();
+
+  // Split by comma or space (any number of these)
+  const parts = val.split(/[\s,]+/);
+
+  // Check if every part is numeric zero, ignoring units
+  return parts.every((p) => {
+    // Remove units: px, deg, %, em, rem, etc.
+    const numericPart = parseFloat(p);
+    if (isNaN(numericPart)) return false; // if can't parse number, assume non-zero
+    return numericPart === 0;
+  });
+}
+
+function cleanTransform(transformStr: string): string {
+  const regex = /(\w+)\(([^)]+)\)/g;
+
+  const cleanedTransforms = [];
+  let match;
+
+  while ((match = regex.exec(transformStr)) !== null) {
+    const funcName = match[1];
+    const value = match[2];
+
+    if (zeroValueCheck(value)) {
+      continue; // skip transform with zero effect
+    }
+
+    cleanedTransforms.push(`${funcName}(${value})`);
+  }
+
+  return cleanedTransforms.join(" ");
+}
+
 const interpolate = (from: any, to: any, t: number) => {
-  console.log(from + (to - from) * t);
-  
   return from + (to - from) * t;
 };
 
 const interpolateColor = (from: string, to: string, t: number): string => {
-  // Converts a hex color (#rrggbb) to RGB object { r, g, b }
   const hexToRgb = (hex: string) => {
     const cleanHex = hex.replace("#", "");
     const bigint = parseInt(cleanHex, 16);
@@ -64,7 +96,6 @@ export const animateLayer = (
 
   const properties =
     layer.editedPropertiesGroup?.flatMap((g: any) => g.propertiesList) || [];
-    
   for (const prop of properties) {
     const kfs = [...prop.keyframes].sort((a, b) => a.percentage - b.percentage);
     if (kfs.length == 0) return;
@@ -107,20 +138,19 @@ export const animateLayer = (
   const transformProperties = ["translateX", "translateY", "scale", "rotate"];
   const validTransforms: string[] = [];
 
-  // Handle transform functions
   for (const tf of transformProperties) {
     const val = style[tf];
-    if (val && isValidTransformFunction(tf, val)) {
+    if (val && !zeroValueCheck(val) && isValidTransformFunction(tf, val)) {
       validTransforms.push(`${tf}(${val})`);
-      delete style[tf]; // Remove from regular CSS so it doesn't get applied below
-    } else if (val) {
-      console.warn(`Invalid transform function: ${tf}(${val})`);
+      delete style[tf];
+    } else {
     }
   }
 
-  if (validTransforms.length) {
-    element.style.transform = validTransforms.join(" ");
-  }
+  const rawTransform = validTransforms.join(" ");
+  const cleanedTransform = cleanTransform(rawTransform);
+
+  element.style.transform = cleanedTransform || "";
 
   // Apply all other styles dynamically (excluding transform properties)
   for (const [key, value] of Object.entries(style)) {

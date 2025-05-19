@@ -5,7 +5,7 @@ import {
   propertiesSchema,
 } from "../../config/propertiespanel.config";
 import { useState } from "react";
-import { PanelRightClose } from "lucide-react";
+import { ChevronDown, ChevronRight, PanelRightClose } from "lucide-react";
 import {
   addKeyframe,
   setConfig,
@@ -19,11 +19,9 @@ const PropertiesPanel = () => {
     (state) => state.animation
   );
 
-  const selectedLayer = layers.find((el) => el.id === selectedLayerId);
+  const [openSections, setOpenSections] = useState<string[]>([]);
 
-  const selectedKeyframe = useAppSelector(
-    (state) => state.animation.selectedKeyframe
-  );
+  const selectedLayer = layers.find((el) => el.id === selectedLayerId);
 
   const handleTogglePropertiesPanel = () => {
     setIsPropertiesPanelOpen((prev) => !prev);
@@ -111,185 +109,239 @@ const PropertiesPanel = () => {
 
       {isPropertiesPanelOpen && (
         <>
-          {Object.entries(ConfigSchema).map(([sectionKey, sectionData]) => (
-            <div key={sectionKey} className={style.section}>
-              <h3>{sectionData.title}</h3>
-              <div className={style.optionsContainer}>
-                {Object.entries(sectionData.fields).map(
-                  ([fieldKey, fieldProps]) => {
-                    const configValue = selectedLayer?.config?.[fieldKey];
-                    return (
-                      <div className={style.option} key={fieldKey}>
-                        <label className={style.label}>
-                          {fieldProps.label}
-                        </label>
+          {Object.entries(ConfigSchema).map(([sectionKey, sectionData]) => {
+            const isOpen = openSections.includes(sectionKey);
 
-                        {fieldProps.type === "select" ? (
-                          <select
-                            value={configValue}
-                            onChange={(e) =>
-                              handleConfigChange(
-                                fieldKey,
-                                e.target.value,
-                                sectionKey
-                              )
-                            }
-                            className={style.input}
-                          >
-                            {"options" in fieldProps &&
-                              (fieldProps.options as string[]).map(
-                                (opt: string) => (
-                                  <option key={opt} value={opt}>
-                                    {opt}
-                                  </option>
-                                )
-                              )}
-                          </select>
-                        ) : (
-                          <input
-                            type={fieldProps.type}
-                            value={configValue}
-                            step={
-                              fieldProps.type === "number" &&
-                              "step" in fieldProps
-                                ? (fieldProps.step as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            min={
-                              fieldProps.type === "number" &&
-                              "min" in fieldProps
-                                ? (fieldProps.min as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            max={
-                              fieldProps.type === "number" &&
-                              "max" in fieldProps
-                                ? (fieldProps.max as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            onChange={(e) =>
-                              handleConfigChange(
-                                fieldKey,
-                                e.target.value,
-                                sectionKey
-                              )
-                            }
-                            className={style.input}
-                          />
-                        )}
-                      </div>
-                    );
-                  }
+            const toggleSection = () => {
+              setOpenSections((prev) =>
+                isOpen
+                  ? prev.filter((key) => key !== sectionKey)
+                  : [...prev, sectionKey]
+              );
+            };
+
+            return (
+              <div key={sectionKey} className={style.section}>
+                <div className={style.chevronH3} onClick={toggleSection}>
+                  {isOpen ? (
+                    <ChevronDown size={14} />
+                  ) : (
+                    <ChevronRight size={14} />
+                  )}
+                  <h3>{sectionData.title}</h3>
+                </div>
+
+                {isOpen && (
+                  <div className={style.optionsContainer}>
+                    {Object.entries(sectionData.fields).map(
+                      ([fieldKey, fieldProps]) => {
+                        const configValue = selectedLayer?.config?.[fieldKey];
+                        return (
+                          <div className={style.option} key={fieldKey}>
+                            <label className={style.label}>
+                              {fieldProps.label}
+                            </label>
+
+                            {fieldProps.type === "select" ? (
+                              <select
+                                value={configValue}
+                                onChange={(e) =>
+                                  handleConfigChange(
+                                    fieldKey,
+                                    e.target.value,
+                                    sectionKey
+                                  )
+                                }
+                                className={style.input}
+                              >
+                                {"options" in fieldProps &&
+                                  (fieldProps.options as string[]).map(
+                                    (opt: string) => (
+                                      <option key={opt} value={opt}>
+                                        {opt}
+                                      </option>
+                                    )
+                                  )}
+                              </select>
+                            ) : (
+                              <input
+                                type={fieldProps.type}
+                                value={configValue}
+                                step={
+                                  fieldProps.type === "number" &&
+                                  "step" in fieldProps
+                                    ? (fieldProps.step as
+                                        | string
+                                        | number
+                                        | undefined)
+                                    : undefined
+                                }
+                                min={
+                                  fieldProps.type === "number" &&
+                                  "min" in fieldProps
+                                    ? (fieldProps.min as
+                                        | string
+                                        | number
+                                        | undefined)
+                                    : undefined
+                                }
+                                max={
+                                  fieldProps.type === "number" &&
+                                  "max" in fieldProps
+                                    ? (fieldProps.max as
+                                        | string
+                                        | number
+                                        | undefined)
+                                    : undefined
+                                }
+                                onChange={(e) =>
+                                  handleConfigChange(
+                                    fieldKey,
+                                    e.target.value,
+                                    sectionKey
+                                  )
+                                }
+                                className={style.input}
+                              />
+                            )}
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
-          {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => (
-            <div key={sectionKey} className={style.section}>
-              <h3>{sectionData.title}</h3>
-              <div className={style.optionsContainer}>
-                {Object.entries(sectionData.fields).map(
-                  ([fieldKey, fieldProps]) => {
-                    const selectedLayerConfig =
-                      selectedLayer?.layerPropertiesValue;
-                    const layerPropsValue =
-                      selectedLayerConfig?.[
-                        sectionKey as keyof typeof selectedLayerConfig
-                      ]?.[fieldKey];
-                    return (
-                      <div className={style.option} key={fieldKey}>
-                        <label className={style.label}>
-                          {fieldProps.label}
-                        </label>
+            );
+          })}
 
-                        {fieldProps.type === "select" ? (
-                          <select
-                            value={
-                              getValueAtCurrentPosition(fieldKey, sectionKey) ??
-                              layerPropsValue
-                            }
-                            onChange={(e) =>
-                              handlePropertyChange(
-                                fieldKey,
-                                e.target.value,
-                                sectionKey
-                              )
-                            }
-                            className={style.input}
-                          >
-                            {"options" in fieldProps &&
-                              (fieldProps.options as string[]).map(
-                                (opt: string) => (
-                                  <option key={opt} value={opt}>
-                                    {opt}
-                                  </option>
-                                )
-                              )}
-                          </select>
-                        ) : (
-                          <input
-                            type={fieldProps.type}
-                            value={
-                              getValueAtCurrentPosition(fieldKey, sectionKey) ??
-                              layerPropsValue
-                            }
-                            step={
-                              fieldProps.type === "number" &&
-                              "step" in fieldProps
-                                ? (fieldProps.step as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            min={
-                              fieldProps.type === "number" &&
-                              "min" in fieldProps
-                                ? (fieldProps.min as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            max={
-                              fieldProps.type === "number" &&
-                              "max" in fieldProps
-                                ? (fieldProps.max as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            onChange={(e) =>
-                              handlePropertyChange(
-                                fieldKey,
-                                e.target.value,
-                                sectionKey
-                              )
-                            }
-                            className={style.input}
-                          />
-                        )}
-                      </div>
-                    );
-                  }
+          {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => {
+            const isOpen = openSections.includes(sectionKey);
+
+            const toggleSection = () => {
+              setOpenSections((prev) =>
+                isOpen
+                  ? prev.filter((key) => key !== sectionKey)
+                  : [...prev, sectionKey]
+              );
+            };
+
+            return (
+              <div key={sectionKey} className={style.section}>
+                <div
+                  className={style.chevronH3}
+                  onClick={toggleSection}
+                  style={{ cursor: "pointer" }}
+                >
+                  {isOpen ? (
+                    <ChevronDown size={14} />
+                  ) : (
+                    <ChevronRight size={14} />
+                  )}
+                  <h3>{sectionData.title}</h3>
+                </div>
+
+                {isOpen && (
+                  <div className={style.optionsContainer}>
+                    {Object.entries(sectionData.fields).map(
+                      ([fieldKey, fieldProps]) => {
+                        const selectedLayerConfig =
+                          selectedLayer?.layerPropertiesValue;
+                        const section = selectedLayerConfig?.[sectionKey];
+
+                        const layerPropsValue =
+                          typeof section === "string"
+                            ? section
+                            : section?.[fieldKey];
+                        return (
+                          <div className={style.option} key={fieldKey}>
+                            <label className={style.label}>
+                              {fieldProps.label}
+                            </label>
+
+                            {fieldProps.type === "select" ? (
+                              <select
+                                value={
+                                  getValueAtCurrentPosition(
+                                    fieldKey,
+                                    sectionKey
+                                  ) ?? layerPropsValue
+                                }
+                                onChange={(e) =>
+                                  handlePropertyChange(
+                                    fieldKey,
+                                    e.target.value,
+                                    sectionKey
+                                  )
+                                }
+                                className={style.input}
+                              >
+                                {"options" in fieldProps &&
+                                  (fieldProps.options as string[]).map(
+                                    (opt: string) => (
+                                      <option key={opt} value={opt}>
+                                        {opt}
+                                      </option>
+                                    )
+                                  )}
+                              </select>
+                            ) : (
+                              <input
+                                type={fieldProps.type}
+                                value={
+                                  getValueAtCurrentPosition(
+                                    fieldKey,
+                                    sectionKey
+                                  ) ?? layerPropsValue
+                                }
+                                step={
+                                  fieldProps.type === "number" &&
+                                  "step" in fieldProps
+                                    ? (fieldProps.step as
+                                        | string
+                                        | number
+                                        | undefined)
+                                    : undefined
+                                }
+                                min={
+                                  fieldProps.type === "number" &&
+                                  "min" in fieldProps
+                                    ? (fieldProps.min as
+                                        | string
+                                        | number
+                                        | undefined)
+                                    : undefined
+                                }
+                                max={
+                                  fieldProps.type === "number" &&
+                                  "max" in fieldProps
+                                    ? (fieldProps.max as
+                                        | string
+                                        | number
+                                        | undefined)
+                                    : undefined
+                                }
+                                onChange={(e) =>
+                                  handlePropertyChange(
+                                    fieldKey,
+                                    e.target.value,
+                                    sectionKey
+                                  )
+                                }
+                                className={style.input}
+                              />
+                            )}
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </>
       )}
     </aside>
   );
 };
-
 export default PropertiesPanel;

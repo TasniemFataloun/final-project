@@ -17,7 +17,7 @@ const Sidebar = () => {
       height: `${config.size.height}px`,
       backgroundColor: config.backgroundColor.backgroundColor,
       opacity: config.opacity.opacity,
-      borderRadius: `${config.opacity.borderRadius}px`,
+      borderRadius: `${config.borderRadius.borderRadius}px`,
       transform: `scale(${config.transform.scale}) rotate(${config.transform.rotate}deg) translate(${config.transform.translateX}px, ${config.transform.translateY}px)`,
     };
 

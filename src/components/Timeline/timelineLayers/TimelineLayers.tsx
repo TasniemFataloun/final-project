@@ -7,11 +7,7 @@ import {
   setSelectedLayer,
   updateLayer,
 } from "../../../redux/slices/animationSlice";
-import {
-  setRemoveKeyframe,
-  toggleLayer,
-  togglePropertyGroup,
-} from "../../../redux/slices/timelineSlice";
+import { toggleLayer } from "../../../redux/slices/timelineSlice";
 import {
   ChevronDown,
   ChevronRight,
@@ -27,20 +23,21 @@ const TimelineLayers = () => {
   const { layers, selectedLayerId } = useAppSelector(
     (state) => state.animation
   );
-  const { expandedLayers, expandedProperties } = useAppSelector(
-    (state) => state.timeline
+  const { expandedLayers } = useAppSelector((state) => state.timeline);
+  const selectedKeyframe = useAppSelector(
+    (state) => state.animation.selectedKeyframe
   );
 
   useEffect(() => {
-    layers.forEach((layer) => {
-      if (
-        (layer.editedPropertiesGroup?.length ?? 0) > 0 &&
-        !expandedLayers[layer.id]
-      ) {
-        dispatch(toggleLayer(layer.id));
-      }
-    });
-  }, [layers, dispatch]);
+    const selected = layers.find((layer) => layer.id === selectedLayerId);
+    if (
+      selected &&
+      (selected.editedPropertiesGroup?.length ?? 0) > 0 &&
+      !expandedLayers[selected.id]
+    ) {
+      dispatch(toggleLayer(selected.id));
+    }
+  }, [layers, selectedLayerId, dispatch]);
 
   return (
     <>
@@ -101,6 +98,7 @@ const TimelineLayers = () => {
               >
                 {layer.name}
               </div>
+
               <button
                 className={style.deleteButton}
                 onClick={() => dispatch(removeLayer(layer.id))}
@@ -117,27 +115,6 @@ const TimelineLayers = () => {
                   return (
                     <React.Fragment key={group.name}>
                       <div key={group.name} className={style.propertyGroup}>
-                        {/*  <div
-                          className={`${style.row} ${style.propertyGroupHeader}`}
-                          onClick={() =>
-                            dispatch(
-                              togglePropertyGroup({
-                                layerId: layer.id,
-                                groupName: group.name,
-                              })
-                            )
-                          }
-                        >
-                          {isGroupExpanded ? (
-                            <ChevronDown size={12} />
-                          ) : (
-                            <ChevronRight size={12} />
-                          )}
-                          <span className={style.propertyGroupHeaderLabel}>
-                            {group.name}
-                          </span>
-                        </div> */}
-                        {/* {isGroupExpanded && ( */}
                         <div>
                           {group.propertiesList.map((prop) => (
                             <div
@@ -150,15 +127,18 @@ const TimelineLayers = () => {
                                 <div className={style.propertyLabel}>
                                   {prop.propertyName}
                                 </div>
-
-                                <button
-                                  className={style.deleteButton}
-                                  onClick={() => {
-                                    dispatch(removeSelectedKeyframe());
-                                  }}
-                                >
-                                  <Trash2 size={14} />
-                                </button>
+                                {selectedKeyframe?.layerId &&
+                                  selectedKeyframe?.property &&
+                                  selectedKeyframe?.keyframeId && (
+                                    <button
+                                      className={style.deleteButton}
+                                      onClick={() => {
+                                        dispatch(removeSelectedKeyframe());
+                                      }}
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  )}
                               </div>
 
                               <div className={style.propertyRowKayframes}></div>

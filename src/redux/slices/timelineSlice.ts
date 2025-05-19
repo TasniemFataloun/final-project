@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Propertykeyframes } from "../types/animations.type";
 
 interface TimelineState {
   expandedLayers: Record<string, boolean>;
@@ -43,11 +42,6 @@ const timelineSlice = createSlice({
       state.expandedProperties = {};
       state.isDragging = false;
     },
-    setRemoveKeyframe(state, action: PayloadAction<Propertykeyframes[]>) {
-      const layer = state.isSelectedKeyframe?.keyframeId;
-      console.log("layer", layer);
-      
-    },
     setIsSelectedKeyframe(
       state,
       action: PayloadAction<{
@@ -66,7 +60,6 @@ export const {
   togglePropertyGroup,
   setIsDragging,
   resetTimelineUI,
-  setRemoveKeyframe,
   setIsSelectedKeyframe,
 } = timelineSlice.actions;
 
@@ -75,7 +68,6 @@ export type TimelineStateType =
   | typeof togglePropertyGroup
   | typeof setIsDragging
   | typeof resetTimelineUI
-  | typeof setRemoveKeyframe
   | typeof setIsSelectedKeyframe;
 
 export default timelineSlice.reducer;

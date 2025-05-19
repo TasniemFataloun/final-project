@@ -31,10 +31,21 @@ const animationSlice = createSlice({
   initialState,
   reducers: {
     addLayer: (state, action: PayloadAction<Layer>) => {
+      const type = action.payload.type;
+
+      const existingCount = state.layers.filter(
+        (layer) => layer.type === type
+      ).length;
+
       const newLayer = {
         ...action.payload,
+        name: `${type} ${existingCount + 1}`,
         editedPropertiesGroup: [],
-        config: getDefaultConfig(action.payload.type),
+        config: getDefaultConfig(type),
+        style: {
+          ...(getDefaultPropertiesGroup(type) || {}),
+          ...(action.payload.style || {}),
+        },
       };
       state.layers.push(newLayer);
       state.selectedLayerId = newLayer.id;
@@ -93,8 +104,10 @@ const animationSlice = createSlice({
 
       const unit =
         groupName === "transform" && propertyName === "rotate"
-          ? "deg"
+          ? "px"
           : groupName === "opacity"
+          ? ""
+          : groupName === "transform" && propertyName === "scale"
           ? ""
           : "px";
 
@@ -210,27 +223,40 @@ const animationSlice = createSlice({
       if (!selected) return;
 
       const { layerId, property, keyframeId } = selected;
-
       const layer = state.layers.find((l) => l.id === layerId);
-      if (!layer || !layer.editedPropertiesGroup) return;
+      if (!layer) return;
+      if (!layer.style) {
+        layer.style = {};
+      }
+      if (!layer.editedPropertiesGroup) return;
 
-      // Remove the keyframe from the selected layer's edited properties group
-      for (const group of layer.editedPropertiesGroup) {
-        const prop = group.propertiesList.find(
+      for (let i = layer.editedPropertiesGroup.length - 1; i >= 0; i--) {
+        const group = layer.editedPropertiesGroup[i];
+
+        const propIndex = group.propertiesList.findIndex(
           (p) => p.propertyName === property
         );
-        // If the property exists, filter out the keyframe
-        if (prop) {
-          prop.keyframes = prop.keyframes.filter((kf) => kf.id !== keyframeId);
-        }
-      }
+        if (propIndex === -1) continue;
 
-      if (layer.layerPropertiesValue) {
-        for (const groupName in layer.layerPropertiesValue) {
-          if (layer.layerPropertiesValue[groupName].hasOwnProperty(property)) {
-            layer.layerPropertiesValue[groupName][property] = ""; // or undefined if you prefer
-            break;
+        const prop = group.propertiesList[propIndex];
+
+        // Remove the selected keyframe
+        prop.keyframes = prop.keyframes.filter((kf) => kf.id !== keyframeId);
+
+        if (prop.keyframes.length === 1 && prop.keyframes[0].percentage === 0) {
+          prop.keyframes = [];
+        }
+
+        if (prop.keyframes.length === 0) {
+          group.propertiesList.splice(propIndex, 1);
+
+          if (layer.style && property in layer.style) {
+            delete (layer.style as any)[property];
           }
+        }
+
+        if (group.propertiesList.length === 0) {
+          layer.editedPropertiesGroup.splice(i, 1);
         }
       }
 

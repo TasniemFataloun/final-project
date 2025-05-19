@@ -8,7 +8,6 @@ import {
 } from "../../../redux/slices/animationSlice";
 import {
   setIsDragging,
-  setIsSelectedKeyframe,
 } from "../../../redux/slices/timelineSlice";
 import { Diamond } from "lucide-react";
 
@@ -19,7 +18,8 @@ const TimelineKeyframes = () => {
   const { expandedLayers, isDragging } = useAppSelector(
     (state) => state.timeline
   );
-  const isSelectedKeyframe = useAppSelector(
+  
+  const selectedKeyframe = useAppSelector(
     (state) => state.animation.selectedKeyframe
   );
 
@@ -144,63 +144,66 @@ const TimelineKeyframes = () => {
       )}
       {/* Keyframes */}
 
-      {layers.map((layer) => (
-        <React.Fragment key={layer.id}>
-          <div
-            className={`${style.row} ${
-              selectedLayerId === layer.id ? ` ${style.selectedLayer}` : ""
-            }`}
-          ></div>
+  {layers.map((layer) => (
+    <React.Fragment key={layer.id}>
+      <div
+        className={`${style.row} ${
+          selectedLayerId === layer.id ? ` ${style.selectedLayer}` : ""
+        }`}
+      ></div>
 
-          <>
-            {layer.editedPropertiesGroup?.map((group) => {
-              const isLayerExpanded = expandedLayers[layer.id];
+      <>
+        {layer.editedPropertiesGroup?.map((group) => {
+          const isLayerExpanded = expandedLayers[layer.id];
 
-              return (
-                <React.Fragment key={group.name}>
-                  {isLayerExpanded && (
-                    <>
-                      {group.propertiesList.map((prop) => (
-                        <div
-                          key={`${layer.id}-${group.name}-${prop.propertyName}`}
-                          className={`${style.row} ${style.keyframeRow}`}
-                        >
-                          {prop.keyframes.map((kf) => {
-                            return (
-                              <Diamond
-                                size={15}
-                                key={kf.id}
-                                className={`${style.keyframe} ${
-                                  isSelectedKeyframe &&
-                                  isSelectedKeyframe.keyframeId === kf.id &&
-                                  isSelectedKeyframe.layerId === layer.id
-                                    ? style.selectedKeyframe
-                                    : ""
-                                }`}
-                                style={{ left: `${kf.percentage}%` }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const payload = {
-                                    layerId: layer.id,
-                                    property: prop.propertyName,
-                                    keyframeId: kf.id,
-                                  };
-                                  dispatch(setSelectedKeyframe(payload));
-                                  dispatch(setCurrentPosition(kf.percentage));
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </>
-        </React.Fragment>
-      ))}
+          return (
+            <React.Fragment key={group.name}>
+              {isLayerExpanded && (
+                <>
+                  {group.propertiesList.map((prop) => (
+                    <div
+                      key={`${layer.id}-${group.name}-${prop.propertyName}`}
+                      className={`${style.row} ${style.keyframeRow}`}
+                    >
+                      {prop.keyframes.map((kf) => {
+                        const isThisKeyframeSelected =
+                          selectedKeyframe?.layerId === layer.id &&
+                          selectedKeyframe?.property === prop.propertyName &&
+                          selectedKeyframe?.keyframeId === kf.id;
+                        return (
+                          <Diamond
+                            size={15}
+                            fill="var(--selectedLayer)"
+                            key={kf.id}
+                            className={`${style.keyframe} ${
+                              isThisKeyframeSelected
+                                ? style.selectedKeyframe
+                                : ""
+                            }`}
+                            style={{ left: `${kf.percentage}%` }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const payload = {
+                                layerId: layer.id,
+                                property: prop.propertyName,
+                                keyframeId: kf.id,
+                              };
+                              dispatch(setSelectedKeyframe(payload));
+                              dispatch(setCurrentPosition(kf.percentage));
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </>
+    </React.Fragment>
+  ))}
     </div>
   );
 };

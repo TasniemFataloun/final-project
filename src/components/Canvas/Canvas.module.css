@@ -14,7 +14,14 @@
     /* bottom-right */ inset -3px 3px 8px rgba(0, 0, 0, 0.15),
     /* bottom-left */ inset 3px -3px 8px rgba(0, 0, 0, 0.15),
     /* top-right */ inset -3px -3px 8px rgba(0, 0, 0, 0.15); /* top-left */
-}/* 
+}
+
+.selected{
+  border: 1px var(--bg) solid;
+  box-shadow: 0 0 10px var(--bg);
+}
+
+/* 
 
 
 .canvasContainer {

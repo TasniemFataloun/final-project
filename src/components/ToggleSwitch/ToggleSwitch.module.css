@@ -1,6 +1,7 @@
 .themeToggle {
   color: var(--selectedLayer);
-  width: 3em;
+  width: 3rem;
+  transition: transform 0.4s ease;
 }
 
 .sunMoonToggleBtn {
@@ -16,6 +17,10 @@
   inset: 0;
   z-index: 2;
   cursor: pointer;
+}
+
+.themeToggle:hover {
+  transform: scale(1.1);
 }
 
 .sunMoonToggleBtn svg {

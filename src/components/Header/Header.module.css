@@ -26,4 +26,6 @@
 
 .cssAndToggleContainer {
   display: flex;
+  height: 4rem;
+  gap: 1rem;
 }

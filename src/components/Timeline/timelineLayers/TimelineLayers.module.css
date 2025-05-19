@@ -62,21 +62,28 @@
   border-radius: 4px;
 }
 
-.layerName:hover {
+.row:hover {
   background: var(--button-hover-bg);
 }
 
 .selectedLayer {
   background-color: var(--selectedLayer) !important;
   width: 100%;
-  color: black !important;
+  color: white;
+}
+
+.selectedLayer .layerButtons{
+  color: white;
+}
+.selectedLayer .deleteButton {
+  color: white;
 }
 
 .LayerProperties {
   display: flex;
   flex-direction: column;
-  background-color: var(--panel-bg);
-}
+  background-color: var(--bg);
+} 
 
 .propertyGroupHeader {
   display: flex;

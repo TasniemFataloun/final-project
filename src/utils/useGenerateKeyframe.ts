@@ -3,7 +3,11 @@ import { Layer } from "../redux/types/animations.type";
 export const UseGenerateKeyframes = (layer: Layer) => {
   if (!layer || !layer.editedPropertiesGroup) return "";
 
-  const className = `.${layer.type}`;
+  const sanitizedLayerName = layer.name.toLowerCase().replace(/\s+/g, "-");
+  const camelToKebab = (str: string) =>
+    str.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase());
+
+  const className = `.${sanitizedLayerName}`;
   const baseStyles: string[] = [];
   const keyframeSteps: Record<number, string[]> = {};
 
@@ -25,30 +29,61 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     });
   });
 
-  const animationName = `animation-${layer.type}`;
+  const animationName = `animation-${sanitizedLayerName}`;
   const anim = layer.config;
+  const props = layer.style || {};
+
+  const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
+
+  const filteredProps = Object.entries(props).filter(([key, value]) => {
+    if (value === "" || value === null || value === undefined) return false;
+
+    // If value is string or number, check if it represents zero or no effect
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+      // Remove zero-like values
+      if (zeroValues.has(normalized)) return false;
+    } else if (typeof value === "number") {
+      if (value === 0) return false;
+    }
+
+    return true;
+  });
+
+  const propsClassName = filteredProps
+    .map(([key, value]) => `  ${camelToKebab(key)}: ${value};`)
+    .join("\n");
+
   const animationCss = `  animation: ${animationName} ${
     anim?.duration || "1"
   }s ${anim?.timingFunction || "ease"} ${anim?.delay || "0"}s ${
     anim?.iterationCount || "infinite"
   };`;
 
-  const baseClassCss = `
+  const baseClassCss = `${
+    layer.editedPropertiesGroup.length > 0
+      ? `
 ${className} {
-${baseStyles.join("\n")}
+${propsClassName}
 ${animationCss}
-}`.trim();
+  }
+`
+      : ""
+  }`.trim();
 
   const sortedPercentages = Object.keys(keyframeSteps)
     .map((k) => parseFloat(k))
     .sort((a, b) => a - b);
 
-  const keyframesCss = `
+  const keyframesCss =
+    layer.editedPropertiesGroup.length > 0
+      ? `
 @keyframes ${animationName} {
 ${sortedPercentages
   .map((pct) => `  ${pct}% {\n${keyframeSteps[pct].join("\n")}\n  }`)
   .join("\n")}
-}`.trim();
+}`
+      : "";
 
   return `
 ${baseClassCss}

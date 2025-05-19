@@ -50,11 +50,16 @@
   height: 100%;
 }
 
+.chevronH3 {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .section {
   grid-template-columns: 1fr fr;
   margin-bottom: 2rem;
 }
-
 .optionsContainer {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

@@ -8,24 +8,15 @@
   --button-bg: #5a5b60;
 
   --border: #ffffff;
-  /*
-    --white: #ffffff;
-  --panel-bg: #d0d3d8;
-  --bg: #3c4049;
-  --header-bg: #2a2e36;
-
-  --timeline-bg: #343841;
-
-  --button-bg: #5a5f6b;
-  --button-hover-bg: #6a7080;
-
-  --border: #ffffff;*/
 
   --highlight-color: #ff4f75;
-  --selectedLayer: #f0b8b8;
+  --selectedLayer: #e5baba;
+  --button-hover-bg: #d89d9d;
 
   --playhead: var(--selectedLayer);
   --keyframe-color: #7dd68c;
+  --warning: #f7d5d5;
+  --control-colors: var(--selectedLayer);
 
   /* Padding */
   --padding: 1rem;
@@ -43,25 +34,6 @@
 }
 /* LIGHT THEME */
 body[data-theme="light"] {
-  /*  --white: #000000;
-  --panel-bg: #fbf1e1;
-  --bg: #ece9d4;
-  --header-bg: #80aa84;
-  --warning: #ff8730;
-
-  --text-color: var(--white);
-  --background-color: var(--bg);
-  --timeline-bg: #efe5d1;
-  --border: #000000;
-  --selectedLayer: #d3d9be;
-  --text-muted: #000000;
-
-  --button-hover-bg: #ddb892;
-  --highlight-color: #f87171;
-
-  --playhead: #097662;
-  --keyframe-color: green;*/
-
   --white: #1b1e25;
   --panel-bg: #dbdde0;
   --bg: #f3f4f6;
@@ -74,35 +46,12 @@ body[data-theme="light"] {
   --button-hover-bg: #c9ccd3;
   --highlight-color: #cf316b;
 
-  --playhead: #0066cc;
+  --playhead: #2b343e;
   --border: #000000;
   --text-muted: #000000;
   --keyframe-color: #38a169;
-  --selectedLayer: #f7d5d5;
-
-  /*  --header-bg: #79798a;
-  --white: #014921;
-  --panel-bg: #E8E5E5;
-  --bg: #E8E5E5;
-  --text-color: #3a3a3a;
-  --timeline-bg: #c0c0cc;
-
-  --border: #a0a0b0;
-  --text-muted: #6b7280;
-  --keyframe-color: #38a169;
-  --button-hover-bg: #8d8da0;*/
-
-  /*  --header-bg: #79798a; 
-  --white: #3a3a3a;
-  --panel-bg: #e4e1ec;
-  --bg: #a9a9b8;
-  --text-color: #3a3a3a;
-  --timeline-bg: #c0c0cc;
-
-  --border: #a0a0b0;
-  --text-muted: #6b7280;
-  --keyframe-color: #38a169;
-  --button-hover-bg: #8d8da0; */
+  --selectedLayer: #2b343e;
+  --control-colors: #2b343e;
 }
 
 body {
@@ -113,13 +62,14 @@ body {
 }
 
 html,
-body {
-  height: 100%;
-}
-
-#root {
+body,
+#root,
+.appContainer {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
   width: 100%;
-  height: 100%;
 }
 
 .appContainer {
@@ -135,6 +85,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .canvasTimelineContainer {

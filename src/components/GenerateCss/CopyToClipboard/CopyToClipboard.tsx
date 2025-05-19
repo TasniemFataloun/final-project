@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import UseDebounce from "../../../utils/UseDebounce";
 import { setIsOpen } from "../../../redux/slices/alertSlice";
-import { Copy } from "lucide-react";
+import { ClipboardCopy, Copy } from "lucide-react";
 import { useAppDispatch } from "../../../redux/store";
 
 type CopyToClipboardProps = {
@@ -27,7 +27,7 @@ const CopyToClipboard = ({ css }: CopyToClipboardProps) => {
     });
   };
 
-  return <Copy onClick={copyToClipboard} />;
+  return <ClipboardCopy  onClick={copyToClipboard} size={20}/>;
 };
 
 export default CopyToClipboard;

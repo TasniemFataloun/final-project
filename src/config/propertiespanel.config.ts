@@ -1,10 +1,6 @@
-export const defaultConfig = {
-  /*   animation: {
-    duration: "",
-    timingFunction: "",
-    delay: "",
-    iterationCount: "",
-  }, */
+import { AnimationType } from "../types/animationType";
+
+export const defaultConfig:AnimationType = {
   size: {
     width: "",
     height: "",
@@ -17,6 +13,8 @@ export const defaultConfig = {
   },
   opacity: {
     opacity: "",
+  },
+  borderRadius: {
     borderRadius: "",
   },
   backgroundColor: {
@@ -62,6 +60,35 @@ export const propertiesSchema = {
       height: { label: "Height (px)", type: "number", step: "1", min: "0" },
     },
   },
+  opacity: {
+    title: "Opacity",
+    fields: {
+      opacity: {
+        label: "",
+        type: "number",
+        step: "0.1",
+        min: "0",
+        max: "1",
+      },
+    },
+  },
+  borderRadius: {
+    title: "Border Radius",
+    fields: {
+      borderRadius: {
+        label: "",
+        type: "number",
+        step: "1",
+        min: "0",
+      },
+    },
+  },
+  backgroundColor: {
+    title: "Background",
+    fields: {
+      backgroundColor: { label: "", type: "color" },
+    },
+  },
   transform: {
     title: "Transform",
     fields: {
@@ -69,31 +96,6 @@ export const propertiesSchema = {
       rotate: { label: "Rotate (degrees)", type: "number" },
       translateX: { label: "Translate X (px)", type: "number" },
       translateY: { label: "Translate Y (px)", type: "number" },
-    },
-  },
-  opacity: {
-    title: "Opacity",
-    fields: {
-      opacity: {
-        label: "Opacity",
-        type: "number",
-        step: "0.1",
-        min: "0",
-        max: "1",
-      },
-      borderRadius: {
-        label: "Border Radius (px)",
-        type: "number",
-        step: "1",
-        min: "0",
-        max: "100",
-      },
-    },
-  },
-  backgroundColor: {
-    title: "Background",
-    fields: {
-      backgroundColor: { label: "Background Color", type: "color" },
     },
   },
 };

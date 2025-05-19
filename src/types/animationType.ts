@@ -22,9 +22,13 @@ export type TransformType = {
 
 export type OpacityType = {
   opacity: string;
-  borderRadius: string;
   [key: string]: string;
 };
+
+export type borderRadiusType = {
+  borderRadius: string;
+  [key: string]: string;  
+}
 
 export type BackgroundColorType = {
   backgroundColor: string;
@@ -35,6 +39,7 @@ export type AnimationType = {
   size: sizeType;
   transform: TransformType;
   opacity: OpacityType;
+  borderRadius: borderRadiusType;
   backgroundColor: BackgroundColorType;
   [key: string]: any;
 };

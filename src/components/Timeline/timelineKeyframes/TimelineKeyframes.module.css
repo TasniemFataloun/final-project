@@ -25,10 +25,11 @@
   transform: translate(-50%, -50%);
   top: 50%;
   cursor: grab;
+  stroke: none;
 }
 
 .selectedKeyframe {
-  stroke: red;
+  stroke: var(--bg);
 }
 
 .playHead {

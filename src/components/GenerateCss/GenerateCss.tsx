@@ -9,30 +9,27 @@ type GenerateCssProps = {
 };
 
 const GenerateCss = ({ onClose }: GenerateCssProps) => {
-  const { layers, selectedLayerId } = useAppSelector(
-    (state) => state.animation
-  );
-  const selectedElement = layers.find((el) => el.id === selectedLayerId);
+  const { layers } = useAppSelector((state) => state.animation);
 
   const generateCSS = () => {
-    if (!selectedElement || !selectedElement.config) {
-      return /* No element selected or missing keyframes */;
-    }
-
     return layers.map((layer) => UseGenerateKeyframes(layer)).join("\n\n");
   };
 
   return (
     <div id="generated-css" className={style.container}>
       <SquareX onClick={onClose} className={style.closeButton} />
-      <div className={style.titleContainer}>
-        <div className={style.generateCss}>
-          <CopyToClipboard css={generateCSS() || ""} />
-          <h2>Generated CSS</h2>
-        </div>
+      <div className={style.generateCss}>
+        <h2>Generated CSS</h2>
       </div>
 
-      <div className={style.code}>{generateCSS()}</div>
+      <div className={style.code}>
+        <div className={style.copyContainer}>
+          <div className={style.iconCopy}>
+            <CopyToClipboard css={generateCSS() || ""} />
+          </div>
+          {generateCSS()}
+        </div>
+      </div>
     </div>
   );
 };
