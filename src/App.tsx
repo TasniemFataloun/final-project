@@ -4,7 +4,7 @@ import PropertiesPanel from "./components/PropertiesPanel/PropertiesPanel";
 import GenerateCss from "./components/GenerateCss/GenerateCss";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppSelector } from "./redux/store";
 import Alert from "./components/GenerateCss/Alert/Alert";
 import TimelineEditor from "./components/Timeline/TimelineEditor";
