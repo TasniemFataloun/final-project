@@ -33,17 +33,24 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const anim = layer.config;
   const props = layer.style || {};
 
-  const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
+  const styleKeys = new Set(Object.keys(props));
 
   const filteredProps = Object.entries(props).filter(([key, value]) => {
     console.log(key);
-
+    
     if (value === "" || value === null || value === undefined) return false;
 
-    // If value is string or number, check if it represents zero or no effect
+    const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
+
+    // Skip objects if their sub-properties already exist in the top-level style
+    if (typeof value === "object" && value !== null) {
+      const subKeys = Object.keys(value);
+      const allSubPropsExist = subKeys.every((subKey) => styleKeys.has(subKey));
+      if (allSubPropsExist) return false;
+    }
+
     if (typeof value === "string") {
       const normalized = value.trim().toLowerCase();
-      // Remove zero-like values
       if (zeroValues.has(normalized)) return false;
     } else if (typeof value === "number") {
       if (value === 0) return false;
@@ -53,7 +60,18 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   });
 
   const propsClassName = filteredProps
-    .map(([key, value]) => `  ${camelToKebab(key)}: ${value};`)
+    .map(([key, value]) => {
+      if (typeof value === "object" && value !== null) {
+        return Object.entries(value)
+          .map(
+            ([subKey, subValue]) =>
+              `  ${camelToKebab(`${key}-${subKey}`)}: ${subValue};`
+          )
+          .join("\n");
+      } else {
+        return `  ${camelToKebab(key)}: ${value};`;
+      }
+    })
     .join("\n");
 
   const animationCss = `  animation: ${animationName} ${
