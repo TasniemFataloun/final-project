@@ -36,6 +36,8 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
 
   const filteredProps = Object.entries(props).filter(([key, value]) => {
+    console.log(key);
+
     if (value === "" || value === null || value === undefined) return false;
 
     // If value is string or number, check if it represents zero or no effect
