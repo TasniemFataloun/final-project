@@ -1,11 +1,11 @@
 .container {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 100%;
   display: flex;
   flex-direction: column;
   background-color: var(--timeline-bg);
+  flex-grow: 10;
+  overflow: auto;
 }
 
 .timelineBody {
@@ -21,7 +21,7 @@
 }
 
 .timelineEditorContainer::-webkit-scrollbar-track {
-  background: var(--panel-bg); 
+  background: var(--panel-bg);
 }
 
 .timelineEditorContainer::-webkit-scrollbar-thumb {

@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface TimelineState {
+  endTimeRef:number;
   expandedLayers: Record<string, boolean>;
   expandedProperties: Record<string, boolean>;
+
   isDragging: boolean;
   isSelectedKeyframe: {
     layerId: string;
@@ -12,6 +14,7 @@ interface TimelineState {
 }
 
 const initialState: TimelineState = {
+  endTimeRef:0,
   expandedLayers: {},
   expandedProperties: {} as Record<string, boolean>,
   isDragging: false,
@@ -22,6 +25,9 @@ const timelineSlice = createSlice({
   name: "timeline",
   initialState,
   reducers: {
+    setEndTimeRef: (state, action: PayloadAction<number>) => {
+      state.endTimeRef = action.payload;
+    },
     toggleLayer(state, action: PayloadAction<string>) {
       const layerId = action.payload;
       state.expandedLayers[layerId] = !state.expandedLayers[layerId];
@@ -61,6 +67,7 @@ export const {
   setIsDragging,
   resetTimelineUI,
   setIsSelectedKeyframe,
+  setEndTimeRef,
 } = timelineSlice.actions;
 
 export type TimelineStateType =

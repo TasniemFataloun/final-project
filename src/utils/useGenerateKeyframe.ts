@@ -36,13 +36,11 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const styleKeys = new Set(Object.keys(props));
 
   const filteredProps = Object.entries(props).filter(([key, value]) => {
-    console.log(key);
-    
+    if (key === "type") return false; // ⛔️ Skip the 'type' property
     if (value === "" || value === null || value === undefined) return false;
 
     const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
 
-    // Skip objects if their sub-properties already exist in the top-level style
     if (typeof value === "object" && value !== null) {
       const subKeys = Object.keys(value);
       const allSubPropsExist = subKeys.every((subKey) => styleKeys.has(subKey));

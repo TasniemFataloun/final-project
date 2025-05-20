@@ -101,11 +101,13 @@ const animationSlice = createSlice({
         (p) => p.propertyName === propertyName
       );
       if (!prop) return;
-
+      
       const unit =
         groupName === "transform" && propertyName === "rotate"
-          ? "px"
+          ? "deg"
           : groupName === "opacity"
+          ? ""
+          : groupName === "backgroundColor" && propertyName === "backgroundColor"
           ? ""
           : groupName === "transform" && propertyName === "scale"
           ? ""

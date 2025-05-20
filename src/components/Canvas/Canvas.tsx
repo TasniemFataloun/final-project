@@ -26,7 +26,6 @@ const Canvas = () => {
     }
   }, [currentPosition, isPlaying, layers]);
 
-
   //this useEffect is used to animate the layers when the play button is pressed (animate request)
   useEffect(() => {
     let startTime: number | null = null;
@@ -34,7 +33,6 @@ const Canvas = () => {
 
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
-      const elapsed = (timestamp - startTime) / 1000;
 
       layers.forEach((layer) => {
         const el = layerRef.current[layer.id];
@@ -48,6 +46,8 @@ const Canvas = () => {
             : parseInt(layer.config?.iterationCount || "infinite");
 
         const totalDuration = layerDuration * iterations;
+        const baseTime = (currentPosition / 100) * layerDuration;
+        const elapsed = (timestamp - startTime!) / 1000 + baseTime;
 
         const localElapsed = Math.min(elapsed, totalDuration);
         const iterationIndex = Math.floor(localElapsed / layerDuration);
