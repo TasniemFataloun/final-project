@@ -8,14 +8,17 @@ import {
   setSelectedKeyframe,
   setSelectedLayer,
 } from "../../../redux/slices/animationSlice";
-import { setIsDragging } from "../../../redux/slices/timelineSlice";
+import {
+  setEndTimeRef,
+  setIsDragging,
+} from "../../../redux/slices/timelineSlice";
 import { Diamond } from "lucide-react";
 
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
   const { layers, selectedLayerId, isPlaying, currentPosition } =
     useAppSelector((state) => state.animation);
-  const { expandedLayers, isDragging } = useAppSelector(
+  const { expandedLayers, isDragging, endTimeRef } = useAppSelector(
     (state) => state.timeline
   );
 
@@ -25,7 +28,6 @@ const TimelineKeyframes = () => {
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number | null>(null);
-  const endTimeRef = useRef<number>(0);
   const animationRef = useRef<number | undefined>(undefined);
 
   const handleTimelineClick = (e: React.MouseEvent) => {
@@ -49,7 +51,7 @@ const TimelineKeyframes = () => {
     const clampedPosition = Math.max(0, Math.min(100, position));
 
     dispatch(setCurrentPosition(clampedPosition));
-    endTimeRef.current = clampedPosition;
+    dispatch(setEndTimeRef(clampedPosition));
     startTimeRef.current = null;
     dispatch(setIsPlaying(false));
   };
@@ -68,14 +70,13 @@ const TimelineKeyframes = () => {
     const clampedPosition = Math.max(0, Math.min(100, position));
 
     dispatch(setCurrentPosition(clampedPosition));
-    endTimeRef.current = clampedPosition;
+    dispatch(setEndTimeRef(clampedPosition));
     startTimeRef.current = null;
   };
 
   const handleMouseUp = () => {
     dispatch(setIsDragging(false));
   };
-  
 
   //useEffect
   useEffect(() => {
@@ -86,14 +87,14 @@ const TimelineKeyframes = () => {
 
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) {
-        const time = (endTimeRef.current / 100) * duration;
+        const time = (endTimeRef / 100) * duration;
         startTimeRef.current = timestamp - time;
       }
       const elapsed = timestamp - startTimeRef.current;
       const position = ((elapsed % duration) / duration) * 100;
       dispatch(setCurrentPosition(position));
 
-      endTimeRef.current = position;
+      dispatch(setEndTimeRef(position));
       if (isPlaying) {
         animationRef.current = requestAnimationFrame(animate);
       }
