@@ -5,6 +5,7 @@
   width: 30rem;
   margin-left: 0.2rem;
 }
+
 .row {
   min-height: 40px;
   display: flex;
@@ -30,16 +31,25 @@
 
 .collapsedRow {
   position: relative;
-  color: green;
 }
 .collapsedKeyframe {
   fill: var(--white);
   opacity: 0.5;
 }
 
-
 .selectedKeyframe {
-  stroke: var(--bg);
+  stroke: rgb(228, 250, 118);
+  stroke-width: 3px;
+  stroke-dasharray: 10;
+  stroke-dashoffset: 0;
+  animation: dashMove 5s linear infinite;
+}
+
+@keyframes dashMove {
+  to {
+    stroke-dashoffset: -100;
+    stroke-dasharray: 9;
+  }
 }
 
 .playHead {

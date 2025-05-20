@@ -84,6 +84,10 @@
   transition: border 0.2s ease;
 }
 
+.selectedKeyframeProperty{
+  border: 10px red solid;
+}
+
 .input:focus,
 .select:focus {
   border-color: none;

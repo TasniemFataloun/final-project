@@ -36,7 +36,7 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const styleKeys = new Set(Object.keys(props));
 
   const filteredProps = Object.entries(props).filter(([key, value]) => {
-    if (key === "type") return false; // ⛔️ Skip the 'type' property
+    if (key === "type") return false;
     if (value === "" || value === null || value === undefined) return false;
 
     const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
@@ -78,16 +78,12 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     anim?.iterationCount || "infinite"
   };`;
 
-  const baseClassCss = `${
-    layer.editedPropertiesGroup.length > 0
-      ? `
+  const baseClassCss = `${`
 ${className} {
 ${propsClassName}
 ${animationCss}
   }
-`
-      : ""
-  }`.trim();
+`}`.trim();
 
   const sortedPercentages = Object.keys(keyframeSteps)
     .map((k) => parseFloat(k))

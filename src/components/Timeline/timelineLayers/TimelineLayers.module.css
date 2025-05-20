@@ -69,21 +69,21 @@
 .selectedLayer {
   background-color: var(--selectedLayer) !important;
   width: 100%;
-  color: white;
+  color: var(--bg);
 }
 
-.selectedLayer .layerButtons{
-  color: white;
+.selectedLayer .layerButtons {
+  color: var(--bg);
 }
 .selectedLayer .deleteButton {
-  color: white;
+  color: var(--bg);
 }
 
 .LayerProperties {
   display: flex;
   flex-direction: column;
   background-color: var(--bg);
-} 
+}
 
 .propertyGroupHeader {
   display: flex;

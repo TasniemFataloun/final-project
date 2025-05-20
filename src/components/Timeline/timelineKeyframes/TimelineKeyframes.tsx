@@ -6,9 +6,10 @@ import {
   setCurrentPosition,
   setIsPlaying,
   setSelectedKeyframe,
+  setSelectedLayer,
 } from "../../../redux/slices/animationSlice";
 import { setIsDragging } from "../../../redux/slices/timelineSlice";
-import { Diamond, DiamondIcon } from "lucide-react";
+import { Diamond } from "lucide-react";
 
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
@@ -74,6 +75,7 @@ const TimelineKeyframes = () => {
   const handleMouseUp = () => {
     dispatch(setIsDragging(false));
   };
+  
 
   //useEffect
   useEffect(() => {
@@ -170,16 +172,6 @@ const TimelineKeyframes = () => {
                       size={12}
                       className={`${style.keyframe} ${style.collapsedKeyframe}`}
                       style={{ left: `${keyframe.percentage}%` }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const payload = {
-                          layerId: layer.id,
-                          property: prop.propertyName,
-                          keyframeId: keyframe.id,
-                        };
-                        dispatch(setSelectedKeyframe(payload));
-                        dispatch(setCurrentPosition(keyframe.percentage));
-                      }}
                     />
                   ))
                 )
@@ -207,7 +199,7 @@ const TimelineKeyframes = () => {
                               selectedKeyframe?.keyframeId === kf.id;
                             return (
                               <Diamond
-                                size={15}
+                                size={17}
                                 fill="var(--selectedLayer)"
                                 key={kf.id}
                                 className={`${style.keyframe} ${
@@ -225,6 +217,7 @@ const TimelineKeyframes = () => {
                                   };
                                   dispatch(setSelectedKeyframe(payload));
                                   dispatch(setCurrentPosition(kf.percentage));
+                                  dispatch(setSelectedLayer(layer.id));
                                 }}
                               />
                             );

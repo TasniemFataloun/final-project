@@ -13,7 +13,7 @@
   background: var(--timeline-bg);
   background:var(--control-colors);
   border-radius: 6px;
-  color: white;
+  color: var(--bg);
   cursor: pointer;
   transition: 0.2s ease;
   display: flex;

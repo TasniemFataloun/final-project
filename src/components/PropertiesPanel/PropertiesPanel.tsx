@@ -4,7 +4,7 @@ import {
   ConfigSchema,
   propertiesSchema,
 } from "../../config/propertiespanel.config";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, PanelRightClose } from "lucide-react";
 import {
   addKeyframe,
@@ -18,10 +18,36 @@ const PropertiesPanel = () => {
   const { selectedLayerId, layers, currentPosition } = useAppSelector(
     (state) => state.animation
   );
-
+  const selectedKeyframe = useAppSelector(
+    (state) => state.animation.selectedKeyframe
+  );
+  const selectedLayer = layers.find((el) => el.id === selectedLayerId);
+  /*   console.log("selectedKeyframe", selectedKeyframe);
+   */
   const [openSections, setOpenSections] = useState<string[]>([]);
 
-  const selectedLayer = layers.find((el) => el.id === selectedLayerId);
+  useEffect(() => {
+    if (!selectedKeyframe?.property) return;
+    let containingSectionKey: string | undefined;
+
+    // Search in propertiesSchema because properties live there
+    for (const [sectionKey, sectionData] of Object.entries(propertiesSchema)) {
+      if (sectionData.fields.hasOwnProperty(selectedKeyframe.property)) {
+        containingSectionKey = sectionKey;
+        break;
+      }
+    }
+
+    if (!containingSectionKey) return;
+
+    // If section not already open, open it
+    setOpenSections((prev) => {
+      if (!prev.includes(containingSectionKey!)) {
+        return [...prev, containingSectionKey!];
+      }
+      return prev;
+    });
+  }, [selectedKeyframe]);
 
   const handleTogglePropertiesPanel = () => {
     setIsPropertiesPanelOpen((prev) => !prev);
@@ -225,6 +251,8 @@ const PropertiesPanel = () => {
               );
             };
 
+            const selectedKeyframeProperty = selectedKeyframe?.property;
+
             return (
               <div key={sectionKey} className={style.section}>
                 <div
@@ -252,6 +280,7 @@ const PropertiesPanel = () => {
                           typeof section === "string"
                             ? section
                             : section?.[fieldKey];
+
                         return (
                           <div className={style.option} key={fieldKey}>
                             <label className={style.label}>
@@ -327,7 +356,11 @@ const PropertiesPanel = () => {
                                     sectionKey
                                   )
                                 }
-                                className={style.input}
+                                className={`${style.input} ${
+                                  selectedKeyframeProperty === fieldKey
+                                    ? style.selectedKeyframeProperty
+                                    : ""
+                                }`}
                               />
                             )}
                           </div>
