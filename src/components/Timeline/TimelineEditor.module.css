@@ -6,6 +6,7 @@
   background-color: var(--timeline-bg);
   flex-grow: 10;
   overflow: auto;
+  padding-right: 1rem;
 }
 
 .timelineBody {

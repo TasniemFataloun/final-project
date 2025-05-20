@@ -28,6 +28,16 @@
   stroke: none;
 }
 
+.collapsedRow {
+  position: relative;
+  color: green;
+}
+.collapsedKeyframe {
+  fill: var(--white);
+  opacity: 0.5;
+}
+
+
 .selectedKeyframe {
   stroke: var(--bg);
 }

@@ -8,7 +8,7 @@ import {
   setSelectedKeyframe,
 } from "../../../redux/slices/animationSlice";
 import { setIsDragging } from "../../../redux/slices/timelineSlice";
-import { Diamond } from "lucide-react";
+import { Diamond, DiamondIcon } from "lucide-react";
 
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
@@ -158,9 +158,33 @@ const TimelineKeyframes = () => {
         <React.Fragment key={layer.id}>
           <div
             className={`${style.row} ${
-              selectedLayerId === layer.id ? ` ${style.selectedLayer}` : ""
-            }`}
-          ></div>
+              selectedLayerId === layer.id ? style.selectedLayer : ""
+            } ${!expandedLayers[layer.id] ? style.collapsedRow : ""}`}
+          >
+            {!expandedLayers[layer.id] &&
+              layer.editedPropertiesGroup?.flatMap((group) =>
+                group.propertiesList.flatMap((prop) =>
+                  prop.keyframes.map((keyframe) => (
+                    <Diamond
+                      key={keyframe.id}
+                      size={12}
+                      className={`${style.keyframe} ${style.collapsedKeyframe}`}
+                      style={{ left: `${keyframe.percentage}%` }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const payload = {
+                          layerId: layer.id,
+                          property: prop.propertyName,
+                          keyframeId: keyframe.id,
+                        };
+                        dispatch(setSelectedKeyframe(payload));
+                        dispatch(setCurrentPosition(keyframe.percentage));
+                      }}
+                    />
+                  ))
+                )
+              )}
+          </div>
 
           <>
             {layer.editedPropertiesGroup?.map((group) => {
