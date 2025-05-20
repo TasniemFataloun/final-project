@@ -32,7 +32,7 @@ function App() {
       {!showSplash && */} {/* ( */}
         <>
           <Header onToggleGenerateCss={handleToggleGenerateCss} />
-          {alertOpen && <Alert message="Url Copied" />}
+          {alertOpen && <Alert message="Copied CSS Code" />}
 
           <main className="main">
             <div className="canvasPropertiesTimeline">
