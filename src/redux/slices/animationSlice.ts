@@ -101,13 +101,14 @@ const animationSlice = createSlice({
         (p) => p.propertyName === propertyName
       );
       if (!prop) return;
-      
+
       const unit =
         groupName === "transform" && propertyName === "rotate"
           ? "deg"
           : groupName === "opacity"
           ? ""
-          : groupName === "backgroundColor" && propertyName === "backgroundColor"
+          : groupName === "backgroundColor" &&
+            propertyName === "backgroundColor"
           ? ""
           : groupName === "transform" && propertyName === "scale"
           ? ""
@@ -234,10 +235,10 @@ const animationSlice = createSlice({
 
       for (let i = layer.editedPropertiesGroup.length - 1; i >= 0; i--) {
         const group = layer.editedPropertiesGroup[i];
-
         const propIndex = group.propertiesList.findIndex(
           (p) => p.propertyName === property
         );
+
         if (propIndex === -1) continue;
 
         const prop = group.propertiesList[propIndex];
@@ -252,8 +253,11 @@ const animationSlice = createSlice({
         if (prop.keyframes.length === 0) {
           group.propertiesList.splice(propIndex, 1);
 
-          if (layer.style && property in layer.style) {
-            delete (layer.style as any)[property];
+          const el = document.querySelector(
+            `[data-layer-id="${layer.id}"]`
+          ) as HTMLElement | null;
+          if (el) {
+            el.style.removeProperty(property);
           }
         }
 

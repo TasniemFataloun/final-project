@@ -1,4 +1,3 @@
-
 import { AnimationConfigType, AnimationType } from "../../types/animationType";
 
 export type ElementType = "rectangle" | "circle" | "square" | "code";
@@ -10,7 +9,7 @@ export interface Propertykeyframes {
   percentage: number;
 }
 
-type PropertyItem = {
+export type PropertyItem = {
   propertyName: string;
   keyframes: Propertykeyframes[];
 };

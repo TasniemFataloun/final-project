@@ -26,7 +26,6 @@ const Canvas = () => {
     }
   }, [currentPosition, isPlaying, layers]);
 
-
   //this useEffect is used to animate the layers when the play button is pressed (animate request)
   useEffect(() => {
     let startTime: number | null = null;
@@ -34,7 +33,6 @@ const Canvas = () => {
 
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
-      
 
       layers.forEach((layer) => {
         const el = layerRef.current[layer.id];
@@ -48,8 +46,8 @@ const Canvas = () => {
             : parseInt(layer.config?.iterationCount || "infinite");
 
         const totalDuration = layerDuration * iterations;
-         const baseTime = (currentPosition / 100) * layerDuration;
-         const elapsed = (timestamp - startTime!) / 1000 + baseTime;
+        const baseTime = (currentPosition / 100) * layerDuration;
+        const elapsed = (timestamp - startTime!) / 1000 + baseTime;
 
         const localElapsed = Math.min(elapsed, totalDuration);
         const iterationIndex = Math.floor(localElapsed / layerDuration);
@@ -71,7 +69,7 @@ const Canvas = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isPlaying, layers]);   
+  }, [isPlaying, layers]);
 
   return (
     <div className={styles.canvasContainer}>
@@ -85,6 +83,7 @@ const Canvas = () => {
                   if (el) layerRef.current[layer.id] = el;
                 }}
                 key={layer.id}
+                data-layer-id={layer.id}
                 onClick={() => {
                   dispatch(toggleLayer(layer.id));
                   dispatch(setSelectedLayer(layer.id));

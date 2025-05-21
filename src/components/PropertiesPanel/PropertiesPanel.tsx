@@ -22,8 +22,7 @@ const PropertiesPanel = () => {
     (state) => state.animation.selectedKeyframe
   );
   const selectedLayer = layers.find((el) => el.id === selectedLayerId);
-  /*   console.log("selectedKeyframe", selectedKeyframe);
-   */
+
   const [openSections, setOpenSections] = useState<string[]>([]);
 
   useEffect(() => {
@@ -130,7 +129,13 @@ const PropertiesPanel = () => {
         >
           <PanelRightClose color="var(--white)" />
         </button>
-        {isPropertiesPanelOpen ? <h2>Properties</h2> : ""}
+        {isPropertiesPanelOpen ? (
+          <h2>{`Properties ${
+            selectedLayer?.name ? ` ${selectedLayer.name}` : ""
+          }`}</h2>
+        ) : (
+          ""
+        )}
       </div>
 
       {isPropertiesPanelOpen && (

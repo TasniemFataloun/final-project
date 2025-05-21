@@ -124,7 +124,6 @@ const TimelineKeyframes = () => {
       ) {
         dispatch(removeSelectedKeyframe());
       }
-      console.log("Keydown", e.code, selectedKeyframe);
     };
 
     window.addEventListener("keydown", handleKeyDown);
