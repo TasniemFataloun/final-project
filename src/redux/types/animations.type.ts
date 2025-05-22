@@ -14,11 +14,11 @@ export type PropertyItem = {
   keyframes: Propertykeyframes[];
 };
 
-//properties in the layer
+/* //properties in the layer
 export type PropertiesGroup = {
   name: string;
   propertiesList: PropertyItem[];
-};
+}; */
 
 export interface Layer {
   id: string;
@@ -27,7 +27,7 @@ export interface Layer {
   visible?: boolean;
   locked?: boolean;
   style?: styleConfig;
-  editedPropertiesGroup?: PropertiesGroup[];
+  editedPropertiesGroup?: PropertyItem[];
   customHtml?: string;
   customCss?: string;
   config?: AnimationConfigType;

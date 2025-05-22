@@ -103,14 +103,12 @@ const animationSlice = createSlice({
       state,
       action: PayloadAction<{
         layerId: string;
-        groupName: string;
         propertyName: string;
         percentage: number;
         value: any;
       }>
     ) => {
-      const { layerId, groupName, propertyName, percentage, value } =
-        action.payload;
+      const { layerId, propertyName, percentage, value } = action.payload;
       const roundedPercentage = Math.round(percentage * 100) / 100;
 
       const layer = state.layers.find((l) => l.id === layerId);
@@ -120,19 +118,7 @@ const animationSlice = createSlice({
         layer.editedPropertiesGroup = [];
       }
 
-      // find or push the group properties
-      let group = layer.editedPropertiesGroup.find((g) => g.name === groupName);
-
-      if (!group) {
-        group = {
-          name: groupName,
-          propertiesList: [],
-        };
-        layer.editedPropertiesGroup.push(group);
-      }
-
-      // find or create the property
-      let prop = group.propertiesList.find(
+      let prop = layer.editedPropertiesGroup.find(
         (p) => p.propertyName === propertyName
       );
 
@@ -141,23 +127,19 @@ const animationSlice = createSlice({
           propertyName,
           keyframes: [],
         };
-        group.propertiesList.push(prop);
+        layer.editedPropertiesGroup.push(prop);
       }
 
-      // units
+      // Set unit
       const unit =
-        groupName === "transform" && propertyName === "rotate"
+        propertyName === "rotate"
           ? "deg"
-          : groupName === "opacity"
-          ? ""
-          : groupName === "backgroundColor" &&
-            propertyName === "backgroundColor"
-          ? ""
-          : groupName === "transform" && propertyName === "scale"
+          : propertyName === "opacity" ||
+            propertyName === "backgroundColor" ||
+            propertyName === "scale"
           ? ""
           : "px";
 
-      // add or update the keyframe
       const existingKeyframe = prop.keyframes.find(
         (kf) => kf.percentage === roundedPercentage
       );
@@ -173,50 +155,51 @@ const animationSlice = createSlice({
         });
       }
 
-      // 5. Sort keyframes
       prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
     updatePropertyValue: (
       state,
       action: PayloadAction<{
-        section: keyof AnimationConfigType;
+        section: keyof AnimationConfigType; // used for layerPropertiesValue
         field: string;
         value: string;
       }>
     ) => {
       const { section, field, value } = action.payload;
       const layer = state.layers.find((l) => l.id === state.selectedLayerId);
-      if (!layer || !layer.layerPropertiesValue) return;
-      // Update the layer properties value
-      layer.layerPropertiesValue[section] = {
-        ...(layer.layerPropertiesValue[section] || {}),
-        [field]: value,
-      };
-      const propertyExists = layer.editedPropertiesGroup?.some((group) =>
-        group.propertiesList.some((p) => p.propertyName === field)
+       if (!layer || !layer.layerPropertiesValue) return;
+
+      // 1. Update layerPropertiesValue
+      if (!layer.layerPropertiesValue) {
+        layer.layerPropertiesValue = {
+          width: "",
+          height: "",
+          transform: "",
+          opacity: "",
+          backgroundColor: "",
+          borderRadius: "",
+        };
+      }
+      layer.layerPropertiesValue[section] = value;
+
+      // 2. Ensure editedPropertiesGroup is initialized
+      if (!layer.editedPropertiesGroup) {
+        layer.editedPropertiesGroup = [];
+      }
+
+      // 3. Check if property exists
+      const existingProperty = layer.editedPropertiesGroup.find(
+        (p) => p.propertyName === field
       );
 
-      if (!propertyExists) {
-        const newProperty = {
+      // 4. Add if it doesn’t exist
+      if (!existingProperty) {
+        layer.editedPropertiesGroup.push({
           propertyName: field,
           keyframes: [],
-        };
-
-        const group = layer.editedPropertiesGroup?.find(
-          (g) => g.name === section
-        );
-
-        if (group) {
-          group.propertiesList.push(newProperty);
-        } else {
-          layer.editedPropertiesGroup?.push({
-            name: section as string,
-            propertiesList: [newProperty],
-          });
-        }
+        });
       }
     },
-
     setConfig: (
       state,
       action: PayloadAction<{
@@ -272,32 +255,25 @@ const animationSlice = createSlice({
 
       const { layerId, property, keyframeId } = selected;
       const layer = state.layers.find((l) => l.id === layerId);
-      if (!layer) return;
-      if (!layer.style) {
-        layer.style = {};
-      }
-      if (!layer.editedPropertiesGroup) return;
+      if (!layer || !layer.editedPropertiesGroup) return;
 
-      for (let i = layer.editedPropertiesGroup.length - 1; i >= 0; i--) {
-        const group = layer.editedPropertiesGroup[i];
-        const propIndex = group.propertiesList.findIndex(
-          (p) => p.propertyName === property
-        );
+      const propIndex = layer.editedPropertiesGroup.findIndex(
+        (p) => p.propertyName === property
+      );
 
-        if (propIndex === -1) continue;
+      if (propIndex === -1) return;
 
-        const prop = group.propertiesList[propIndex];
+      const prop = layer.editedPropertiesGroup[propIndex];
 
-        // Remove the selected keyframe
-        prop.keyframes = prop.keyframes.filter((kf) => kf.id !== keyframeId);
+      // Remove the selected keyframe
+      prop.keyframes = prop.keyframes.filter((kf) => kf.id !== keyframeId);
 
-        if (prop.keyframes.length === 1 && prop.keyframes[0].percentage === 0) {
-          prop.keyframes = [];
-        }
-
-        if (prop.keyframes.length === 0) {
-          group.propertiesList.splice(propIndex, 1);
-        }
+      // Remove the entire property if keyframes are empty or only one with 0%
+      if (
+        prop.keyframes.length === 0 ||
+        (prop.keyframes.length === 1 && prop.keyframes[0].percentage === 0)
+      ) {
+        layer.editedPropertiesGroup.splice(propIndex, 1);
       }
 
       state.selectedKeyframe = null;

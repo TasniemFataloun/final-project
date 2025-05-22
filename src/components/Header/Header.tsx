@@ -10,9 +10,7 @@ type HeaderProps = {
 const Header = ({ onToggleGenerateCss }: HeaderProps) => {
   const layers = useAppSelector((state) => state.animation.layers);
   const hasKeyframes = layers.some((layer) =>
-    layer.editedPropertiesGroup?.some((group) =>
-      group.propertiesList.some((prop) => prop.keyframes.length > 0)
-    )
+    layer.editedPropertiesGroup?.some((group) => group.keyframes.length > 0)
   );
 
   return (

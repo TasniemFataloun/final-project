@@ -12,20 +12,18 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const keyframeSteps: Record<number, string[]> = {};
 
   layer.editedPropertiesGroup.forEach((group) => {
-    group.propertiesList.forEach((property) => {
-      property.keyframes.forEach((kf) => {
-        const percentage = kf.percentage;
-        const line = `    ${property.propertyName}: ${kf.value}${kf.unit};`;
+    group.keyframes.forEach((kf) => {
+      const percentage = kf.percentage;
+      const line = `    ${group.propertyName}: ${kf.value}${kf.unit};`;
 
-        if (!keyframeSteps[percentage]) {
-          keyframeSteps[percentage] = [];
-        }
-        keyframeSteps[percentage].push(line);
+      if (!keyframeSteps[percentage]) {
+        keyframeSteps[percentage] = [];
+      }
+      keyframeSteps[percentage].push(line);
 
-        if (percentage === 0) {
-          baseStyles.push(`  ${property.propertyName}: ${kf.value}${kf.unit};`);
-        }
-      });
+      if (percentage === 0) {
+        baseStyles.push(`  ${group.propertyName}: ${kf.value}${kf.unit};`);
+      }
     });
   });
 

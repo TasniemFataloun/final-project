@@ -14,15 +14,15 @@ export type styleConfig = {
   opacity: string;
   transform: string;
   [key: string]: string;
-}
+};
 
-export type sizeType = {
+/* export type sizeType = {
   width: string;
   height: string;
   [key: string]: string;
-};
+}; */
 
-export type TransformType = {
+/* export type TransformType = {
   scale: string;
   rotate: string;
   translateX: string;
@@ -37,19 +37,20 @@ export type OpacityType = {
 
 export type borderRadiusType = {
   borderRadius: string;
-  [key: string]: string;  
-}
+  [key: string]: string;
+};
 
 export type BackgroundColorType = {
   backgroundColor: string;
   [key: string]: string;
 };
-
+ */
 export type AnimationType = {
-  size: sizeType;
-  transform: TransformType;
-  opacity: OpacityType;
-  borderRadius: borderRadiusType;
-  backgroundColor: BackgroundColorType;
-  [key: string]: any;
+  width: string;
+  height: string;
+  transform: string;
+  opacity: string;
+  borderRadius: string;
+  backgroundColor: string;
+  [key: string]: string; 
 };

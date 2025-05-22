@@ -119,12 +119,12 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
 
             {expandedLayers[layer.id] && (
               <div className={style.LayerProperties}>
-                {layer.editedPropertiesGroup?.map((group) => {
+                {layer.editedPropertiesGroup?.map(() => {
                   return (
-                    <React.Fragment key={group.name}>
-                      <div key={group.name} className={style.propertyGroup}>
+                    <React.Fragment key={layer.id}>
+                      <div className={style.propertyGroup}>
                         <div>
-                          {group.propertiesList.map((prop) => (
+                          {(layer.editedPropertiesGroup || []).map((prop) => (
                             <div
                               key={prop.propertyName}
                               className={style.propertyRow}
@@ -149,11 +149,10 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                                   )}
                               </div>
 
-                              <div className={style.propertyRowKayframes}></div>
+                              <div className={style.propertyRowKeyframes}></div>
                             </div>
                           ))}
                         </div>
-                        {/*  )} */}
                       </div>
                     </React.Fragment>
                   );

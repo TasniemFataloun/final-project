@@ -62,8 +62,7 @@ export const animateLayer = (
     element = element.firstElementChild as HTMLElement;
   }
 
-  const properties =
-    layer.editedPropertiesGroup?.flatMap((g: any) => g.propertiesList) || [];
+  const properties = layer.editedPropertiesGroup || []; // ✅ UPDATED HERE
   for (const prop of properties) {
     const kfs = [...prop.keyframes].sort((a, b) => a.percentage - b.percentage);
     if (kfs.length == 0) return;
@@ -86,6 +85,7 @@ export const animateLayer = (
     } else if (time >= kfs[kfs.length - 1].percentage) {
       prev = next = kfs[kfs.length - 1];
     }
+
     if (prev.value.startsWith("#") && next.value.startsWith("#")) {
       style[prop.propertyName] = interpolateColor(
         prev.value,
@@ -105,12 +105,11 @@ export const animateLayer = (
   const transformProperties = ["translateX", "translateY", "scale", "rotate"];
   const validTransforms: string[] = [];
 
-  // Handle transform functions
   for (const tf of transformProperties) {
     const val = style[tf];
     if (val && isValidTransformFunction(tf, val)) {
       validTransforms.push(`${tf}(${val})`);
-      delete style[tf]; // Remove from regular CSS so it doesn't get applied below
+      delete style[tf];
     } else if (val) {
       console.warn(`Invalid transform function: ${tf}(${val})`);
     }
@@ -120,7 +119,6 @@ export const animateLayer = (
     element.style.transform = validTransforms.join(" ");
   }
 
-  // Apply all other styles dynamically (excluding transform properties)
   for (const [key, value] of Object.entries(style)) {
     if (!transformProperties.includes(key) && value !== undefined) {
       if (key in element.style) {

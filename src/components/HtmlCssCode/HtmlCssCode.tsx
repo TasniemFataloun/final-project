@@ -24,8 +24,6 @@ const defultCss = `
   border-radius: 50%;
   left: 0;
   top: 0;
-  animation: moveCircle 2s infinite;
-
 }
 `.trim();
 

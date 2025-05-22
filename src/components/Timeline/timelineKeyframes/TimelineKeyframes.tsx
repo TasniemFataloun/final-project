@@ -164,17 +164,15 @@ const TimelineKeyframes = () => {
             } ${!expandedLayers[layer.id] ? style.collapsedRow : ""}`}
           >
             {!expandedLayers[layer.id] &&
-              layer.editedPropertiesGroup?.flatMap((group) =>
-                group.propertiesList.flatMap((prop) =>
-                  prop.keyframes.map((keyframe) => (
-                    <Diamond
-                      key={keyframe.id}
-                      size={12}
-                      className={`${style.keyframe} ${style.collapsedKeyframe}`}
-                      style={{ left: `${keyframe.percentage}%` }}
-                    />
-                  ))
-                )
+              layer.editedPropertiesGroup?.flatMap((prop) =>
+                prop.keyframes.map((keyframe) => (
+                  <Diamond
+                    key={keyframe.id}
+                    size={12}
+                    className={`${style.keyframe} ${style.collapsedKeyframe}`}
+                    style={{ left: `${keyframe.percentage}%` }}
+                  />
+                ))
               )}
           </div>
 
@@ -183,49 +181,46 @@ const TimelineKeyframes = () => {
               const isLayerExpanded = expandedLayers[layer.id];
 
               return (
-                <React.Fragment key={group.name}>
-                  {isLayerExpanded && (
-                    <>
-                      {group.propertiesList.map((prop) => (
-                        <div
-                          key={`${layer.id}-${group.name}-${prop.propertyName}`}
-                          className={`${style.row} ${style.keyframeRow}`}
-                        >
-                          {prop.keyframes.map((kf) => {
-                            const isThisKeyframeSelected =
-                              selectedKeyframe?.layerId === layer.id &&
-                              selectedKeyframe?.property ===
-                                prop.propertyName &&
-                              selectedKeyframe?.keyframeId === kf.id;
-                            return (
-                              <Diamond
-                                size={17}
-                                fill="var(--selectedLayer)"
-                                key={kf.id}
-                                className={`${style.keyframe} ${
-                                  isThisKeyframeSelected
-                                    ? style.selectedKeyframe
-                                    : ""
-                                }`}
-                                style={{ left: `${kf.percentage}%` }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const payload = {
-                                    layerId: layer.id,
-                                    property: prop.propertyName,
-                                    keyframeId: kf.id,
-                                  };
-                                  dispatch(setSelectedKeyframe(payload));
-                                  dispatch(setCurrentPosition(kf.percentage));
-                                  dispatch(setSelectedLayer(layer.id));
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </>
-                  )}
+                <React.Fragment key={group.propertyName}>
+                  {isLayerExpanded &&
+                    layer.editedPropertiesGroup?.map((prop) => (
+                      <div
+                        key={`${layer.id}-${prop.propertyName}`}
+                        className={`${style.row} ${style.keyframeRow}`}
+                      >
+                        {prop.keyframes.map((kf) => {
+                          const isThisKeyframeSelected =
+                            selectedKeyframe?.layerId === layer.id &&
+                            selectedKeyframe?.property === prop.propertyName &&
+                            selectedKeyframe?.keyframeId === kf.id;
+
+                          return (
+                            <Diamond
+                              size={17}
+                              fill="var(--selectedLayer)"
+                              key={kf.id}
+                              className={`${style.keyframe} ${
+                                isThisKeyframeSelected
+                                  ? style.selectedKeyframe
+                                  : ""
+                              }`}
+                              style={{ left: `${kf.percentage}%` }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const payload = {
+                                  layerId: layer.id,
+                                  property: prop.propertyName,
+                                  keyframeId: kf.id,
+                                };
+                                dispatch(setSelectedKeyframe(payload));
+                                dispatch(setCurrentPosition(kf.percentage));
+                                dispatch(setSelectedLayer(layer.id));
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
                 </React.Fragment>
               );
             })}
