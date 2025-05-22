@@ -4,13 +4,19 @@ import TimelineHeader from "./timelineHeader/TimelineHeader";
 import TimelineLayers from "./timelineLayers/TimelineLayers";
 import TimelineKeyframes from "./timelineKeyframes/TimelineKeyframes";
 
-const TimelineEditor = () => {
+type TimelineEditorProps = {
+  onOpenLayerSettings: () => void;
+};
+
+const TimelineEditor: React.FC<TimelineEditorProps> = ({
+  onOpenLayerSettings,
+}) => {
   return (
     <div className={style.container}>
       <TimelineControl />
       <TimelineHeader />
       <div className={`${style.timelineBody} ${style.scrole}`}>
-        <TimelineLayers />
+        <TimelineLayers onOpenLayerSettings={onOpenLayerSettings} />{" "}
         <TimelineKeyframes />
       </div>
     </div>

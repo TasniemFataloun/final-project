@@ -4,31 +4,20 @@ import { addLayer } from "../../redux/slices/animationSlice";
 
 import { Square, Circle, RectangleHorizontal } from "lucide-react";
 import { ElementType } from "../../redux/types/animations.type";
-import { getDefaultPropertiesGroup } from "../../helpers/GetDefaultPropertiesGroup";
+import HtmlCssCode from "../HtmlCssCode/HtmlCssCode";
+import { useState } from "react";
 
 const Sidebar = () => {
   const dispatch = useAppDispatch();
+  const [showCodeComponent, setShowCodeComponent] = useState(false);
 
   const handleAddElement = (type: ElementType) => {
-    const config = getDefaultPropertiesGroup(type);
-
-    const style = {
-      width: `${config.size.width}px`,
-      height: `${config.size.height}px`,
-      backgroundColor: config.backgroundColor.backgroundColor,
-      opacity: config.opacity.opacity,
-      borderRadius: `${config.borderRadius.borderRadius}px`,
-      transform: `scale(${config.transform.scale}) rotate(${config.transform.rotate}deg) translate(${config.transform.translateX}px, ${config.transform.translateY}px)`,
-    };
-
     const newLayer = {
       id: Date.now().toString(),
       name: type,
       type: type,
       visible: true,
       locked: false,
-      style,
-      layerPropertiesValue: config,
     };
 
     dispatch(addLayer(newLayer));
@@ -62,6 +51,23 @@ const Sidebar = () => {
           onClick={() => handleAddElement("square")}
         />
       </div>
+      <button onClick={() => setShowCodeComponent(true)}>
+        Import your code
+      </button>
+
+      {showCodeComponent && (
+        <HtmlCssCode
+          onSave={(html, css) => {
+            // Handle save
+            console.log("HTML:", html);
+            console.log("CSS:", css);
+            setShowCodeComponent(false);
+          }}
+          onCancel={() => {
+            setShowCodeComponent(false);
+          }}
+        />
+      )}
     </div>
   );
 };

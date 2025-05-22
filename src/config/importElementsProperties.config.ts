@@ -1,4 +1,4 @@
-import { AnimationConfigType, AnimationType } from "../types/animationType";
+import { AnimationConfigType, styleConfig } from "../types/animationType";
 
 //animation config
 export const importCircleConfig: AnimationConfigType = {
@@ -26,53 +26,32 @@ export const importSquareConfig: AnimationConfigType = {
 };
 
 //animation properties
-export const importCircleProps: AnimationType = {
+export const importCircleProps: styleConfig = {
   type: "circle",
-  size: {
-    width: "50",
-    height: "50",
-  },
-  transform: {
-    scale: "1",
-    rotate: "0",
-    translateX: "0",
-    translateY: "0",
-  },
-  opacity: { opacity: "1" },
-  borderRadius: { borderRadius: "100" },
-  backgroundColor: { backgroundColor: "#FFFFFF" },
+  width: "50px",
+  height: "50px",
+  backgroundColor: "#FFFFFF",
+  borderRadius: "50%",
+  opacity: "1",
+  transform: "scale(1) rotate(0deg) translateX(0px) translateY(0px)",
 };
 
-export const importRectangleProps: AnimationType = {
+export const importRectangleProps: styleConfig = {
   type: "rectangle",
-  size: {
-    width: "70",
-    height: "50",
-  },
-  transform: {
-    scale: "1",
-    rotate: "0",
-    translateX: "0",
-    translateY: "0",
-  },
-  opacity: { opacity: "1" },
-  borderRadius: { borderRadius: "0" },
-  backgroundColor: { backgroundColor: "#000000" },
+  width: "70px",
+  height: "50px",
+  backgroundColor: "#FF3F34",
+  borderRadius: "0%",
+  opacity: "1",
+  transform: "scale(1) rotate(0deg) translateX(0px) translateY(0px)",
 };
 
-export const importSquareProps: AnimationType = {
+export const importSquareProps: styleConfig = {
   type: "square",
-  size: {
-    width: "50",
-    height: "50",
-  },
-  transform: {
-    scale: "1",
-    rotate: "0",
-    translateX: "0",
-    translateY: "0",
-  },
-  opacity: { opacity: "1" },
-  borderRadius: { borderRadius: "0" },
-  backgroundColor: { backgroundColor: "#4A90E2" },
+  width: "50px",
+  height: "50px",
+  backgroundColor: "#fab687",
+  borderRadius: "0%",
+  opacity: "1",
+  transform: "scale(1) rotate(0deg) translateX(0px) translateY(0px)",
 };

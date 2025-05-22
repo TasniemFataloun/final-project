@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AnimationConfigType } from "../../types/animationType";
+import { AnimationConfigType, styleConfig } from "../../types/animationType";
 import { Layer } from "../types/animations.type";
 import {
   getDefaultConfig,
@@ -43,8 +43,32 @@ const animationSlice = createSlice({
         editedPropertiesGroup: [],
         config: getDefaultConfig(type),
         style: {
-          ...(getDefaultPropertiesGroup(type) || {}),
-          ...(action.payload.style || {}),
+          width:
+            action.payload.style?.width ??
+            getDefaultPropertiesGroup(type)?.width ??
+            "",
+          height:
+            action.payload.style?.height ??
+            getDefaultPropertiesGroup(type)?.height ??
+            "",
+          backgroundColor:
+            action.payload.style?.backgroundColor ??
+            getDefaultPropertiesGroup(type)?.backgroundColor ??
+            "",
+          borderRadius:
+            action.payload.style?.borderRadius ??
+            getDefaultPropertiesGroup(type)?.borderRadius ??
+            "",
+          opacity:
+            action.payload.style?.opacity ??
+            getDefaultPropertiesGroup(type)?.opacity ??
+            "",
+          transform:
+            action.payload.style?.transform ??
+            getDefaultPropertiesGroup(type)?.transform ??
+            "",
+          ...getDefaultPropertiesGroup(type),
+          ...action.payload.style,
         },
       };
       state.layers.push(newLayer);
@@ -92,16 +116,35 @@ const animationSlice = createSlice({
       const layer = state.layers.find((l) => l.id === layerId);
       if (!layer) return;
 
-      const group = layer.editedPropertiesGroup?.find(
-        (g) => g.name === groupName
-      );
-      if (!group) return;
+      if (!layer.editedPropertiesGroup) {
+        layer.editedPropertiesGroup = [];
+      }
 
-      const prop = group.propertiesList.find(
+      // find or push the group properties
+      let group = layer.editedPropertiesGroup.find((g) => g.name === groupName);
+
+      if (!group) {
+        group = {
+          name: groupName,
+          propertiesList: [],
+        };
+        layer.editedPropertiesGroup.push(group);
+      }
+
+      // find or create the property
+      let prop = group.propertiesList.find(
         (p) => p.propertyName === propertyName
       );
-      if (!prop) return;
 
+      if (!prop) {
+        prop = {
+          propertyName,
+          keyframes: [],
+        };
+        group.propertiesList.push(prop);
+      }
+
+      // units
       const unit =
         groupName === "transform" && propertyName === "rotate"
           ? "deg"
@@ -114,38 +157,23 @@ const animationSlice = createSlice({
           ? ""
           : "px";
 
-      // If this property has no keyframes yet, add a default 0% keyframe
-      const hasZeroKeyframe = prop.keyframes.some((kf) => kf.percentage === 0);
-      if (!hasZeroKeyframe) {
-        const defaultValue =
-          getDefaultPropertiesGroup(layer.type)?.[groupName]?.[propertyName] ??
-          0;
+      // add or update the keyframe
+      const existingKeyframe = prop.keyframes.find(
+        (kf) => kf.percentage === roundedPercentage
+      );
 
+      if (existingKeyframe) {
+        existingKeyframe.value = value;
+      } else {
         prop.keyframes.push({
-          id: `${propertyName}-0`,
-          value: defaultValue,
+          id: `${propertyName}-${roundedPercentage}`,
+          value,
           unit,
-          percentage: 0,
+          percentage: roundedPercentage,
         });
       }
 
-      if (roundedPercentage !== 0) {
-        const existingKeyframe = prop.keyframes.find(
-          (kf) => kf.percentage === roundedPercentage
-        );
-
-        if (existingKeyframe) {
-          existingKeyframe.value = value;
-        } else {
-          prop.keyframes.push({
-            id: `${propertyName}-${roundedPercentage}`,
-            value,
-            unit,
-            percentage: roundedPercentage,
-          });
-        }
-      }
-
+      // 5. Sort keyframes
       prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
     updatePropertyValue: (
@@ -203,6 +231,23 @@ const animationSlice = createSlice({
       layer.config = { ...layer.config, [field]: value };
     },
 
+    setLayerConfigSettings: (
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        style: styleConfig;
+      }>
+    ) => {
+      const { layerId, style } = action.payload;
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer) return;
+
+      layer.style = {
+        ...layer.style,
+        ...style,
+      };
+    },
+
     setSelectedKeyframe: (
       state,
       action: PayloadAction<{
@@ -252,17 +297,6 @@ const animationSlice = createSlice({
 
         if (prop.keyframes.length === 0) {
           group.propertiesList.splice(propIndex, 1);
-
-          const el = document.querySelector(
-            `[data-layer-id="${layer.id}"]`
-          ) as HTMLElement | null;
-          if (el) {
-            el.style.removeProperty(property);
-          }
-        }
-
-        if (group.propertiesList.length === 0) {
-          layer.editedPropertiesGroup.splice(i, 1);
         }
       }
 
@@ -280,6 +314,7 @@ export const {
   setSelectedLayer,
   setIsPlaying,
   setConfig,
+  setLayerConfigSettings,
   setSelectedKeyframe,
   setCurrentPosition,
   removeSelectedKeyframe,
@@ -294,6 +329,7 @@ export type AnimationActionType =
   | typeof setSelectedLayer
   | typeof setIsPlaying
   | typeof setConfig
+  | typeof setLayerConfigSettings
   | typeof setSelectedKeyframe
   | typeof setCurrentPosition
   | typeof removeSelectedKeyframe;

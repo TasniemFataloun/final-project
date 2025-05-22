@@ -3,7 +3,6 @@
   height: 40px;
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  padding-right: 1rem;
 }
 .currentProgressTime {
   width: 220px;

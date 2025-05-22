@@ -82,8 +82,9 @@ const TimelineControl = () => {
       dispatch(setCurrentPosition(previousKeyframe));
       dispatch(setEndTimeRef(previousKeyframe));
     } else {
-      dispatch(setCurrentPosition(100));
-      dispatch(setEndTimeRef(100));
+      const firstKeyframe = uniqueSortedKeyframes[0];
+      dispatch(setCurrentPosition(firstKeyframe));
+      dispatch(setEndTimeRef(firstKeyframe));
     }
   };
 

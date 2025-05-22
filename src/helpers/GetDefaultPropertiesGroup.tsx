@@ -16,8 +16,6 @@ export const getDefaultPropertiesGroup = (type: string) => {
       return importRectangleProps;
     case "square":
       return importSquareProps;
-    default:
-      return importSquareProps;
   }
 };
 

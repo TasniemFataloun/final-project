@@ -1,0 +1,10 @@
+.container {
+  transition: width 0.3s ease;
+  background-color: var(--bg);
+  box-shadow: var(--box-shadow);
+  color: var(--white);
+  overflow: auto;
+  width: 20rem;
+  padding: var(--padding);
+  height: 35rem;
+}

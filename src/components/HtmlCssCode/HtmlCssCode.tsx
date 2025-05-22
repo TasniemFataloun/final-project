@@ -1,9 +1,9 @@
-/* import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./HtmlCssCode.module.css";
 import DOMPurify from "dompurify";
 import Editor from "@monaco-editor/react";
 import { useAppDispatch } from "../../redux/store";
-import { addElement } from "../../redux/slices/elementsSlice";
+import { addLayer } from "../../redux/slices/animationSlice";
 
 type HtmlCssCodeProps = {
   onSave: (html: string, css: string) => void;
@@ -11,17 +11,10 @@ type HtmlCssCodeProps = {
 };
 
 const defultHtml = `
-<div class="custom-shape">
   <div class="circle"></div>
-</div>
 `.trim();
 
 const defultCss = `
-.custom-shape {
-  position: relative;
-  width: 100px;
-  height: 100px;
-}
     
 .circle {
   position: absolute;
@@ -40,7 +33,6 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
   const [html, setHtml] = useState(defultHtml);
   const [css, setCss] = useState(defultCss);
   const [preview, setPreview] = useState("");
-  
 
   const dispatch = useAppDispatch();
 
@@ -89,11 +81,13 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
     const sanitizedHtml = DOMPurify.sanitize(html, purifyConfig);
 
     dispatch(
-      addElement({
+      addLayer({
         id: crypto.randomUUID(),
-        type: "custom",
-        html: sanitizedHtml,
-        css, 
+        type: "code",
+        customHtml: sanitizedHtml,
+        customCss: css,
+        visible: true,
+        name: "Code Layer",
       })
     );
 
@@ -163,4 +157,3 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
 };
 
 export default HtmlCssCode;
- */

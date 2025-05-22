@@ -15,10 +15,17 @@ import {
   EyeOff,
   Lock,
   LockOpen,
+  Settings2,
   Trash2,
 } from "lucide-react";
 
-const TimelineLayers = () => {
+type TimelineLayersProps = {
+  onOpenLayerSettings: () => void;
+};
+
+const TimelineLayers: React.FC<TimelineLayersProps> = ({
+  onOpenLayerSettings,
+}) => {
   const dispatch = useAppDispatch();
   const { layers, selectedLayerId } = useAppSelector(
     (state) => state.animation
@@ -98,6 +105,7 @@ const TimelineLayers = () => {
               >
                 {layer.name}
               </div>
+              <Settings2 size={14} onClick={onOpenLayerSettings} />
 
               <button
                 className={style.deleteButton}

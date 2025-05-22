@@ -16,15 +16,31 @@ const Canvas = () => {
   );
 
   useEffect(() => {
+    layers.forEach((layer) => {
+      if (layer.type === "code" && layer.customCss) {
+        const styleId = `layer-style-${layer.id}`;
+        let styleTag = document.getElementById(styleId) as HTMLStyleElement;
+
+        if (!styleTag) {
+          styleTag = document.createElement("style");
+          styleTag.id = styleId;
+          document.head.appendChild(styleTag);
+        }
+
+        styleTag.innerHTML = layer.customCss;
+      }
+    });
+
+
     if (!isPlaying) {
       layers.forEach((layer) => {
-        const element = layerRef.current[layer.id];
-        if (element && layer.visible) {
-          animateLayer(element, layer, Math.round(currentPosition));
+        const el = layerRef.current[layer.id];
+        if (el && layer.visible) {
+          animateLayer(el, layer, Math.round(currentPosition));
         }
       });
     }
-  }, [currentPosition, isPlaying, layers]);
+  }, [currentPosition, layers]);
 
   //this useEffect is used to animate the layers when the play button is pressed (animate request)
   useEffect(() => {
@@ -76,14 +92,28 @@ const Canvas = () => {
       <div className={styles.grid}></div>
       <div className={styles.animatedElementContainer}>
         {layers.map((layer) => {
-          return (
-            <>
+          if (layer.type === "code") {
+            return (
               <div
                 ref={(el) => {
                   if (el) layerRef.current[layer.id] = el;
                 }}
                 key={layer.id}
-                data-layer-id={layer.id}
+                className={styles.layer}
+                style={{
+                  visibility: layer.visible ? "visible" : "hidden",
+                  ...layer.style,
+                }}
+                dangerouslySetInnerHTML={{ __html: layer.customHtml! }}
+              />
+            );
+          } else
+            return (
+              <div
+                key={layer.id}
+                ref={(el) => {
+                  if (el) layerRef.current[layer.id] = el;
+                }}
                 onClick={() => {
                   dispatch(toggleLayer(layer.id));
                   dispatch(setSelectedLayer(layer.id));
@@ -96,9 +126,17 @@ const Canvas = () => {
                 className={`${styles.animatedElement} layer-${layer.id} ${
                   layer.id === selectedLayerId ? styles.selected : ""
                 }`}
-              />
-            </>
-          );
+              >
+                {layer.id === selectedLayerId && (
+                  <>
+                    <span className={styles.cornerTopLeft}></span>
+                    <span className={styles.cornerTopRight}></span>
+                    <span className={styles.cornerBottomLeft}></span>
+                    <span className={styles.cornerBottomRight}></span>
+                  </>
+                )}
+              </div>
+            );
         })}
       </div>
     </div>

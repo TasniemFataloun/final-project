@@ -8,10 +8,15 @@ import { useState } from "react";
 import { useAppSelector } from "./redux/store";
 import Alert from "./components/GenerateCss/Alert/Alert";
 import TimelineEditor from "./components/Timeline/TimelineEditor";
+import LayerConfigSetting from "./components/LayerConfigSetting/LayerConfigSetting";
 
 function App() {
   const [showGenerateCss, setShowGenerateCss] = useState(false);
   const alertOpen = useAppSelector((state) => state.alert.isOpen);
+  const [showLayerSettings, setShowLayerSettings] = useState(false);
+
+  const handleOpenLayerSettings = () => setShowLayerSettings((prev) => !prev);
+
   /*   const [showSplash, setShowSplash] = useState(true);
    */
   const handleToggleGenerateCss = () => {
@@ -39,9 +44,10 @@ function App() {
           <div className="canvasPropertiesTimeline">
             <Sidebar />
             <Canvas />
-            <PropertiesPanel />
+            {showLayerSettings ? <LayerConfigSetting /> : <PropertiesPanel />}
           </div>
-          <TimelineEditor />
+          <TimelineEditor onOpenLayerSettings={handleOpenLayerSettings} />
+
           {showGenerateCss && <GenerateCss onClose={handleToggleGenerateCss} />}
         </main>
       </>

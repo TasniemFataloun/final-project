@@ -16,11 +16,45 @@
     /* top-right */ inset -3px -3px 8px rgba(0, 0, 0, 0.15); /* top-left */
 }
 
-.selected{
+.selected {
   border: 1px var(--bg) solid;
   box-shadow: 0 0 10px var(--bg);
+  position: relative;
+  border: 2px solid #005eff;
+}
+/* Shared corner style */
+.cornerTopLeft,
+.cornerTopRight,
+.cornerBottomLeft,
+.cornerBottomRight {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #005eff;
+  background-color: #fff;
+  box-sizing: border-box;
 }
 
+/* Individual corner positions */
+.cornerTopLeft {
+  top: -6px;
+  left: -6px;
+}
+
+.cornerTopRight {
+  top: -6px;
+  right: -6px;
+}
+
+.cornerBottomLeft {
+  bottom: -6px;
+  left: -6px;
+}
+
+.cornerBottomRight {
+  bottom: -6px;
+  right: -6px;
+}
 /* 
 
 

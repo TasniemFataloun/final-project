@@ -6,6 +6,16 @@ export type AnimationConfigType = {
   [key: string]: string | number;
 };
 
+export type styleConfig = {
+  width: string;
+  height: string;
+  backgroundColor: string;
+  borderRadius: string;
+  opacity: string;
+  transform: string;
+  [key: string]: string;
+}
+
 export type sizeType = {
   width: string;
   height: string;
