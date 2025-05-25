@@ -43,6 +43,7 @@
   stroke-dasharray: 10;
   stroke-dashoffset: 0;
   animation: dashMove 5s linear infinite;
+  cursor: grab;
 }
 
 @keyframes dashMove {

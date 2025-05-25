@@ -5,6 +5,7 @@ import {
   importRectangleConfig,
   importSquareProps,
   importSquareConfig,
+  importCodeConfig,
 } from "../config/importElementsProperties.config";
 
 //props
@@ -28,7 +29,7 @@ export const getDefaultConfig = (type: string) => {
       return importRectangleConfig;
     case "square":
       return importSquareConfig;
-    default:
-      return importSquareConfig;
+    case "code":
+      return importCodeConfig;
   }
 };

@@ -58,11 +58,11 @@ export const animateLayer = (
   time: number
 ) => {
   const style: Record<string, string> = {};
-  if (layer.type === "code" && element.firstElementChild) {
-    element = element.firstElementChild as HTMLElement;
-  }
 
-  const properties = layer.editedPropertiesGroup || []; // ✅ UPDATED HERE
+
+    layer.type === "code" ? element.querySelector(".html-css-content") || element : element;
+
+  const properties = layer.editedPropertiesGroup || [];
   for (const prop of properties) {
     const kfs = [...prop.keyframes].sort((a, b) => a.percentage - b.percentage);
     if (kfs.length == 0) return;
@@ -77,14 +77,15 @@ export const animateLayer = (
       }
     }
 
-    const localProgress =
-      (time - prev.percentage) / (next.percentage - prev.percentage || 1);
-
     if (time <= kfs[0].percentage) {
       prev = next = kfs[0];
     } else if (time >= kfs[kfs.length - 1].percentage) {
       prev = next = kfs[kfs.length - 1];
     }
+    const localProgress =
+      prev === next
+        ? 0
+        : (time - prev.percentage) / (next.percentage - prev.percentage);
 
     if (prev.value.startsWith("#") && next.value.startsWith("#")) {
       style[prop.propertyName] = interpolateColor(

@@ -25,7 +25,25 @@ export const importSquareConfig: AnimationConfigType = {
   iterationCount: "infinite",
 };
 
-//animation properties
+export const importCodeConfig: AnimationConfigType = {
+  type: "code",
+  duration: 10,
+  timingFunction: "ease-in-out",
+  delay: 0,
+  iterationCount: "infinite",
+};
+
+//transform properties
+
+export const transformKeys = [
+  "scale",
+  "rotate",
+  "translateX",
+  "translateY",
+] as const;
+//end transform properties
+
+// animation properties
 export const importCircleProps: styleConfig = {
   type: "circle",
   width: "50px",

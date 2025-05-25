@@ -1,11 +1,19 @@
 .canvasContainer {
   width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.layer {
+  width: 100%;
+  height: 100%;
+}
+.innerDiv {
+  width: 100%;
+  height: 100%;
 }
 
 .animatedElementContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   height: 100%;
   background-color: var(--panel-bg);
   position: relative;
@@ -14,6 +22,8 @@
     /* bottom-right */ inset -3px 3px 8px rgba(0, 0, 0, 0.15),
     /* bottom-left */ inset 3px -3px 8px rgba(0, 0, 0, 0.15),
     /* top-right */ inset -3px -3px 8px rgba(0, 0, 0, 0.15); /* top-left */
+  position: relative;
+  overflow: hidden;
 }
 
 .selected {
@@ -55,47 +65,3 @@
   bottom: -6px;
   right: -6px;
 }
-/* 
-
-
-.canvasContainer {
-    display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  border-radius: 0.5rem;
-  background-color: #111827;
-  position: relative;
-  overflow: hidden;
-}
-
-.grid {
-  position: absolute;
-  inset: 0;
-  background-size: 40px 40px;
-  background-image: 
-  linear-gradient(to right, #1f2937 1px, transparent 1px),
-  linear-gradient(to bottom, #1f2937 1px, transparent 1px);
-  opacity: 0.2;
-}
-
-
-.animatedElementContainer {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  background-color: var(--panel-bg);
- 
-}
-
-.animatedElement{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  color: white;
-  font-size: 1rem;
-  font-weight: 500;
-} */

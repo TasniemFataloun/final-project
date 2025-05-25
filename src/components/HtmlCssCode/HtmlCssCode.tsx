@@ -3,7 +3,6 @@ import styles from "./HtmlCssCode.module.css";
 import DOMPurify from "dompurify";
 import Editor from "@monaco-editor/react";
 import { useAppDispatch } from "../../redux/store";
-import { addLayer } from "../../redux/slices/animationSlice";
 
 type HtmlCssCodeProps = {
   onSave: (html: string, css: string) => void;
@@ -11,21 +10,30 @@ type HtmlCssCodeProps = {
 };
 
 const defultHtml = `
-  <div class="circle"></div>
+  <div class="example"></div>
 `.trim();
 
 const defultCss = `
     
-.circle {
-  position: absolute;
+.example {
   width: 50px;
   height: 50px;
   background: green;
-  border-radius: 50%;
-  left: 0;
-  top: 0;
 }
+  
+
+
 `.trim();
+
+export const getWidthHeightFromCss = (css: string) => {
+  const widthMatch = css.match(/width\s*:\s*([^;]+);/);
+  const heightMatch = css.match(/height\s*:\s*([^;]+);/);
+
+  return {
+    width: widthMatch ? widthMatch[1].trim() : null,
+    height: heightMatch ? heightMatch[1].trim() : null,
+  };
+};
 
 const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
   const [html, setHtml] = useState(defultHtml);
@@ -50,6 +58,14 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
     ],
   };
 
+  useEffect(() => {
+    // Existing sanitizing, preview setup...
+
+    const { width, height } = getWidthHeightFromCss(css);
+    console.log("Extracted width:", width);
+    console.log("Extracted height:", height);
+  }, [html, css]);
+
   const handleHtmlChange = (value: string | undefined) => {
     if (value === undefined) return;
     setHtml(value);
@@ -61,35 +77,28 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
 
   useEffect(() => {
     const sanitizedHtml = DOMPurify.sanitize(html, purifyConfig);
-    const combinedStyles = `<style>${css}</style>${sanitizedHtml}`;
+    // Wrap the content in a container with a specific class
+    const combinedStyles = `<style>${css}</style><div class="html-css-content">${sanitizedHtml}</div>`;
     setPreview(combinedStyles);
 
-    // Dynamically add the CSS to the document head
     const styleTag = document.createElement("style");
     styleTag.textContent = css;
     document.head.appendChild(styleTag);
 
-    // Cleanup style tag when component unmounts
-    return () => {
-      styleTag.remove();
-    };
+    requestAnimationFrame(() => {
+      const elements = document.querySelectorAll(".html-css-content *");
+      elements.forEach((el) => {
+        el.getBoundingClientRect();
+      });
+    });
+
+    return () => styleTag.remove();
   }, [html, css]);
 
   const handleSave = () => {
     const sanitizedHtml = DOMPurify.sanitize(html, purifyConfig);
-
-    dispatch(
-      addLayer({
-        id: crypto.randomUUID(),
-        type: "code",
-        customHtml: sanitizedHtml,
-        customCss: css,
-        visible: true,
-        name: "Code Layer",
-      })
-    );
-
     onSave(sanitizedHtml, css);
+    console.log("Sanitized HTML:", sanitizedHtml);
   };
 
   return (

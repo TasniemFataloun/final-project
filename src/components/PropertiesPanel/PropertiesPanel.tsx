@@ -94,20 +94,16 @@ const PropertiesPanel = () => {
   };
 
   const getValueAtCurrentPosition = (
-    propertyName: string,
-    groupName: string
+    propertyName: string
   ): string | number | undefined => {
     if (!selectedLayer) return;
 
-    const group = selectedLayer.editedPropertiesGroup?.find(
-      (g) => g.name === groupName
-    );
-    const prop = group?.propertiesList.find(
+    const prop = selectedLayer?.editedPropertiesGroup?.find(
       (p) => p.propertyName === propertyName
     );
-    if (!prop) return;
+    if (!prop) return "";
 
-    // Find closest keyframe at or before current position
+    // find closest keyframe at or before current position
     const keyframes = [...prop.keyframes].sort(
       (a, b) => b.percentage - a.percentage
     );
@@ -277,15 +273,6 @@ const PropertiesPanel = () => {
                   <div className={style.optionsContainer}>
                     {Object.entries(sectionData.fields).map(
                       ([fieldKey, fieldProps]) => {
-                        const selectedLayerConfig =
-                          selectedLayer?.layerPropertiesValue;
-                        const section = selectedLayerConfig?.[sectionKey];
-
-                        const layerPropsValue =
-                          typeof section === "string"
-                            ? section
-                            : section?.[fieldKey];
-
                         return (
                           <div className={style.option} key={fieldKey}>
                             <label className={style.label}>
@@ -294,12 +281,7 @@ const PropertiesPanel = () => {
 
                             {fieldProps.type === "select" ? (
                               <select
-                                value={
-                                  getValueAtCurrentPosition(
-                                    fieldKey,
-                                    sectionKey
-                                  ) ?? layerPropsValue
-                                }
+                                value={getValueAtCurrentPosition(fieldKey)}
                                 onChange={(e) =>
                                   handlePropertyChange(
                                     fieldKey,
@@ -321,12 +303,7 @@ const PropertiesPanel = () => {
                             ) : (
                               <input
                                 type={fieldProps.type}
-                                value={
-                                  getValueAtCurrentPosition(
-                                    fieldKey,
-                                    sectionKey
-                                  ) ?? layerPropsValue
-                                }
+                                value={getValueAtCurrentPosition(fieldKey)}
                                 step={
                                   fieldProps.type === "number" &&
                                   "step" in fieldProps

@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AnimationConfigType, styleConfig } from "../../types/animationType";
-import { Layer } from "../types/animations.type";
+import { Layer, Propertykeyframes } from "../types/animations.type";
 import {
   getDefaultConfig,
   getDefaultPropertiesGroup,
 } from "../../helpers/GetDefaultPropertiesGroup";
+import { transformKeys } from "../../config/importElementsProperties.config";
 
 export interface AnimationState {
   layers: Layer[];
@@ -14,8 +15,9 @@ export interface AnimationState {
   selectedKeyframe: {
     layerId: string;
     property: string;
-    keyframeId: string;
+    keyframe: Propertykeyframes;
   } | null;
+  copyKeyframe: Propertykeyframes | null;
 }
 
 export const initialState: AnimationState = {
@@ -24,6 +26,7 @@ export const initialState: AnimationState = {
   isPlaying: false,
   currentPosition: 0,
   selectedKeyframe: null,
+  copyKeyframe: null,
 };
 
 const animationSlice = createSlice({
@@ -32,49 +35,25 @@ const animationSlice = createSlice({
   reducers: {
     addLayer: (state, action: PayloadAction<Layer>) => {
       const type = action.payload.type;
-
+      const layer = action.payload;
       const existingCount = state.layers.filter(
         (layer) => layer.type === type
       ).length;
 
       const newLayer = {
-        ...action.payload,
+        ...layer,
+        id: action.payload.id,
         name: `${type} ${existingCount + 1}`,
+        type,
+        visible: true,
+        locked: false,
+        style: getDefaultPropertiesGroup(type),
         editedPropertiesGroup: [],
         config: getDefaultConfig(type),
-        style: {
-          width:
-            action.payload.style?.width ??
-            getDefaultPropertiesGroup(type)?.width ??
-            "",
-          height:
-            action.payload.style?.height ??
-            getDefaultPropertiesGroup(type)?.height ??
-            "",
-          backgroundColor:
-            action.payload.style?.backgroundColor ??
-            getDefaultPropertiesGroup(type)?.backgroundColor ??
-            "",
-          borderRadius:
-            action.payload.style?.borderRadius ??
-            getDefaultPropertiesGroup(type)?.borderRadius ??
-            "",
-          opacity:
-            action.payload.style?.opacity ??
-            getDefaultPropertiesGroup(type)?.opacity ??
-            "",
-          transform:
-            action.payload.style?.transform ??
-            getDefaultPropertiesGroup(type)?.transform ??
-            "",
-          ...getDefaultPropertiesGroup(type),
-          ...action.payload.style,
-        },
       };
       state.layers.push(newLayer);
       state.selectedLayerId = newLayer.id;
     },
-
     removeLayer: (state, action: PayloadAction<string>) => {
       const id = action.payload;
       state.layers = state.layers.filter((layer) => layer.id !== id);
@@ -92,6 +71,16 @@ const animationSlice = createSlice({
       );
       state.layers = layer;
     },
+    renameLayer: (
+      state,
+      action: PayloadAction<{ id: string; newName: string }>
+    ) => {
+      const { id, newName } = action.payload;
+      const layer = state.layers.find((layer) => layer.id === id);
+      if (layer) {
+        layer.name = newName;
+      }
+    },
 
     setSelectedLayer: (state, action: PayloadAction<string | null>) => {
       state.selectedLayerId = action.payload;
@@ -103,20 +92,18 @@ const animationSlice = createSlice({
       state,
       action: PayloadAction<{
         layerId: string;
+        groupName: string;
         propertyName: string;
         percentage: number;
         value: any;
       }>
     ) => {
-      const { layerId, propertyName, percentage, value } = action.payload;
+      const { layerId, propertyName, groupName, percentage, value } =
+        action.payload;
       const roundedPercentage = Math.round(percentage * 100) / 100;
 
       const layer = state.layers.find((l) => l.id === layerId);
-      if (!layer) return;
-
-      if (!layer.editedPropertiesGroup) {
-        layer.editedPropertiesGroup = [];
-      }
+      if (!layer || !layer.editedPropertiesGroup) return;
 
       let prop = layer.editedPropertiesGroup.find(
         (p) => p.propertyName === propertyName
@@ -130,13 +117,15 @@ const animationSlice = createSlice({
         layer.editedPropertiesGroup.push(prop);
       }
 
-      // Set unit
       const unit =
-        propertyName === "rotate"
+        groupName === "transform" && propertyName === "rotate"
           ? "deg"
-          : propertyName === "opacity" ||
-            propertyName === "backgroundColor" ||
-            propertyName === "scale"
+          : groupName === "opacity"
+          ? ""
+          : groupName === "backgroundColor" &&
+            propertyName === "backgroundColor"
+          ? ""
+          : groupName === "transform" && propertyName === "scale"
           ? ""
           : "px";
 
@@ -154,52 +143,102 @@ const animationSlice = createSlice({
           percentage: roundedPercentage,
         });
       }
+      // 5. Sort keyframes
+      prop.keyframes.sort((a, b) => a.percentage - b.percentage);
+    },
+    updateKeyframePercentage: (
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        property: string;
+        keyframeId: string;
+        newPercentage: number;
+      }>
+    ) => {
+      const { layerId, property, keyframeId, newPercentage } = action.payload;
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer) return;
+
+      const prop = layer.editedPropertiesGroup?.find(
+        (p) => p.propertyName === property
+      );
+      if (!prop) return;
+
+      const keyframe = prop.keyframes.find((kf) => kf.id === keyframeId);
+      if (!keyframe) return;
+
+      // Clamp and round to 2 decimal places
+      keyframe.percentage = Math.round(
+        Math.max(0, Math.min(100, newPercentage))
+      );
 
       prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
+    copyKeyframe: (state, action: PayloadAction<Propertykeyframes>) => {
+      state.copyKeyframe = action.payload;
+    },
+    pasteKeyframe: (
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        property: string;
+        newPercentage: number;
+      }>
+    ) => {
+      const { layerId, property, newPercentage } = action.payload;
+      const copied = state.copyKeyframe;
+      if (!copied) return;
+
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer || !layer.editedPropertiesGroup) return;
+
+      const prop = layer.editedPropertiesGroup.find(
+        (p) => p.propertyName === property
+      );
+      if (!prop) return;
+
+      // Create a new keyframe with the NEW position (not the copied one)
+      const newKeyframe = {
+        ...copied,
+        id: `${copied.id}-pasted-${Date.now()}`, // Ensure unique ID
+        percentage: Math.round(Math.max(0, Math.min(100, newPercentage))), // Use newPercentage
+      };
+
+      prop.keyframes.push(newKeyframe);
+      prop.keyframes.sort((a, b) => a.percentage - b.percentage);
+    },
+
     updatePropertyValue: (
       state,
       action: PayloadAction<{
-        section: keyof AnimationConfigType; // used for layerPropertiesValue
+        section: keyof AnimationConfigType;
         field: string;
         value: string;
+        unit?: string;
       }>
     ) => {
-      const { section, field, value } = action.payload;
-      const layer = state.layers.find((l) => l.id === state.selectedLayerId);
-       if (!layer || !layer.layerPropertiesValue) return;
+      const { field, value, unit } = action.payload;
 
-      // 1. Update layerPropertiesValue
-      if (!layer.layerPropertiesValue) {
-        layer.layerPropertiesValue = {
-          width: "",
-          height: "",
-          transform: "",
-          opacity: "",
-          backgroundColor: "",
-          borderRadius: "",
-        };
-      }
-      layer.layerPropertiesValue[section] = value;
+      const selected = state.selectedKeyframe;
+      if (!selected) return;
 
-      // 2. Ensure editedPropertiesGroup is initialized
-      if (!layer.editedPropertiesGroup) {
-        layer.editedPropertiesGroup = [];
-      }
+      const { layerId, property, keyframe } = selected;
+      if (property !== field) return;
 
-      // 3. Check if property exists
-      const existingProperty = layer.editedPropertiesGroup.find(
-        (p) => p.propertyName === field
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer) return;
+
+      const prop = layer.editedPropertiesGroup?.find(
+        (p) => p.propertyName === property
       );
+      if (!prop) return;
 
-      // 4. Add if it doesn’t exist
-      if (!existingProperty) {
-        layer.editedPropertiesGroup.push({
-          propertyName: field,
-          keyframes: [],
-        });
-      }
+      const kf = prop.keyframes.find((kf) => kf.id === keyframe.id);
+      if (!kf) return;
+      kf.value = value;
+      if (unit !== undefined) kf.unit = unit;
     },
+
     setConfig: (
       state,
       action: PayloadAction<{
@@ -236,13 +275,13 @@ const animationSlice = createSlice({
       action: PayloadAction<{
         layerId: string;
         property: string;
-        keyframeId: string;
+        keyframe: Propertykeyframes;
       }>
     ) => {
       state.selectedKeyframe = {
         layerId: action.payload.layerId,
         property: action.payload.property,
-        keyframeId: action.payload.keyframeId,
+        keyframe: action.payload.keyframe,
       };
     },
 
@@ -253,30 +292,37 @@ const animationSlice = createSlice({
       const selected = state.selectedKeyframe;
       if (!selected) return;
 
-      const { layerId, property, keyframeId } = selected;
+      const { layerId, property, keyframe } = selected;
       const layer = state.layers.find((l) => l.id === layerId);
       if (!layer || !layer.editedPropertiesGroup) return;
 
-      const propIndex = layer.editedPropertiesGroup.findIndex(
-        (p) => p.propertyName === property
-      );
+      layer.editedPropertiesGroup = layer.editedPropertiesGroup
+        .map((prop) => {
+          if (prop.propertyName !== property) return prop;
 
-      if (propIndex === -1) return;
+          const filteredKeyframes = prop.keyframes.filter(
+            (kf) => kf.id !== keyframe.id
+          );
 
-      const prop = layer.editedPropertiesGroup[propIndex];
+          if (filteredKeyframes.length === 0) {
+            const el = document.querySelector(
+              `[data-layer-id="${layer.id}"]`
+            ) as HTMLElement | null;
 
-      // Remove the selected keyframe
-      prop.keyframes = prop.keyframes.filter((kf) => kf.id !== keyframeId);
+            if (el && layer.style) {
+              if (transformKeys.includes(property as any)) {
+                el.style.transform = layer.style.transform;
+              } else {
+                el.style[property as any] = String(
+                  layer.style[property as any]
+                );
+              }
+            }
+          }
 
-      // Remove the entire property if keyframes are empty or only one with 0%
-      if (
-        prop.keyframes.length === 0 ||
-        (prop.keyframes.length === 1 && prop.keyframes[0].percentage === 0)
-      ) {
-        layer.editedPropertiesGroup.splice(propIndex, 1);
-      }
-
-      state.selectedKeyframe = null;
+          return { ...prop, keyframes: filteredKeyframes };
+        })
+        .filter((prop) => prop.keyframes.length > 0);
     },
   },
 });
@@ -284,6 +330,10 @@ const animationSlice = createSlice({
 export const {
   addLayer,
   addKeyframe,
+  renameLayer,
+  updateKeyframePercentage,
+  copyKeyframe,
+  pasteKeyframe,
   updatePropertyValue,
   removeLayer,
   updateLayer,
@@ -299,6 +349,10 @@ export const {
 export type AnimationActionType =
   | typeof addLayer
   | typeof addKeyframe
+  | typeof renameLayer
+  | typeof updateKeyframePercentage
+  | typeof copyKeyframe
+  | typeof pasteKeyframe
   | typeof updatePropertyValue
   | typeof removeLayer
   | typeof updateLayer

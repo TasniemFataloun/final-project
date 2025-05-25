@@ -12,15 +12,27 @@ const Sidebar = () => {
   const [showCodeComponent, setShowCodeComponent] = useState(false);
 
   const handleAddElement = (type: ElementType) => {
+    const id = Date.now().toString();
+    dispatch(
+      addLayer({
+        type,
+        id,
+      })
+    );
+  };
+
+  const handleSaveHtmlCss = (html: string, css: string) => {
     const newLayer = {
       id: Date.now().toString(),
-      name: type,
-      type: type,
-      visible: true,
-      locked: false,
+      type: "code" as const,
+      customHtml: html,
+      customCss: css,
     };
-
     dispatch(addLayer(newLayer));
+    setShowCodeComponent(false);
+
+    console.log("Custom HTML saved:", html);
+    console.log("Custom CSS saved:", css);
   };
 
   return (
@@ -57,15 +69,8 @@ const Sidebar = () => {
 
       {showCodeComponent && (
         <HtmlCssCode
-          onSave={(html, css) => {
-            // Handle save
-            console.log("HTML:", html);
-            console.log("CSS:", css);
-            setShowCodeComponent(false);
-          }}
-          onCancel={() => {
-            setShowCodeComponent(false);
-          }}
+          onSave={(html: string, css: string) => handleSaveHtmlCss(html, css)}
+          onCancel={() => setShowCodeComponent(false)}
         />
       )}
     </div>

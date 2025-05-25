@@ -2,17 +2,22 @@ import React, { useEffect, useRef } from "react";
 import style from "./TimelineKeyframes.module.css";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import {
+  addKeyframe,
+  copyKeyframe,
+  pasteKeyframe,
   removeSelectedKeyframe,
   setCurrentPosition,
   setIsPlaying,
   setSelectedKeyframe,
   setSelectedLayer,
+  updateKeyframePercentage,
 } from "../../../redux/slices/animationSlice";
 import {
   setEndTimeRef,
   setIsDragging,
 } from "../../../redux/slices/timelineSlice";
 import { Diamond } from "lucide-react";
+import { Rnd } from "react-rnd";
 
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
@@ -21,30 +26,31 @@ const TimelineKeyframes = () => {
   const { expandedLayers, isDragging, endTimeRef } = useAppSelector(
     (state) => state.timeline
   );
-
+  const { copyKeyframe: copiedKeyframe } = useAppSelector(
+    (state) => state.animation
+  );
   const selectedKeyframe = useAppSelector(
     (state) => state.animation.selectedKeyframe
   );
+
+  //find the layer id
+  const layerId = layers.find((layer) => layer.id === selectedLayerId)?.id;
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number | null>(null);
   const animationRef = useRef<number | undefined>(undefined);
 
+  const justCopiedRef = useRef(false);
+  const justPastedRef = useRef(false);
+
   const handleTimelineClick = (e: React.MouseEvent) => {
     if (!timelineRef.current) return;
 
-    // If click target is a keyframe, do NOT reset
     const target = e.target as HTMLElement;
-    if (target.closest(`.${style.keyframe}`)) {
-      return;
-    }
 
-    // Else reset selected keyframe
-    dispatch(
-      setSelectedKeyframe({ layerId: "", property: "", keyframeId: "" })
-    );
+    // If clicking on a keyframe, do not clear selection
+    if (target.closest(`.${style.keyframe}`)) return;
 
-    // Existing logic for setting current position
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const position = (x / rect.width) * 100;
@@ -54,6 +60,31 @@ const TimelineKeyframes = () => {
     dispatch(setEndTimeRef(clampedPosition));
     startTimeRef.current = null;
     dispatch(setIsPlaying(false));
+
+    // Handle special copy case
+    if (justCopiedRef.current) {
+      justCopiedRef.current = false;
+      return; // Skip clearing selection once right after copy
+    }
+
+    // Reset paste flag, but don't skip clearing selection
+    if (justPastedRef.current) {
+      justPastedRef.current = false;
+    }
+
+    // Clear selection normally
+    dispatch(
+      setSelectedKeyframe({
+        layerId: "",
+        property: "",
+        keyframe: {
+          id: "",
+          percentage: 0,
+          value: "",
+          unit: "",
+        },
+      })
+    );
   };
 
   const handleMouseDown = () => {
@@ -109,7 +140,56 @@ const TimelineKeyframes = () => {
       }
       startTimeRef.current = null;
     }
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = undefined;
+      }
+    };
+  }, [isPlaying, dispatch, selectedKeyframe, copiedKeyframe, currentPosition]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey && e.code === "KeyC" && selectedKeyframe?.keyframe?.id) {
+        e.preventDefault();
+        dispatch(copyKeyframe(selectedKeyframe.keyframe));
+        justCopiedRef.current = true;
+      }
+
+      if (e.metaKey && e.code === "KeyV" && layerId && copiedKeyframe) {
+        e.preventDefault();
+        justPastedRef.current = true;
+
+        const clampedPosition = Math.max(0, Math.min(100, currentPosition));
+
+        dispatch(
+          pasteKeyframe({
+            layerId: layerId,
+            property: selectedKeyframe?.property || "",
+            newPercentage: clampedPosition,
+          })
+        );
+        dispatch(
+          setSelectedKeyframe({
+            layerId: "",
+            property: "",
+            keyframe: {
+              id: "",
+              percentage: 0,
+              value: "",
+              unit: "",
+            },
+          })
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [dispatch, selectedKeyframe, copiedKeyframe, currentPosition]);
+
+  // Separate effect for play/pause and delete
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         e.preventDefault();
@@ -120,21 +200,14 @@ const TimelineKeyframes = () => {
         e.code === "Backspace" &&
         selectedKeyframe?.layerId &&
         selectedKeyframe?.property &&
-        selectedKeyframe?.keyframeId
+        selectedKeyframe?.keyframe
       ) {
         dispatch(removeSelectedKeyframe());
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = undefined;
-      }
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPlaying, dispatch, selectedKeyframe]);
 
   return (
@@ -176,55 +249,92 @@ const TimelineKeyframes = () => {
               )}
           </div>
 
-          <>
-            {layer.editedPropertiesGroup?.map((group) => {
-              const isLayerExpanded = expandedLayers[layer.id];
+          {expandedLayers[layer.id] &&
+            layer.editedPropertiesGroup?.map((prop) => (
+              <div
+                key={`${layer.id}-${prop.propertyName}`}
+                className={`${style.row} ${style.keyframeRow}`}
+              >
+                {prop.keyframes.map((kf) => {
+                  const isThisKeyframeSelected =
+                    selectedKeyframe?.layerId === layer.id &&
+                    selectedKeyframe?.property === prop.propertyName &&
+                    selectedKeyframe?.keyframe?.id === kf.id;
 
-              return (
-                <React.Fragment key={group.propertyName}>
-                  {isLayerExpanded &&
-                    layer.editedPropertiesGroup?.map((prop) => (
-                      <div
-                        key={`${layer.id}-${prop.propertyName}`}
-                        className={`${style.row} ${style.keyframeRow}`}
-                      >
-                        {prop.keyframes.map((kf) => {
-                          const isThisKeyframeSelected =
-                            selectedKeyframe?.layerId === layer.id &&
-                            selectedKeyframe?.property === prop.propertyName &&
-                            selectedKeyframe?.keyframeId === kf.id;
+                  return (
+                    <Rnd
+                      key={kf.id}
+                      style={{ position: "relative" }}
+                      default={{
+                        x:
+                          (kf.percentage / 100) *
+                          (timelineRef.current?.clientWidth || 0),
+                        y: 0,
+                        width: 20,
+                        height: 20,
+                      }}
+                      bounds="parent"
+                      enableResizing={false}
+                      dragAxis="x"
+                      onDragStop={(e, d) => {
+                        if (!timelineRef.current) return;
+                        const newPercentage =
+                          (d.x / timelineRef.current.clientWidth) * 100;
+                        const clamped = Math.max(
+                          0,
+                          Math.min(100, newPercentage)
+                        );
 
-                          return (
-                            <Diamond
-                              size={17}
-                              fill="var(--selectedLayer)"
-                              key={kf.id}
-                              className={`${style.keyframe} ${
-                                isThisKeyframeSelected
-                                  ? style.selectedKeyframe
-                                  : ""
-                              }`}
-                              style={{ left: `${kf.percentage}%` }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const payload = {
-                                  layerId: layer.id,
-                                  property: prop.propertyName,
-                                  keyframeId: kf.id,
-                                };
-                                dispatch(setSelectedKeyframe(payload));
-                                dispatch(setCurrentPosition(kf.percentage));
-                                dispatch(setSelectedLayer(layer.id));
-                              }}
-                            />
+                        dispatch(
+                          updateKeyframePercentage({
+                            layerId: layer.id,
+                            property: prop.propertyName,
+                            keyframeId: kf.id,
+                            newPercentage: clamped,
+                          })
+                        );
+
+                        if (
+                          selectedKeyframe?.layerId === layer.id &&
+                          selectedKeyframe?.property === prop.propertyName &&
+                          selectedKeyframe?.keyframe?.id === kf.id
+                        ) {
+                          dispatch(setCurrentPosition(clamped));
+                          dispatch(
+                            setSelectedKeyframe({
+                              layerId: layer.id,
+                              property: prop.propertyName,
+                              keyframe: { ...kf, percentage: clamped },
+                            })
                           );
-                        })}
-                      </div>
-                    ))}
-                </React.Fragment>
-              );
-            })}
-          </>
+                        }
+                      }}
+                      dragHandleClassName={style.keyframe}
+                      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                        e.stopPropagation();
+                        dispatch(
+                          setSelectedKeyframe({
+                            layerId: layer.id,
+                            property: prop.propertyName,
+                            keyframe: kf,
+                          })
+                        );
+                        dispatch(setSelectedLayer(layer.id));
+                      }}
+                    >
+                      <Diamond
+                        size={17}
+                        fill="var(--selectedLayer)"
+                        className={`${style.keyframe} ${
+                          isThisKeyframeSelected ? style.selectedKeyframe : ""
+                        }`}
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                      />
+                    </Rnd>
+                  );
+                })}
+              </div>
+            ))}
         </React.Fragment>
       ))}
     </div>

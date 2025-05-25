@@ -22,7 +22,7 @@ export type PropertiesGroup = {
 
 export interface Layer {
   id: string;
-  name: string;
+  name?: string;
   type: ElementType;
   visible?: boolean;
   locked?: boolean;
@@ -31,5 +31,4 @@ export interface Layer {
   customHtml?: string;
   customCss?: string;
   config?: AnimationConfigType;
-  layerPropertiesValue?: AnimationType;
 }

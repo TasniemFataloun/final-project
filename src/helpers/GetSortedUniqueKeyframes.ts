@@ -11,10 +11,7 @@ export const getSortedUniqueKeyframes = (
   if (!selectedLayer || !selectedLayer.editedPropertiesGroup) return [];
 
   const allKeyframePercentages = selectedLayer.editedPropertiesGroup.flatMap(
-    (propertyGroup) =>
-      propertyGroup.propertiesList.flatMap((property) =>
-        property.keyframes.map((kf) => kf.percentage)
-      )
+    (propertyGroup) => propertyGroup.keyframes.map((kf) => kf.percentage)
   );
 
   const uniqueKeyframes = Array.from(new Set(allKeyframePercentages));
