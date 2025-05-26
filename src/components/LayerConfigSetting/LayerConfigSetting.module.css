@@ -1,10 +1,60 @@
 .container {
+  display: flex;
+  flex-direction: column;
   transition: width 0.3s ease;
   background-color: var(--bg);
   box-shadow: var(--box-shadow);
   color: var(--white);
   overflow: auto;
+  min-width: 20rem;
   width: 20rem;
   padding: var(--padding);
   height: 35rem;
+}
+
+.container label {
+  display: flex;
+  font-size: 16px;
+  flex-direction: column;
+  color: var(--white);
+  gap: 0.3rem;
+}
+
+.container input[type="text"],
+.container input[type="color"] 
+{
+  width: 100%;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.4rem;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--white);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.container input[type="text"]:focus,
+.container input[type="color"]:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+
+.container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.container input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
 }

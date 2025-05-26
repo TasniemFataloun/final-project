@@ -12,6 +12,7 @@
   width: 20rem;
   padding: var(--padding);
   height: 35rem;
+  position: relative;
 }
 
 .iconh2 {
@@ -85,7 +86,7 @@
 }
 
 .selectedKeyframeProperty{
-  border: 10px red solid;
+  border: 3px var(--selectedLayer) solid;
 }
 
 .input:focus,

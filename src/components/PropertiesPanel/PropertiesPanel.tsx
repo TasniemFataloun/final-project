@@ -339,7 +339,8 @@ const PropertiesPanel = () => {
                                   )
                                 }
                                 className={`${style.input} ${
-                                  selectedKeyframeProperty === fieldKey
+                                  (selectedLayer?.editedPropertiesGroup?.length ?? 0) >
+                                    0 && selectedKeyframeProperty === fieldKey
                                     ? style.selectedKeyframeProperty
                                     : ""
                                 }`}

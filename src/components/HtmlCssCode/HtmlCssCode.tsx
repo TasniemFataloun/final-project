@@ -10,18 +10,63 @@ type HtmlCssCodeProps = {
 };
 
 const defultHtml = `
-  <div class="example"></div>
+      <div id="card">
+    <h1 id="profile-image">Logo</h1>
+    <h2 id="profile-name">Tasniem</h2>
+    <p id="description">Web Developer & Designer</p>
+    <a id="contact-button" href="https://github.com/TasniemFataloun">Contact Me</a>
+  </div>
 `.trim();
 
 const defultCss = `
-    
-.example {
-  width: 50px;
-  height: 50px;
-  background: green;
-}
-  
+#card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+      background: gray;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 300px;
+    }
 
+    #profile-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #357ab8;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+
+    #profile-name {
+      margin: 0.5rem 0;
+    }
+
+    #description {
+      color: black;
+    }
+
+    #contact-button {
+      display: inline-block;
+      margin-top: 1rem;
+      text-decoration: none;
+      background: #4a90e2;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+
+    #contact-button:hover {
+      background: #357ab8;
+    }
 
 `.trim();
 
@@ -40,14 +85,14 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
   const [css, setCss] = useState(defultCss);
   const [preview, setPreview] = useState("");
 
-  const dispatch = useAppDispatch();
-
   const purifyConfig = {
-    ALLOWED_ATTR: ["class", "style"],
-    ADD_TAGS: ["style"],
-    ADD_ATTR: ["class"],
+    ALLOWED_ATTR: ["id"],
+    ADD_TAGS: [],
+    ADD_ATTR: [],
     FORBID_TAGS: ["script", "iframe", "object", "embed"],
     FORBID_ATTR: [
+      "class",
+      "style",
       "onerror",
       "onload",
       "onclick",
@@ -57,14 +102,6 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
       "onchange",
     ],
   };
-
-  useEffect(() => {
-    // Existing sanitizing, preview setup...
-
-    const { width, height } = getWidthHeightFromCss(css);
-    console.log("Extracted width:", width);
-    console.log("Extracted height:", height);
-  }, [html, css]);
 
   const handleHtmlChange = (value: string | undefined) => {
     if (value === undefined) return;
@@ -77,28 +114,25 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
 
   useEffect(() => {
     const sanitizedHtml = DOMPurify.sanitize(html, purifyConfig);
-    // Wrap the content in a container with a specific class
-    const combinedStyles = `<style>${css}</style><div class="html-css-content">${sanitizedHtml}</div>`;
+    const combinedStyles = `<style>${css}</style>${sanitizedHtml}`;
     setPreview(combinedStyles);
 
+    // Dynamically add the CSS to the document head
     const styleTag = document.createElement("style");
     styleTag.textContent = css;
     document.head.appendChild(styleTag);
+    
+    
 
-    requestAnimationFrame(() => {
-      const elements = document.querySelectorAll(".html-css-content *");
-      elements.forEach((el) => {
-        el.getBoundingClientRect();
-      });
-    });
-
-    return () => styleTag.remove();
+    // Cleanup style tag when component unmounts
+    return () => {
+      styleTag.remove();
+    };
   }, [html, css]);
 
   const handleSave = () => {
     const sanitizedHtml = DOMPurify.sanitize(html, purifyConfig);
     onSave(sanitizedHtml, css);
-    console.log("Sanitized HTML:", sanitizedHtml);
   };
 
   return (

@@ -1,38 +1,97 @@
 import style from "./Sidebar.module.css";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { addLayer } from "../../redux/slices/animationSlice";
-
 import { Square, Circle, RectangleHorizontal } from "lucide-react";
-import { ElementType } from "../../redux/types/animations.type";
+import { ElementType, Layer } from "../../redux/types/animations.type";
 import HtmlCssCode from "../HtmlCssCode/HtmlCssCode";
 import { useState } from "react";
+import * as cssParser from "css";
+import { getDefaultPropertiesGroup } from "../../helpers/GetDefaultPropertiesGroup";
+import { nanoid } from "nanoid";
+
+const parseHtmlToLayers = (
+  html: string,
+  css: string,
+  parentId: string | null = null
+) => {
+  const layers: Layer[] = [];
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+
+  const processElement = (element: Element, parentId: string | null) => {
+    const tag = element.tagName.toLowerCase(); //div , button , h1,...
+    const selector = element.id ? `#${element.id}` : ""; //the name inside the >> id="Container"
+    const style = selector ? parseCss(css, selector) : {};
+    const id = nanoid(5);
+    console.log("tag:", element.tagName, "id:", element.id || "(no id)");
+    layers.push({
+      id,
+      parentId,
+      selector: element.id || `${tag}`,
+      tag,
+      type: "code",
+      style,
+      customHtml: element.outerHTML,
+    });
+
+    Array.from(element.children).forEach((child) => processElement(child, id));
+  };
+
+  Array.from(temp.children).forEach((el) => processElement(el, parentId));
+
+  return layers;
+};
+
+const parseCss = (css: string, selector: string): Record<string, string> => {
+  const parsed = cssParser.parse(css);
+  const result: Record<string, string> = {};
+  parsed.stylesheet?.rules.forEach((rule: any) => {
+    if (rule.type === "rule" && rule.selectors.includes(selector)) {
+      rule.declarations.forEach((decl: any) => {
+        if (decl.type === "declaration") {
+          result[
+            decl.property.replace(/-([a-z])/g, (_: any, char: string) =>
+              char.toUpperCase()
+            )
+          ] = decl.value;
+        }
+      });
+    }
+  });
+  return result;
+};
 
 const Sidebar = () => {
+  const { layers } = useAppSelector((state) => state.animation);
   const dispatch = useAppDispatch();
   const [showCodeComponent, setShowCodeComponent] = useState(false);
 
   const handleAddElement = (type: ElementType) => {
-    const id = Date.now().toString();
+    const id = nanoid(5);
+    const name = layers.filter((layer) => layer.type === type).length;
     dispatch(
       addLayer({
-        type,
         id,
+        type,
+        name: `${type} ${name}`,
+        style: getDefaultPropertiesGroup(type)!,
       })
     );
   };
-
   const handleSaveHtmlCss = (html: string, css: string) => {
-    const newLayer = {
-      id: Date.now().toString(),
-      type: "code" as const,
-      customHtml: html,
-      customCss: css,
-    };
-    dispatch(addLayer(newLayer));
+    const layersToAdd = parseHtmlToLayers(html, css);
+    layersToAdd.forEach((layer) => {
+      const count = layers.filter((l) =>
+        l.name?.startsWith(layer.selector!)
+      ).length;
+      dispatch(
+        addLayer({
+          ...layer,
+          name: count === 0 ? layer.selector : `${layer.selector}${count}`,
+        })
+      );
+    });
     setShowCodeComponent(false);
-
-    console.log("Custom HTML saved:", html);
-    console.log("Custom CSS saved:", css);
   };
 
   return (

@@ -1,4 +1,8 @@
-import { AnimationConfigType, AnimationType, styleConfig } from "../../types/animationType";
+import {
+  AnimationConfigType,
+  AnimationType,
+  styleConfig,
+} from "../../types/animationType";
 
 export type ElementType = "rectangle" | "circle" | "square" | "code";
 
@@ -14,21 +18,18 @@ export type PropertyItem = {
   keyframes: Propertykeyframes[];
 };
 
-/* //properties in the layer
-export type PropertiesGroup = {
-  name: string;
-  propertiesList: PropertyItem[];
-}; */
-
 export interface Layer {
   id: string;
   name?: string;
+  tag?: any;
   type: ElementType;
   visible?: boolean;
   locked?: boolean;
-  style?: styleConfig;
+  style: styleConfig;
   editedPropertiesGroup?: PropertyItem[];
-  customHtml?: string;
+  customHtml?: any;
   customCss?: string;
+  parentId?: string | null;
+  selector?: string;
   config?: AnimationConfigType;
 }

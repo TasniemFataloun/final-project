@@ -2,7 +2,7 @@
   padding: 1rem 3rem;
   background-color: var(--selectedLayer);
   border-radius: 4rem;
-  color: white;
+  color:var(--bg);
   text-align: center;
   cursor: pointer;
 }

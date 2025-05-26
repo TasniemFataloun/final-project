@@ -12,6 +12,9 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.7.0",
+    "@types/css": "^0.0.38",
+    "css": "^3.0.0",
+    "cssparser": "^0.9.4",
     "dompurify": "^3.2.5",
     "lucide-react": "^0.503.0",
     "react": "^19.0.0",

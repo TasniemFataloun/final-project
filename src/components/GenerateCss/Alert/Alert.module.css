@@ -17,19 +17,24 @@
   gap: 1rem;
   overflow: hidden;
   padding: 0 1rem;
+  border-radius: 10px;
 }
 
 .messageText {
-  color: var(--dark-color);
+  color: var(--bg);
   font-weight: bold;
 }
 
 .closeAlert {
   width: var(--width-1-2);
   aspect-ratio: 1;
-  color: var(--dark-color);
+  color: var(--bg);
   cursor: pointer;
   margin-right: var(--spacing-2);
+}
+
+.closeButton{
+   color: var(--bg);
 }
 
 @media (max-width: 769px) {

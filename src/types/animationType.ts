@@ -7,13 +7,7 @@ export type AnimationConfigType = {
 };
 
 export type styleConfig = {
-  width: string;
-  height: string;
-  backgroundColor: string;
-  borderRadius: string;
-  opacity: string;
-  transform: string;
-  [key: string]: string | number;
+  [key: string]: string;
 };
 
 export type sizeType = {

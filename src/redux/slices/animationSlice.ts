@@ -47,7 +47,6 @@ const animationSlice = createSlice({
         type,
         visible: true,
         locked: false,
-        style: getDefaultPropertiesGroup(type),
         editedPropertiesGroup: [],
         config: getDefaultConfig(type),
       };
@@ -55,9 +54,32 @@ const animationSlice = createSlice({
       state.selectedLayerId = newLayer.id;
     },
     removeLayer: (state, action: PayloadAction<string>) => {
-      const id = action.payload;
-      state.layers = state.layers.filter((layer) => layer.id !== id);
-      if (state.selectedLayerId === id) {
+      const idToRemove = action.payload;
+
+      // Recursive helper function to get all descendant IDs
+      const getAllDescendants = (parentId: string): string[] => {
+        const directChildren = state.layers.filter(
+          (layer) => layer.parentId === parentId
+        );
+        const descendants = directChildren.flatMap((child) =>
+          getAllDescendants(child.id)
+        );
+        return directChildren.map((child) => child.id).concat(descendants);
+      };
+
+      // Get all IDs to remove: target + all descendants
+      const allIdsToRemove = [idToRemove, ...getAllDescendants(idToRemove)];
+
+      // Filter out all these IDs from layers
+      state.layers = state.layers.filter(
+        (layer) => !allIdsToRemove.includes(layer.id)
+      );
+
+      // Clear selectedLayerId
+      if (
+        state.selectedLayerId &&
+        allIdsToRemove.includes(state.selectedLayerId)
+      ) {
         state.selectedLayerId = null;
       }
     },

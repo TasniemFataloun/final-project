@@ -27,9 +27,9 @@
 .layerNameInput{
   border: none;
   background: transparent;
-  width: 80%;
+  width: 100%;
   cursor:text ;
-  color: var(--bg);
+  color: var(--white);
 }
 .layerNameInput:focus {
   outline: none;
@@ -70,6 +70,7 @@
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
+  color: var(--white);
 }
 
 .row:hover {

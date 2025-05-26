@@ -1,104 +1,268 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import styles from "./Canvas.module.css";
 import { toggleLayer } from "../../redux/slices/timelineSlice";
 import { animateLayer } from "../../utils/LayerAnimation";
-import {
-  setSelectedLayer,
-  updateLayer,
-} from "../../redux/slices/animationSlice";
-import { Rnd } from "react-rnd";
-import { getWidthHeightFromCss } from "../HtmlCssCode/HtmlCssCode";
+import { setSelectedLayer } from "../../redux/slices/animationSlice";
 
 const Canvas = () => {
   const dispatch = useAppDispatch();
   const layerRef = useRef<{ [id: string]: HTMLDivElement | null }>({});
-  const { layers, selectedLayerId, isPlaying, currentPosition } =
-    useAppSelector((state) => state.animation);
+  const { layers, selectedLayerId } = useAppSelector(
+    (state) => state.animation
+  );
+  const { isPlaying, currentPosition } = useAppSelector(
+    (state) => state.animation
+  );
 
-  // Inject custom HTML and CSS when layers change
+  useEffect(() => {
+    if (!isPlaying) {
+      layers.forEach((layer) => {
+        const el = layerRef.current[layer.id];
+        if (el && layer.visible) {
+          animateLayer(el, layer, Math.round(currentPosition));
+        }
+      });
+    }
+  }, [currentPosition, layers]);
+
+  useEffect(() => {
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+
+      layers.forEach((layer) => {
+        const el = layerRef.current[layer.id];
+        if (!el || !layer.visible) return;
+
+        const layerDuration = layer.config?.duration || 1;
+
+        const iterations =
+          layer.config?.iterationCount === "infinite"
+            ? Infinity
+            : parseInt(layer.config?.iterationCount || "infinite");
+
+        const totalDuration = layerDuration * iterations;
+        const baseTime = (currentPosition / 100) * layerDuration;
+        const elapsed = (timestamp - startTime!) / 1000 + baseTime;
+
+        const localElapsed = Math.min(elapsed, totalDuration);
+        const iterationIndex = Math.floor(localElapsed / layerDuration);
+        const progress = (localElapsed % layerDuration) / layerDuration;
+        const percentTime = progress * 100;
+
+        if (iterationIndex < iterations) {
+          animateLayer(el, layer, percentTime);
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    if (isPlaying) {
+      animationFrameId = requestAnimationFrame(step);
+    }
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isPlaying, layers]);
+
+
+  // Usage in your component rendering
+
+  return (
+    <div className={styles.canvasContainer}>
+      <div className={styles.grid}></div>
+      <div className={styles.animatedElementContainer}>
+        {layers.map((layer) => {
+          if (layer.type === "code") {
+            if (layer.parentId) return null;
+
+            const renderLayerTree = (parentLayer: any): any => {
+              const temp = document.createElement("div");
+              temp.innerHTML = parentLayer.customHtml || "";
+              const el = temp.firstElementChild;
+              if (!el) return null;
+              const tag = parentLayer.tag;
+              const children = layers
+                .filter((l) => l.parentId === parentLayer.id)
+                .map((childLayer) => renderLayerTree(childLayer));
+              const textContent =
+                el.childElementCount === 0 ? el.textContent?.trim() : null;
+              return React.createElement(
+                tag,
+                {
+                  key: el.id,
+                  "data-layer-id": parentLayer.id,
+                  ref: (ref: any) => {
+                    if (ref) layerRef.current[parentLayer.id] = ref;
+                  },
+                  id: el.id,
+
+                  className: styles.layer,
+                  style: {
+                    visibility: parentLayer.visible ? "visible" : "hidden",
+                    ...parentLayer.style,
+                  },
+                  onClick: () => {
+                    dispatch(toggleLayer(parentLayer.id));
+                    dispatch(setSelectedLayer(parentLayer.id));
+                  },
+                },
+                children.length > 0 ? children : textContent
+              );
+            };
+
+            return renderLayerTree(layer);
+          } else
+            return (
+              <div
+                key={layer.id}
+                data-layer-id={layer.id}
+                ref={(el) => {
+                  if (el) layerRef.current[layer.id] = el;
+                }}
+                onClick={() => {
+                  dispatch(toggleLayer(layer.id));
+                  dispatch(setSelectedLayer(layer.id));
+                }}
+                style={{
+                  ...layer.style,
+                  visibility: layer.visible ? "visible" : "visible",
+                  animationPlayState: isPlaying ? "running" : "paused",
+                }}
+                className={`${styles.animatedElement} layer-${layer.id} ${
+                  layer.id === selectedLayerId ? styles.selected : ""
+                }`}
+              >
+                {layer.id === selectedLayerId && (
+                  <>
+                    <span className={styles.cornerTopLeft}></span>
+                    <span className={styles.cornerTopRight}></span>
+                    <span className={styles.cornerBottomLeft}></span>
+                    <span className={styles.cornerBottomRight}></span>
+                  </>
+                )}
+              </div>
+            );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default Canvas;
+
+
+/*
+import { useEffect, useRef } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import styles from "./Canvas.module.css";
+import {
+  setSelectedLayer,
+  updateLayer,
+  addKeyframe,
+} from "../../redux/slices/animationSlice";
+import { animateLayer } from "../../utils/LayerAnimation";
+import { Rnd, RndResizeCallback, RndDragCallback } from "react-rnd";
+import { getWidthHeightFromCss } from "../HtmlCssCode/HtmlCssCode";
+import { Layer } from "../../redux/types/animations.type";
+import { styleConfig } from "../../types/animationType";
+
+// === Utility functions ===
+const updateTransformTranslate = (
+  transform: string,
+  x: number,
+  y: number
+): string => {
+  const scale = transform.match(/scale\([^)]+\)/)?.[0] || "scale(1)";
+  const rotate = transform.match(/rotate\([^)]+\)/)?.[0] || "rotate(0deg)";
+  return `translateX(${x}px) translateY(${y}px) ${scale} ${rotate}`;
+};
+
+const getLayerStyle = (layer: Layer): styleConfig => ({
+  ...layer?.style,
+  width: layer?.style?.width || "",
+  height: layer?.style?.height || "",
+  backgroundColor: layer?.style?.backgroundColor ?? "",
+  borderRadius: layer?.style?.borderRadius ?? "",
+  opacity: layer?.style?.opacity ?? "",
+  transform: layer?.style?.transform ?? "",
+});
+
+// === Custom Hooks ===
+const useInjectHtmlCss = (
+  layers: Layer[],
+  layerRef: React.MutableRefObject<{ [id: string]: HTMLDivElement | null }>
+) => {
   useEffect(() => {
     layers.forEach((layer) => {
-      if (layer.type === "code") {
-        const wrapper = layerRef.current[layer.id];
-        //innerhtml of wrapper is customHtml
-        if (!wrapper) return;
-        wrapper.innerHTML = layer.customHtml || "";
+      if (layer.type !== "code") return;
 
-        // Inject CSS into <style> tag
-        const styleId = `layer-style-${layer.id}`; //unique ID for each layer's style
-        let styleTag = document.getElementById(styleId) as HTMLStyleElement;
-        // doesnt exist, create it
-        if (!styleTag) {
-          styleTag = document.createElement("style");
-          styleTag.id = styleId;
-          document.head.appendChild(styleTag);
-        }
+      const wrapper = layerRef.current[layer.id];
+      if (!wrapper) return;
+      wrapper.innerHTML = layer.customHtml || "";
 
-        const { width, height } = getWidthHeightFromCss(layer.customCss || "");
-        console.log("Extracted width:", width);
-        console.log("Extracted height:", height);
+      const styleId = `layer-style-${layer.id}`;
+      let styleTag = document.getElementById(styleId) as HTMLStyleElement;
 
-        styleTag.innerHTML = `
-  ${layer.customCss || ""}
-
-  .custom-html-wrapper {
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-  }
-
-  .custom-html-wrapper > * {
-    min-width: ${width};
-    min-height: ${height};
-    width: 100%;
-    height: 100%;
-  }
-`;
+      if (!styleTag) {
+        styleTag = document.createElement("style");
+        styleTag.id = styleId;
+        document.head.appendChild(styleTag);
       }
-    });
-  }, [layers]);
 
-  // Set play/pause animation state AFTER HTML and CSS are mounted
+      styleTag.innerHTML = layer.customCss || "";
+    });
+  }, [layers, layerRef]);
+};
+
+const useAnimationPlayState = (
+  layers: Layer[],
+  isPlaying: boolean,
+  layerRef: React.MutableRefObject<{ [id: string]: HTMLDivElement | null }>
+) => {
   useEffect(() => {
     layers.forEach((layer) => {
       if (!layer.visible) return;
       const wrapper = layerRef.current[layer.id];
-      if (!wrapper) return;
-
       const target =
-        layer.type === "code"
-          ? (wrapper.firstElementChild as HTMLElement)
-          : wrapper;
-
-      if (target) {
+        layer.type === "code" ? wrapper?.firstElementChild : wrapper;
+      if (target instanceof HTMLElement) {
         target.style.animationPlayState = isPlaying ? "running" : "paused";
       }
     });
-  }, [isPlaying, layers]);
+  }, [isPlaying, layers, layerRef]);
+};
 
-  // Update position manually when paused
+const useManualPositionUpdate = (
+  layers: Layer[],
+  isPlaying: boolean,
+  currentPosition: number,
+  layerRef: React.MutableRefObject<{ [id: string]: HTMLDivElement | null }>
+) => {
   useEffect(() => {
     if (isPlaying) return;
-
     layers.forEach((layer) => {
       if (!layer.visible) return;
       const wrapper = layerRef.current[layer.id];
-      const el =
-        layer.type === "code"
-          ? (wrapper?.firstElementChild as HTMLElement)
-          : wrapper;
-
-      if (el) {
+      const el = layer.type === "code" ? wrapper?.firstElementChild : wrapper;
+      if (el instanceof HTMLElement) {
         animateLayer(el, layer, Math.round(currentPosition));
       }
     });
-  }, [currentPosition, isPlaying, layers]);
+  }, [isPlaying, currentPosition, layers, layerRef]);
+};
 
-  // Animation playback loop
+const usePlaybackLoop = (
+  isPlaying: boolean,
+  layers: Layer[],
+  currentPosition: number,
+  layerRef: React.MutableRefObject<{ [id: string]: HTMLDivElement | null }>
+) => {
   useEffect(() => {
     let startTime: number | null = null;
     let animationFrameId: number;
@@ -108,21 +272,15 @@ const Canvas = () => {
 
       layers.forEach((layer) => {
         if (!layer.visible) return;
-
         const wrapper = layerRef.current[layer.id];
-        const el =
-          layer.type === "code"
-            ? (wrapper?.firstElementChild as HTMLElement)
-            : wrapper;
-
-        if (!el) return;
+        const el = layer.type === "code" ? wrapper?.firstElementChild : wrapper;
+        if (!(el instanceof HTMLElement)) return;
 
         const duration = layer.config?.duration || 1;
         const iterations =
           layer.config?.iterationCount === "infinite"
             ? Infinity
             : parseInt(layer.config?.iterationCount || "1");
-
         const totalDuration = duration * iterations;
         const baseTime = (currentPosition / 100) * duration;
         const elapsed = (timestamp - startTime!) / 1000 + baseTime;
@@ -145,208 +303,164 @@ const Canvas = () => {
     }
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isPlaying, layers]);
+  }, [isPlaying, layers, currentPosition, layerRef]);
+};
 
-  //RND
-  //helper function to get the layer style
-  const getLayerStyle = (layerId: string) => {
-    const layer = layers.find((l) => l.id === layerId);
-    return {
-      position: "absolute",
-      ...layer?.style,
-      width: layer?.style?.width || "",
-      height: layer?.style?.height || "",
+// === Main Component ===
+const Canvas = () => {
+  const dispatch = useAppDispatch();
+  const { layers, selectedLayerId, isPlaying, currentPosition } =
+    useAppSelector((state) => state.animation);
+  const layerRef = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
-      backgroundColor: layer?.style?.backgroundColor ?? "",
-      borderRadius: layer?.style?.borderRadius ?? "",
-      opacity: layer?.style?.opacity ?? "",
-      transform: layer?.style?.transform ?? "",
-    };
+  useInjectHtmlCss(layers, layerRef);
+  useAnimationPlayState(layers, isPlaying, layerRef);
+  useManualPositionUpdate(layers, isPlaying, currentPosition, layerRef);
+  usePlaybackLoop(isPlaying, layers, currentPosition, layerRef);
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!(e.target as HTMLElement).closest("[data-layer-id]")) {
+      dispatch(setSelectedLayer(null));
+    }
   };
 
-  //function to create a generic update layer style
-  const updateLayerStyle = (
-    layerId: string,
-    updatedStyle: Partial<React.CSSProperties>
-  ) => {
-    const currentStyle = getLayerStyle(layerId);
+  const updateLayerStyle = (id: string, newStyle: styleConfig) => {
+    const layer = layers.find((l) => l.id === id);
+    if (!layer) return;
+    const currentStyle = getLayerStyle(layer);
+
     dispatch(
       updateLayer({
-        id: layerId,
+        id,
         updates: {
           style: {
             ...currentStyle,
-            ...updatedStyle,
-            width:
-              updatedStyle.width !== undefined
-                ? String(updatedStyle.width)
-                : String(currentStyle.width),
-            height:
-              updatedStyle.height !== undefined
-                ? String(updatedStyle.height)
-                : String(currentStyle.height),
-
-            backgroundColor:
-              updatedStyle.backgroundColor || currentStyle.backgroundColor,
-            borderRadius:
-              updatedStyle.borderRadius !== undefined
-                ? String(updatedStyle.borderRadius)
-                : String(currentStyle.borderRadius),
-            opacity:
-              updatedStyle.opacity !== undefined
-                ? String(updatedStyle.opacity)
-                : String(currentStyle.opacity),
-            transform: updatedStyle.transform || currentStyle.transform,
+            ...newStyle,
           },
         },
       })
     );
   };
 
-  // final size and position of the layer and update in redux store
-  const handleResizeStop = (
-    _e: any,
-    _dir: any,
-    ref: any,
-    _delta: any,
-    pos: any,
-    id: string
-  ) => {
+  const handleResizeStop: RndResizeCallback = (_e, _dir, ref, _delta) => {
+    // Find the layer id by matching the ref's parent Rnd component
+    const id = ref.parentElement
+      ?.querySelector("[data-layer-id]")
+      ?.getAttribute("data-layer-id");
+    if (!id) return;
+    const layer = layers.find((l) => l.id === id);
+    if (!layer) return;
+    const currentStyle = getLayerStyle(layer);
     updateLayerStyle(id, {
-      width: ref.style.width || ref.offsetWidth + "px",
-      height: ref.style.height || ref.offsetHeight + "px",
-    });
-  };
-
-  const handleDragStop = (_e: any, d: any, id: string) => {
-    updateLayerStyle(id, {});
-  };
-
-  const handleResize = (
-    _e: any,
-    _dir: any,
-    ref: any,
-    _delta: any,
-    id: string
-  ) => {
-    updateLayerStyle(id, {
-      width: ref.style.width,
-      height: ref.style.height,
-    });
-
-    console.log("Resize event", {
+      ...currentStyle,
       width: ref.style.width,
       height: ref.style.height,
     });
   };
 
-  const handleDrag = (_e: any, d: any, id: string) => {
-    updateLayerStyle(id, {});
+  const handleResize: RndResizeCallback = (_e, _dir, ref, _delta) => {
+    const id = ref.parentElement
+      ?.querySelector("[data-layer-id]")
+      ?.getAttribute("data-layer-id");
+    if (!id) return;
+    const layer = layers.find((l) => l.id === id);
+    if (!layer) return;
+    const currentStyle = getLayerStyle(layer);
+    updateLayerStyle(id, {
+      ...currentStyle,
+      width: ref.style.width,
+      height: ref.style.height,
+    });
+  };
+
+  const handleDragStop: RndDragCallback = (_e, d) => {
+    // The Rnd component's "onDragStop" passes only (e, d), so get id from d.node
+    const id = d.node
+      .querySelector("[data-layer-id]")
+      ?.getAttribute("data-layer-id");
+    if (!id) return;
+    const layer = layers.find((l) => l.id === id);
+    if (!layer) return;
+
+    const transform = updateTransformTranslate(
+      layer.style?.transform || "",
+      d.x,
+      d.y
+    );
+    updateLayerStyle(id, { 
+      ...getLayerStyle(layer), 
+      transform 
+    });
+
+    dispatch(
+      addKeyframe({
+        layerId: id,
+        percentage: currentPosition,
+        groupName: "transform",
+        propertyName: "transform",
+        value: transform,
+      })
+    );
+  };
+
+  const handleDrag: RndDragCallback = (_e, d) => {
+    const id = d.node
+      .querySelector("[data-layer-id]")
+      ?.getAttribute("data-layer-id");
+    if (!id) return;
+    const layer = layers.find((l) => l.id === id);
+    if (!layer) return;
+
+    const updatedTransform = updateTransformTranslate(
+      layer.style?.transform || "",
+      d.x,
+      d.y
+    );
+    const currentStyle = getLayerStyle(layer);
+    updateLayerStyle(id, { 
+      ...currentStyle, 
+      transform: updatedTransform 
+    });
   };
 
   return (
-    <div className={styles.canvasContainer}>
+    <div className={styles.canvasContainer} onMouseDown={handleCanvasClick}>
       <div className={styles.animatedElementContainer}>
         {layers.map((layer) => {
-          //style for selected layer
           const isSelected = layer.id === selectedLayerId;
-          const visibilityStyle: React.CSSProperties = {
-            visibility: layer.visible ? "visible" : "hidden",
-          };
-          const commonProps = {
-            "data-layer-id": layer.id,
-            onClick: () => {
-              dispatch(toggleLayer(layer.id));
-              dispatch(setSelectedLayer(layer.id));
-            },
-            style: { ...layer.style, ...visibilityStyle },
-            className: `layer-${layer.id} ${
-              isSelected ? styles.selected : ""
-            } ${styles.innerDiv}`,
-            ref: (el: HTMLDivElement | null) => {
-              layerRef.current[layer.id] = el;
-            },
+          const visibility = layer.visible ? "visible" : "hidden";
+          const baseStyle: React.CSSProperties = {
+            ...layer.style,
+            visibility,
           };
 
-          if (layer.type === "code") {
-            return (
-              <Rnd
-                style={{ border: "1px dashed red" }}
-                key={layer.id}
-                size={{
-                  width: layer.style?.width || "",
-                  height: layer.style?.height || "",
-                }}
-                onResizeStop={(e, dir, ref, delta, pos) =>
-                  handleResizeStop(e, dir, ref, delta, pos, layer.id)
-                }
-                onDragStop={(e, d) => handleDragStop(e, d, layer.id)}
-                enableResizing={true}
-                onResize={(e, dir, ref, delta, pos) =>
-                  handleResize(e, dir, ref, delta, layer.id)
-                }
-                onDrag={(e, d) => handleDrag(e, d, layer.id)}
-                bounds="parent"
-              >
-                <div
-                  {...commonProps}
-                  className={`${commonProps.className} custom-html-wrapper`}
-                  style={{
-                    width: layer.style?.width || "",
-                    height: layer.style?.height || "",
-                  }}
-                ></div>
-              </Rnd>
-            );
-          } else {
-            return (
-              <Rnd
-                style={{ border: "1px dashed red" }}
-                key={layer.id}
-                size={{
-                  width: layer.style?.width || "",
-                  height: layer.style?.height || "",
-                }}
-                onResizeStop={(e, dir, ref, delta, pos) =>
-                  handleResizeStop(e, dir, ref, delta, pos, layer.id)
-                }
-                onDragStop={(e, d) => handleDragStop(e, d, layer.id)}
-                enableResizing={true}
-                onResize={(e, dir, ref, delta, pos) =>
-                  handleResize(e, dir, ref, delta, layer.id)
-                }
-                onDrag={(e, d) => handleDrag(e, d, layer.id)}
-                bounds="parent"
-              >
-                <div
-                  data-layer-id={layer.id}
-                  ref={(el) => {
-                    layerRef.current[layer.id] = el;
-                  }}
-                  onClick={() => {
-                    dispatch(toggleLayer(layer.id));
-                    dispatch(setSelectedLayer(layer.id));
-                  }}
-                  style={{
-                    ...layer.style,
-                    visibility: layer.visible ? "visible" : "hidden",
-                  }}
-                  className={`layer-${layer.id} ${
-                    layer.id === selectedLayerId ? styles.selected : ""
-                  }`}
-                >
-                  {layer.id === selectedLayerId && (
-                    <>
-                      <span className={styles.cornerTopLeft}></span>
-                      <span className={styles.cornerTopRight}></span>
-                      <span className={styles.cornerBottomLeft}></span>
-                      <span className={styles.cornerBottomRight}></span>
-                    </>
-                  )}
-                </div>
-              </Rnd>
-            );
-          }
+          const { width, height } = getWidthHeightFromCss(
+            layer.customCss || ""
+          );
+
+          return (
+            <Rnd
+              key={layer.id}
+              size={{
+                width: layer.style?.width ?? width ?? "",
+                height: layer.style?.height ?? height ?? "",
+              }}
+              style={baseStyle}
+              onResizeStop={handleResizeStop}
+              onResize={handleResize}
+              onDragStop={handleDragStop}
+              onDrag={handleDrag}
+              bounds="parent"
+            >
+              <div
+                data-layer-id={layer.id}
+                className={`layer-${layer.id} ${
+                  isSelected ? styles.selected : ""
+                } ${styles.innerDiv}`}
+                ref={(el) => { layerRef.current[layer.id] = el; }}
+              />
+            </Rnd>
+          );
         })}
       </div>
     </div>
@@ -354,3 +468,4 @@ const Canvas = () => {
 };
 
 export default Canvas;
+ */

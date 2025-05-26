@@ -18,81 +18,40 @@ const LayerConfigSetting = () => {
   const handleChange = (key: keyof styleConfig, value: string) => {
     if (!selectedLayer) return;
     const style: styleConfig = {
-      width: selectedLayer.style?.width ?? "",
-      height: selectedLayer.style?.height ?? "",
-      backgroundColor: selectedLayer.style?.backgroundColor ?? "#000000",
-      borderRadius: selectedLayer.style?.borderRadius ?? "",
-      opacity: selectedLayer.style?.opacity ?? "1",
-      transform: selectedLayer.style?.transform ?? "",
+      ...selectedLayer.style,
       [key]: value,
     };
     dispatch(setLayerConfigSettings({ layerId: selectedLayer.id, style }));
   };
-
   if (!formValues)
     return <div className={style.container}>No layer selected</div>;
 
   return (
     <div className={style.container}>
-      <h3>Edit {selectedLayer.name} Properties</h3>
+      <h2>Edit {selectedLayer?.name || "Layer"} Properties</h2>
 
-      <label>
-        Width:
-        <input
-          type="text"
-          value={formValues.width}
-          onChange={(e) => handleChange("width", e.target.value)}
-        />
-      </label>
+      {Object.entries(formValues).map(([key, value]) => {
+        if (key === "type") return null;
+        console.log(`Key: ${key}, Value: ${value}`);
 
-      <label>
-        Height:
-        <input
-          type="text"
-          value={formValues.height}
-          onChange={(e) => handleChange("height", e.target.value)}
-        />
-      </label>
+        const isColor = key.toLowerCase().includes("color");
+        const isOpacity = key.toLowerCase() === "opacity";
 
-      <label>
-        Background Color:
-        <input
-          type="color"
-          value={formValues.backgroundColor}
-          onChange={(e) => handleChange("backgroundColor", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Border Radius:
-        <input
-          type="text"
-          value={formValues.borderRadius}
-          onChange={(e) => handleChange("borderRadius", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Opacity:
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={formValues.opacity}
-          onChange={(e) => handleChange("opacity", e.target.value)}
-        />
-        {formValues.opacity}
-      </label>
-
-      <label>
-        Transform:
-        <input
-          type="text"
-          value={formValues.transform}
-          onChange={(e) => handleChange("transform", e.target.value)}
-        />
-      </label>
+        return (
+          <h3 key={key}>
+            {key}:
+            <input
+              type={isColor ? "color" : isOpacity ? "range" : "text"}
+              min={isOpacity ? "0" : undefined}
+              max={isOpacity ? "1" : undefined}
+              step={isOpacity ? "0.01" : undefined}
+              value={value}
+              onChange={(e) => handleChange(key, e.target.value)}
+            />
+            {isOpacity && <span>{value}</span>}
+          </h3>
+        );
+      })}
     </div>
   );
 };
