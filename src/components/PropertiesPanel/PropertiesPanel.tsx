@@ -9,8 +9,10 @@ import { ChevronDown, ChevronRight, PanelRightClose } from "lucide-react";
 import {
   addKeyframe,
   setConfig,
+  updateLayer,
   updatePropertyValue,
 } from "../../redux/slices/animationSlice";
+import { parseTransform } from "../Canvas/Canvas";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -58,14 +60,51 @@ const PropertiesPanel = () => {
     newValue: any,
     groupName: string
   ) => {
-    if (!selectedLayerId) return;
-    dispatch(
-      updatePropertyValue({
-        section: groupName,
-        field: propertyName,
-        value: newValue,
-      })
-    );
+    if (!selectedLayerId || !selectedLayer) return;
+
+    // For transform properties
+    if (groupName === "transform") {
+      const currentTransform = parseTransform(
+        selectedLayer.style?.transform || ""
+      );
+
+      // Preserve all transform properties
+      const newTransform = {
+        ...currentTransform,
+        [propertyName]: newValue,
+      };
+
+      // Convert back to transform string
+      const transformString = `translate(${newTransform.translateX || 0}px, ${
+        newTransform.translateY || 0
+      }px)`;
+
+      dispatch(
+        updateLayer({
+          id: selectedLayerId,
+          updates: {
+            style: {
+              ...selectedLayer.style,
+              transform: transformString,
+            },
+          },
+        })
+      );
+    }
+    // For regular style properties
+    else {
+      dispatch(
+        updateLayer({
+          id: selectedLayerId,
+          updates: {
+            style: {
+              ...selectedLayer.style,
+              [propertyName]: newValue,
+            },
+          },
+        })
+      );
+    }
 
     dispatch(
       addKeyframe({
@@ -98,18 +137,44 @@ const PropertiesPanel = () => {
   ): string | number | undefined => {
     if (!selectedLayer) return;
 
+    // Check if property exists in current style
+    if (selectedLayer.style?.[propertyName] !== undefined) {
+      return selectedLayer.style[propertyName];
+    }
+
+    // Check for keyframes
     const prop = selectedLayer?.editedPropertiesGroup?.find(
       (p) => p.propertyName === propertyName
     );
-    if (!prop) return "";
 
-    // find closest keyframe at or before current position
+    if (!prop)
+      return propertyName.includes("color")
+        ? "#000000"
+        : propertyName === "opacity"
+        ? 1
+        : propertyName === "borderRadius"
+        ? "0"
+        : "0px";
+
     const keyframes = [...prop.keyframes].sort(
-      (a, b) => b.percentage - a.percentage
+      (a, b) => a.percentage - b.percentage
     );
-    const keyframe = keyframes.find((kf) => kf.percentage === currentPosition);
 
-    return keyframe?.value;
+    // Find the most recent keyframe at or before current position
+    let activeKeyframe;
+    for (const kf of keyframes) {
+      if (kf.percentage <= currentPosition) {
+        activeKeyframe = kf;
+      } else {
+        break;
+      }
+    }
+
+    return (
+      activeKeyframe?.value ||
+      prop.keyframes[0]?.value ||
+      (propertyName.includes("translate") ? "0px" : 0)
+    );
   };
 
   return (
@@ -339,8 +404,9 @@ const PropertiesPanel = () => {
                                   )
                                 }
                                 className={`${style.input} ${
-                                  (selectedLayer?.editedPropertiesGroup?.length ?? 0) >
-                                    0 && selectedKeyframeProperty === fieldKey
+                                  (selectedLayer?.editedPropertiesGroup
+                                    ?.length ?? 0) > 0 &&
+                                  selectedKeyframeProperty === fieldKey
                                     ? style.selectedKeyframeProperty
                                     : ""
                                 }`}

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import styles from "./HtmlCssCode.module.css";
 import DOMPurify from "dompurify";
 import Editor from "@monaco-editor/react";
-import { useAppDispatch } from "../../redux/store";
 
 type HtmlCssCodeProps = {
   onSave: (html: string, css: string) => void;
@@ -121,8 +120,6 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
     const styleTag = document.createElement("style");
     styleTag.textContent = css;
     document.head.appendChild(styleTag);
-    
-    
 
     // Cleanup style tag when component unmounts
     return () => {
@@ -132,7 +129,25 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
 
   const handleSave = () => {
     const sanitizedHtml = DOMPurify.sanitize(html, purifyConfig);
-    onSave(sanitizedHtml, css);
+
+    // Create a temporary element to compute styles
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = sanitizedHtml;
+    document.body.appendChild(tempDiv);
+
+    const element = tempDiv.firstElementChild as HTMLElement;
+    const computedStyles = window.getComputedStyle(element);
+
+    // Extract important styles
+    const style: Record<string, string> = {
+      width: computedStyles.width,
+      height: computedStyles.height,
+      // Add other properties you want to preserve
+    };
+
+    document.body.removeChild(tempDiv);
+
+    onSave(sanitizedHtml, css,); // Add style to save parameters
   };
 
   return (

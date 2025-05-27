@@ -58,9 +58,6 @@ export const animateLayer = (
   time: number
 ) => {
   const style: Record<string, string> = {};
-  /*   if (layer.type === "code" && element.firstElementChild) {
-    element = element.firstElementChild as HTMLDivElement;
-  } */
 
   const properties = layer.editedPropertiesGroup || [];
   for (const prop of properties) {
