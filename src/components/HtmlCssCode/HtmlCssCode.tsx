@@ -102,16 +102,6 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
     tempDiv.innerHTML = sanitizedHtml;
     document.body.appendChild(tempDiv);
 
-    const element = tempDiv.firstElementChild as HTMLElement;
-    const computedStyles = window.getComputedStyle(element);
-
-    // Extract important styles
-    const style: Record<string, string> = {
-      width: computedStyles.width,
-      height: computedStyles.height,
-      // Add other properties you want to preserve
-    };
-
     document.body.removeChild(tempDiv);
 
     onSave(sanitizedHtml, css); // Add style to save parameters
