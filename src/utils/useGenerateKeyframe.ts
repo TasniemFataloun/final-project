@@ -11,9 +11,9 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const baseStyles: string[] = [];
   const keyframeSteps: Record<number, string[]> = {};
 
-  layer.editedPropertiesGroup.forEach((group) => {
-    const transformMap: Record<number, Record<string, string>> = {};
+  const transformMap: Record<number, Record<string, string>> = {};
 
+  layer.editedPropertiesGroup.forEach((group) => {
     group.keyframes.forEach((kf) => {
       const percentage = kf.percentage;
       const prop = group.propertyName;
@@ -23,45 +23,45 @@ export const UseGenerateKeyframes = (layer: Layer) => {
         keyframeSteps[percentage] = [];
       }
 
-      // Group transform-related properties together
       if (prop === "translateX" || prop === "translateY") {
         if (!transformMap[percentage]) transformMap[percentage] = {};
         transformMap[percentage][prop] = val;
       } else {
-        // Non-transform properties
-        if (!keyframeSteps[percentage]) keyframeSteps[percentage] = [];
         keyframeSteps[percentage].push(`    ${prop}: ${val};`);
-
         if (percentage === 0) {
           baseStyles.push(`  ${prop}: ${val};`);
         }
       }
     });
+  });
 
-    Object.entries(transformMap).forEach(([pctStr, transforms]) => {
-      const pct = Number(pctStr);
-      const x = transforms.translateX || "0px";
-      const y = transforms.translateY || "0px";
-      const transformLine = `    transform: translate(${x}, ${y});`;
+  // Now handle transforms
+  Object.entries(transformMap).forEach(([pctStr, transforms]) => {
+    const pct = Number(pctStr);
+    const x = transforms.translateX; // fallback to 0px if missing
+    const y = transforms.translateY;
 
-      if (!keyframeSteps[pct]) keyframeSteps[pct] = [];
+    const transformLine = `    transform: translate(${x}, ${y});`;
 
-      const alreadyHasTransform = keyframeSteps[pct].some((line) =>
+    if (!keyframeSteps[pct]) keyframeSteps[pct] = [];
+
+    const alreadyHasTransform = keyframeSteps[pct].some((line) =>
+      line.trim().startsWith("transform:")
+    );
+    if (!alreadyHasTransform) {
+      keyframeSteps[pct].push(transformLine);
+    }
+
+    if (pct === 0) {
+      const baseAlreadyHasTransform = baseStyles.some((line) =>
         line.trim().startsWith("transform:")
       );
-      if (!alreadyHasTransform) {
-        keyframeSteps[pct].push(transformLine);
+      if (!baseAlreadyHasTransform) {
+        baseStyles.push(`  transform: translate(${x}, ${y});`);
       }
+    }
 
-      if (pct === 0) {
-        const baseAlreadyHasTransform = baseStyles.some((line) =>
-          line.trim().startsWith("transform:")
-        );
-        if (!baseAlreadyHasTransform) {
-          baseStyles.push(`  transform: translate(${x}, ${y});`);
-        }
-      }
-    });
+    console.log(`Transform for ${pct}%: translateX=${x}, translateY=${y}`);
   });
 
   const animationName = `animation-${sanitizedLayerName}`;
