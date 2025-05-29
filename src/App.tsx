@@ -9,7 +9,6 @@ import { useAppSelector } from "./redux/store";
 import Alert from "./components/GenerateCss/Alert/Alert";
 import TimelineEditor from "./components/Timeline/TimelineEditor";
 import LayerConfigSetting from "./components/LayerConfigSetting/LayerConfigSetting";
-import CloseIcon from "./components/CloseIcon/CloseIcon";
 
 function App() {
   const [showGenerateCss, setShowGenerateCss] = useState(false);

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import styles from "./Canvas.module.css";
-import { toggleLayer } from "../../redux/slices/timelineSlice";
 import { animateLayer } from "../../utils/LayerAnimation";
 import {
   addKeyframe,
@@ -297,7 +296,7 @@ const Canvas = () => {
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      dispatch(setSelectedLayer(null));
+      //dispatch(setSelectedLayer(null));
       setDragInfo({} as any);
     }
   };

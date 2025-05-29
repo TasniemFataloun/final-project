@@ -10,7 +10,6 @@ import {
   addKeyframe,
   setConfig,
   updateLayer,
-  updatePropertyValue,
 } from "../../redux/slices/animationSlice";
 
 

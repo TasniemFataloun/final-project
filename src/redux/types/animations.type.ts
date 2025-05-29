@@ -1,6 +1,5 @@
 import {
   AnimationConfigType,
-  AnimationType,
   styleConfig,
 } from "../../types/animationType";
 

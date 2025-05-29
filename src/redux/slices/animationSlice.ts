@@ -119,7 +119,9 @@ const animationSlice = createSlice({
     ) => {
       const { layerId, propertyName, groupName, percentage, value } =
         action.payload;
-      const roundedPercentage = Math.round(percentage * 100) / 100;
+      const roundedPercentage = Math.round(
+        Math.max(0, Math.min(100, percentage))
+      );
 
       const layer = state.layers.find((l) => l.id === layerId);
       if (!layer || !layer.editedPropertiesGroup) return;

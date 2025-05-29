@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import style from "./TimelineKeyframes.module.css";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import {
-  addKeyframe,
   copyKeyframe,
   pasteKeyframe,
   removeSelectedKeyframe,
