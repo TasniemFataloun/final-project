@@ -60,8 +60,6 @@ export const UseGenerateKeyframes = (layer: Layer) => {
         baseStyles.push(`  transform: translate(${x}, ${y});`);
       }
     }
-
-    console.log(`Transform for ${pct}%: translateX=${x}, translateY=${y}`);
   });
 
   const animationName = `animation-${sanitizedLayerName}`;
