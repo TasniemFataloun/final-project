@@ -3,7 +3,7 @@ import { Layer } from "../redux/types/animations.type";
 export const UseGenerateKeyframes = (layer: Layer) => {
   if (!layer || !layer.editedPropertiesGroup) return "";
 
-  const sanitizedLayerName = layer.name.toLowerCase().replace(/\s+/g, "-");
+  const sanitizedLayerName = layer.name?.toLowerCase().replace(/\s+/g, "-");
   const camelToKebab = (str: string) =>
     str.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase());
 
@@ -12,17 +12,54 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const keyframeSteps: Record<number, string[]> = {};
 
   layer.editedPropertiesGroup.forEach((group) => {
+    const transformMap: Record<number, Record<string, string>> = {};
+
     group.keyframes.forEach((kf) => {
       const percentage = kf.percentage;
-      const line = `    ${group.propertyName}: ${kf.value}${kf.unit};`;
+      const prop = group.propertyName;
+      const val = `${kf.value}${kf.unit}`;
 
       if (!keyframeSteps[percentage]) {
         keyframeSteps[percentage] = [];
       }
-      keyframeSteps[percentage].push(line);
 
-      if (percentage === 0) {
-        baseStyles.push(`  ${group.propertyName}: ${kf.value}${kf.unit};`);
+      // Group transform-related properties together
+      if (prop === "translateX" || prop === "translateY") {
+        if (!transformMap[percentage]) transformMap[percentage] = {};
+        transformMap[percentage][prop] = val;
+      } else {
+        // Non-transform properties
+        if (!keyframeSteps[percentage]) keyframeSteps[percentage] = [];
+        keyframeSteps[percentage].push(`    ${prop}: ${val};`);
+
+        if (percentage === 0) {
+          baseStyles.push(`  ${prop}: ${val};`);
+        }
+      }
+    });
+
+    Object.entries(transformMap).forEach(([pctStr, transforms]) => {
+      const pct = Number(pctStr);
+      const x = transforms.translateX || "0px";
+      const y = transforms.translateY || "0px";
+      const transformLine = `    transform: translate(${x}, ${y});`;
+
+      if (!keyframeSteps[pct]) keyframeSteps[pct] = [];
+
+      const alreadyHasTransform = keyframeSteps[pct].some((line) =>
+        line.trim().startsWith("transform:")
+      );
+      if (!alreadyHasTransform) {
+        keyframeSteps[pct].push(transformLine);
+      }
+
+      if (pct === 0) {
+        const baseAlreadyHasTransform = baseStyles.some((line) =>
+          line.trim().startsWith("transform:")
+        );
+        if (!baseAlreadyHasTransform) {
+          baseStyles.push(`  transform: translate(${x}, ${y});`);
+        }
       }
     });
   });

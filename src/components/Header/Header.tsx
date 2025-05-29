@@ -19,7 +19,7 @@ const Header = ({ onToggleGenerateCss }: HeaderProps) => {
         </div>
 
         <div className={style.cssAndToggleContainer}>
-          <ExportCss onClick={onToggleGenerateCss} />
+          {layers.length > 0 && <ExportCss onClick={onToggleGenerateCss} />}
           <ToggleSwitch />
         </div>
       </div>

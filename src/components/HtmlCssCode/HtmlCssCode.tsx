@@ -10,10 +10,7 @@ type HtmlCssCodeProps = {
 
 const defultHtml = `
       <div id="card">
-    <h1 id="profile-image">Logo</h1>
-    <h2 id="profile-name">Tasniem</h2>
-    <p id="description">Web Developer & Designer</p>
-    <a id="contact-button" href="https://github.com/TasniemFataloun">Contact Me</a>
+    <h1 id="image"></h1>
   </div>
 `.trim();
 
@@ -23,49 +20,20 @@ const defultCss = `
   align-items: center;
   justify-content: center;
   flex-direction: column;
-      background: gray;
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      max-width: 300px;
-    }
+  background:#f2ff00;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 300px;
+}
 
-    #profile-image {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #357ab8;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 1rem;
-    }
-
-    #profile-name {
-      margin: 0.5rem 0;
-    }
-
-    #description {
-      color: black;
-    }
-
-    #contact-button {
-      display: inline-block;
-      margin-top: 1rem;
-      text-decoration: none;
-      background: #4a90e2;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      transition: background 0.3s ease;
-      cursor: pointer;
-    }
-
-    #contact-button:hover {
-      background: #357ab8;
-    }
+#image {
+  width: 200px;
+  height: 100px;
+  background: red;
+  border-radius: 100px / 50px;
+}
 
 `.trim();
 
@@ -85,12 +53,11 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
   const [preview, setPreview] = useState("");
 
   const purifyConfig = {
-    ALLOWED_ATTR: ["id"],
+    ALLOWED_ATTR: ["id", "class"],
     ADD_TAGS: [],
     ADD_ATTR: [],
     FORBID_TAGS: ["script", "iframe", "object", "embed"],
     FORBID_ATTR: [
-      "class",
       "style",
       "onerror",
       "onload",
@@ -147,7 +114,7 @@ const HtmlCssCode: React.FC<HtmlCssCodeProps> = ({ onSave, onCancel }) => {
 
     document.body.removeChild(tempDiv);
 
-    onSave(sanitizedHtml, css,); // Add style to save parameters
+    onSave(sanitizedHtml, css); // Add style to save parameters
   };
 
   return (

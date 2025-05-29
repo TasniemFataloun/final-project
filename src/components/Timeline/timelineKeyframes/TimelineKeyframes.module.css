@@ -38,19 +38,9 @@
 }
 
 .selectedKeyframe {
-  stroke: rgb(228, 250, 118);
-  stroke-width: 3px;
-  stroke-dasharray: 10;
-  stroke-dashoffset: 0;
-  animation: dashMove 5s linear infinite;
+  stroke: rgb(255, 132, 0);
   cursor: grab;
-}
-
-@keyframes dashMove {
-  to {
-    stroke-dashoffset: -100;
-    stroke-dasharray: 9;
-  }
+  scale: 1.1;
 }
 
 .playHead {

@@ -244,6 +244,7 @@ const TimelineKeyframes = () => {
                     size={12}
                     className={`${style.keyframe} ${style.collapsedKeyframe}`}
                     style={{ left: `${keyframe.percentage}%` }}
+                    onClick={()=> setCurrentPosition(keyframe.percentage)}
                   />
                 ))
               )}
@@ -276,7 +277,7 @@ const TimelineKeyframes = () => {
                       bounds="parent"
                       enableResizing={false}
                       dragAxis="x"
-                      onDragStop={(e, d) => {
+                      onDragStop={(_e, d) => {
                         if (!timelineRef.current) return;
                         const newPercentage =
                           (d.x / timelineRef.current.clientWidth) * 100;
@@ -320,6 +321,7 @@ const TimelineKeyframes = () => {
                           })
                         );
                         dispatch(setSelectedLayer(layer.id));
+                        dispatch(setCurrentPosition(kf.percentage));
                       }}
                     >
                       <Diamond

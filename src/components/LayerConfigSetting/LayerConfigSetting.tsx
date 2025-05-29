@@ -5,6 +5,7 @@ import { setLayerConfigSettings } from "../../redux/slices/animationSlice";
 
 const LayerConfigSetting = () => {
   const dispatch = useAppDispatch();
+  const editMode = useAppSelector((state) => state.editMode.value); // Add this line
 
   const selectedLayerId = useAppSelector(
     (state) => state.animation.selectedLayerId
@@ -17,12 +18,17 @@ const LayerConfigSetting = () => {
 
   const handleChange = (key: keyof styleConfig, value: string) => {
     if (!selectedLayer) return;
-    const style: styleConfig = {
-      ...selectedLayer.style,
-      [key]: value,
-    };
-    dispatch(setLayerConfigSettings({ layerId: selectedLayer.id, style }));
+
+    // Only update if in class edit mode
+    if (editMode === "class") {
+      const style: styleConfig = {
+        ...selectedLayer.style,
+        [key]: value,
+      };
+      dispatch(setLayerConfigSettings({ layerId: selectedLayer.id, style }));
+    }
   };
+  
   if (!formValues)
     return <div className={style.container}>No layer selected</div>;
 
@@ -32,7 +38,6 @@ const LayerConfigSetting = () => {
 
       {Object.entries(formValues).map(([key, value]) => {
         if (key === "type") return null;
-        console.log(`Key: ${key}, Value: ${value}`);
 
         const isColor = key.toLowerCase().includes("color");
         const isOpacity = key.toLowerCase() === "opacity";

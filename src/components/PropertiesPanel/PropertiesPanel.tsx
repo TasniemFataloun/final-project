@@ -12,7 +12,7 @@ import {
   updateLayer,
   updatePropertyValue,
 } from "../../redux/slices/animationSlice";
-import { parseTransform } from "../Canvas/Canvas";
+
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -64,13 +64,12 @@ const PropertiesPanel = () => {
 
     // For transform properties
     if (groupName === "transform") {
-      const currentTransform = parseTransform(
-        selectedLayer.style?.transform || ""
-      );
+      const currentTransform = selectedLayer.style?.transform || ""
+
 
       // Preserve all transform properties
       const newTransform = {
-        ...currentTransform,
+        currentTransform,
         [propertyName]: newValue,
       };
 
@@ -137,11 +136,6 @@ const PropertiesPanel = () => {
   ): string | number | undefined => {
     if (!selectedLayer) return;
 
-    // Check if property exists in current style
-    if (selectedLayer.style?.[propertyName] !== undefined) {
-      return selectedLayer.style[propertyName];
-    }
-
     // Check for keyframes
     const prop = selectedLayer?.editedPropertiesGroup?.find(
       (p) => p.propertyName === propertyName
@@ -153,8 +147,8 @@ const PropertiesPanel = () => {
         : propertyName === "opacity"
         ? 1
         : propertyName === "borderRadius"
-        ? "0"
-        : "0px";
+        ? "0%"
+        : "";
 
     const keyframes = [...prop.keyframes].sort(
       (a, b) => a.percentage - b.percentage
@@ -169,6 +163,8 @@ const PropertiesPanel = () => {
         break;
       }
     }
+
+    
 
     return (
       activeKeyframe?.value ||

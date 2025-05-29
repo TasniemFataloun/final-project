@@ -20,10 +20,13 @@ const parseHtmlToLayers = (
 
   const processElement = (element: Element, parentId: string | null) => {
     const tag = element.tagName.toLowerCase(); //div , button , h1,...
-    const selector = element.id ? `#${element.id}` : ""; //the name inside the >> id="Container"
+    const selector = element.id
+      ? `#${element.id}`
+      : element.className
+      ? `.${[...element.classList].join(".")}`
+      : element.tagName.toLowerCase();
     const style = selector ? parseCss(css, selector) : {};
     const id = nanoid(5);
-    console.log("tag:", element.tagName, "id:", element.id || "(no id)");
     layers.push({
       id,
       parentId,
@@ -123,7 +126,7 @@ const Sidebar = () => {
         />
       </div>
       <button onClick={() => setShowCodeComponent(true)}>
-        Import your code
+        Add your own element
       </button>
 
       {showCodeComponent && (

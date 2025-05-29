@@ -10,56 +10,6 @@ import {
   updateLayer,
 } from "../../redux/slices/animationSlice";
 
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface Size {
-  width: number;
-  height: number;
-}
-
-export function parseTransform(transform: string): {
-  translateX: number;
-  translateY: number;
-  scale: number;
-  rotate: number;
-} {
-  if (!transform || transform === "none") {
-    return { translateX: 0, translateY: 0, scale: 1, rotate: 0 };
-  }
-
-  const result = {
-    translateX: 0,
-    translateY: 0,
-    scale: 1,
-    rotate: 0,
-  };
-
-  // Extract translate
-  const translateMatch = transform.match(/translate\(([^)]+)\)/);
-  if (translateMatch) {
-    const parts = translateMatch[1].split(",").map((p) => parseFloat(p.trim()));
-    result.translateX = parts[0] || 0;
-    result.translateY = parts[1] || 0;
-  }
-
-  // Extract scale
-  const scaleMatch = transform.match(/scale\(([^)]+)\)/);
-  if (scaleMatch) {
-    result.scale = parseFloat(scaleMatch[1]) || 1;
-  }
-
-  // Extract rotate
-  const rotateMatch = transform.match(/rotate\(([^)]+)\)/);
-  if (rotateMatch) {
-    result.rotate = parseFloat(rotateMatch[1]) || 0;
-  }
-
-  return result;
-}
-
 const Canvas = () => {
   const dispatch = useAppDispatch();
   const layerRef = useRef<{ [id: string]: HTMLDivElement | null }>({});
@@ -69,20 +19,31 @@ const Canvas = () => {
   const { isPlaying, currentPosition } = useAppSelector(
     (state) => state.animation
   );
+  const editMode = useAppSelector((state) => state.editMode.value);
+
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [dragStartPos, setDragStartPos] = useState<Position>({ x: 0, y: 0 });
-  const [originalStyle, setOriginalStyle] = useState<any>(null);
-  const [resizeDirection, setResizeDirection] = useState<string | null>(null);
-  const [originalSize, setOriginalSize] = useState<Size>({
-    width: 0,
-    height: 0,
-  });
-  const [originalMousePos, setOriginalMousePos] = useState<Position>({
-    x: 0,
-    y: 0,
+  const [dragInfo, setDragInfo] = useState<{
+    type: "drag" | "resize" | null;
+    startX: number;
+    startY: number;
+    baseTranslateX: number;
+    baseTranslateY: number;
+    currentTranslateX: number;
+    currentTranslateY: number;
+    layerId: string | null;
+    styleInfo: React.CSSProperties;
+    corner?: string;
+  }>({
+    type: null,
+    startX: 0,
+    startY: 0,
+    baseTranslateX: 0,
+    baseTranslateY: 0,
+    currentTranslateX: 0,
+    currentTranslateY: 0,
+    layerId: null,
+    styleInfo: {},
   });
 
   // Animation effects (keep your existing useEffect hooks)
@@ -136,230 +97,193 @@ const Canvas = () => {
       animationFrameId = requestAnimationFrame(step);
     }
 
-    console.log("Is playing:", isPlaying);
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
   }, [isPlaying, layers, currentPosition]);
 
-  const handleMouseDown = (e: React.MouseEvent, layerId: string) => {
-    if (layerId !== selectedLayerId) {
-      dispatch(setIsPlaying(false));
-      dispatch(setSelectedLayer(layerId));
-      return;
-    }
-
-    const target = e.target as HTMLElement;
-    if (target.classList.contains(styles.cornerTopLeft)) {
-      startResizing("top-left", e, layerId);
-    } else if (target.classList.contains(styles.cornerTopRight)) {
-      startResizing("top-right", e, layerId);
-    } else if (target.classList.contains(styles.cornerBottomLeft)) {
-      startResizing("bottom-left", e, layerId);
-    } else if (target.classList.contains(styles.cornerBottomRight)) {
-      startResizing("bottom-right", e, layerId);
-    } else {
-      startDragging(e, layerId);
-    }
-  };
-
-  const startDragging = (e: React.MouseEvent, layerId: string) => {
-    const layer = layers.find((l) => l.id === layerId);
-    if (!layer) return;
-
-    setIsDragging(true);
-    setDragStartPos({ x: e.clientX, y: e.clientY });
-
-    const { translateX, translateY } = parseTransform(
-      layer.style?.transform || ""
-    );
-
-    setOriginalStyle({
-      x: translateX,
-      y: translateY,
-    });
-
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const startResizing = (
-    direction: string,
+  const handleMouseDown = (
     e: React.MouseEvent,
-    layerId: string
+    layerId: string,
+    type: "drag" | "resize" = "drag",
+    corner?: string
   ) => {
-    const layer = layers.find((l) => l.id === layerId);
-    if (!layer) return;
-
-    setIsResizing(true);
-    setResizeDirection(direction);
-    setOriginalMousePos({ x: e.clientX, y: e.clientY });
-    setOriginalSize({
-      width: parseInt(layer.style?.width),
-      height: parseInt(layer.style?.height),
-    });
-
     e.preventDefault();
     e.stopPropagation();
+
+    dispatch(setSelectedLayer(layerId));
+
+    const el = layerRef.current[layerId];
+    const canvas = canvasRef.current;
+    if (!el || !canvas) return;
+
+    const elRect = el.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const selectedLayer = layers.find((l) => l.id === layerId);
+    if (!selectedLayer) return;
+    dispatch(setIsPlaying(false));
+
+    const computedStyle = window.getComputedStyle(el);
+    const transform = computedStyle.transform;
+    const matrix = new DOMMatrix(transform);
+
+    const width =
+      parseFloat(selectedLayer.style?.width as string) ||
+      parseFloat(selectedLayer.style?.maxWidth as string) ||
+      parseFloat(selectedLayer.style?.minWidth as string) ||
+      elRect.width;
+    const height =
+      parseFloat(selectedLayer.style?.height as string) ||
+      parseFloat(selectedLayer.style?.maxHeight as string) ||
+      parseFloat(selectedLayer.style?.minHeight as string) ||
+      elRect.height;
+
+    const style = {
+      width,
+      height,
+    };
+
+    setDragInfo({
+      type,
+      startX: e.clientX - canvasRect.left,
+      startY: e.clientY - canvasRect.top,
+      currentTranslateX: 0,
+      currentTranslateY: 0,
+      baseTranslateX: matrix.m41,
+      baseTranslateY: matrix.m42,
+      layerId,
+      styleInfo: style,
+      corner,
+    });
   };
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!isDragging && !isResizing) return;
-      if (!selectedLayerId) return;
+      if (!dragInfo.type || !dragInfo.layerId) return;
+      if (!canvasRef.current) return;
 
-      const selectedLayer = layers.find((l) => l.id === selectedLayerId);
+      const {
+        startX,
+        startY,
+        styleInfo,
+        type,
+        layerId,
+        baseTranslateX,
+        baseTranslateY,
+        corner,
+      } = dragInfo;
+
+      const canvasRect = canvasRef.current.getBoundingClientRect();
+      const mouseXRelativeToCanvas = e.clientX - canvasRect.left;
+      const mouseYRelativeToCanvas = e.clientY - canvasRect.top;
+      const dx = mouseXRelativeToCanvas - startX;
+      const dy = mouseYRelativeToCanvas - startY;
+
+      const selectedLayer = layers.find((l) => l.id === layerId);
       if (!selectedLayer) return;
+      let newStyle: Partial<React.CSSProperties> = {};
 
-      if (isDragging) {
-        const deltaX = e.clientX - dragStartPos.x;
-        const deltaY = e.clientY - dragStartPos.y;
+      const initWidth = styleInfo.width as number;
+      const initHeight = styleInfo.height as number;
 
-        const newX = originalStyle.x + deltaX;
-        const newY = originalStyle.y + deltaY;
+      if (type === "drag") {
+        const newX = Math.round(baseTranslateX + dx);
+        const newY = Math.round(baseTranslateY + dy);
 
-        const newStyle = {
+        const updatedStyle = {
           ...selectedLayer.style,
           transform: `translate(${newX}px, ${newY}px)`,
         };
 
-        dispatch(
-          updateLayer({
-            id: selectedLayerId,
-            updates: { style: newStyle },
-          })
-        );
-      } else if (isResizing) {
-        const deltaX = e.clientX - originalMousePos.x;
-        const deltaY = e.clientY - originalMousePos.y;
-
-        let newWidth = originalSize.width;
-        let newHeight = originalSize.height;
-
-        switch (resizeDirection) {
-          case "top-left":
-            newWidth = Math.max(20, originalSize.width - deltaX);
-            newHeight = Math.max(20, originalSize.height - deltaY);
-            break;
-          case "top-right":
-            newWidth = Math.max(20, originalSize.width + deltaX);
-            newHeight = Math.max(20, originalSize.height - deltaY);
-            break;
-          case "bottom-left":
-            newWidth = Math.max(20, originalSize.width - deltaX);
-            newHeight = Math.max(20, originalSize.height + deltaY);
-            break;
-          case "bottom-right":
-            newWidth = Math.max(20, originalSize.width + deltaX);
-            newHeight = Math.max(20, originalSize.height + deltaY);
-            break;
+        if (editMode === "timeline") {
+          dispatch(
+            addKeyframe({
+              layerId: selectedLayer.id,
+              percentage: currentPosition,
+              groupName: "transform",
+              propertyName: "translateX",
+              value: `${newX}`,
+            })
+          );
+          dispatch(
+            addKeyframe({
+              layerId: selectedLayer.id,
+              percentage: currentPosition,
+              groupName: "transform",
+              propertyName: "translateY",
+              value: `${newY}`,
+            })
+          );
+        } else {
+          dispatch(
+            updateLayer({
+              id: dragInfo.layerId,
+              updates: { style: updatedStyle },
+            })
+          );
+        }
+      } else if (type === "resize") {
+        if (corner?.includes("Right")) {
+          newStyle.width = initWidth + dx;
+        }
+        if (corner?.includes("Left")) {
+          newStyle.width = initWidth - dx;
+        }
+        if (corner?.includes("Bottom")) {
+          newStyle.height = initHeight + dy;
+        }
+        if (corner?.includes("Top")) {
+          newStyle.height = initHeight - dy;
         }
 
-        const newStyle = {
+        const updatedStyle = {
           ...selectedLayer.style,
-          width: `${newWidth}px`,
-          height: `${newHeight}px`,
+          width: `${newStyle.width}px`,
+          height: `${newStyle.height}px`,
         };
 
+        // Always update the layer's style
         dispatch(
           updateLayer({
-            id: selectedLayerId,
-            updates: { style: newStyle },
+            id: dragInfo.layerId,
+            updates: { style: updatedStyle },
           })
         );
-      }
-    },
-    [
-      isDragging,
-      isResizing,
-      selectedLayerId,
-      layers,
-      originalStyle,
-      originalSize,
-      resizeDirection,
-      dragStartPos,
-      originalMousePos,
-      dispatch,
-    ]
-  );
 
-  // In Canvas.tsx, modify the handleMouseUp function
-  const handleMouseUp = useCallback(() => {
-    if ((isDragging || isResizing) && selectedLayerId) {
-      const selectedLayer = layers.find((l) => l.id === selectedLayerId);
-      if (selectedLayer) {
-        const el = layerRef.current[selectedLayerId];
-        if (el) {
-          const computedStyle = window.getComputedStyle(el);
-
-          if (isDragging) {
-            const { translateX, translateY } = parseTransform(
-              computedStyle.transform
-            );
-
-            const newStyle = {
-              ...selectedLayer.style,
-            };
-            dispatch(
-              updateLayer({ id: selectedLayerId, updates: { style: newStyle } })
-            );
-
-            dispatch(
-              addKeyframe({
-                layerId: selectedLayerId,
-                percentage: currentPosition,
-                groupName: "position",
-                propertyName: "transform",
-                value: `translate(${translateX}px, ${translateY}px)`,
-              })
-            );
-          }
-
-          if (isResizing) {
-            const newStyle = {
-              ...selectedLayer.style,
-              width: computedStyle.width,
-              height: computedStyle.height,
-            };
-
-            dispatch(
-              updateLayer({ id: selectedLayerId, updates: { style: newStyle } })
-            );
-
-            dispatch(
-              addKeyframe({
-                layerId: selectedLayerId,
-                percentage: currentPosition,
-                groupName: "size",
-                propertyName: "width",
-                value: computedStyle.width,
-              })
-            );
-            dispatch(
-              addKeyframe({
-                layerId: selectedLayerId,
-                percentage: currentPosition,
-                groupName: "size",
-                propertyName: "height",
-                value: computedStyle.height,
-              })
-            );
-          }
+        // Only add keyframes in timeline mode
+        if (editMode === "timeline") {
+          dispatch(
+            addKeyframe({
+              layerId: selectedLayer.id,
+              percentage: currentPosition,
+              groupName: "size",
+              propertyName: "width",
+              value: `${newStyle.width}`,
+            })
+          );
+          dispatch(
+            addKeyframe({
+              layerId: selectedLayer.id,
+              percentage: currentPosition,
+              groupName: "size",
+              propertyName: "height",
+              value: `${newStyle.height}`,
+            })
+          );
         }
       }
-    }
+    },
+    [dragInfo, canvasRef, layers, dispatch, editMode, currentPosition]
+  );
 
-    setIsDragging(false);
-    setIsResizing(false);
-    setResizeDirection(null);
-  }, [
-    isDragging,
-    isResizing,
-    selectedLayerId,
-    layers,
-    currentPosition,
-    dispatch,
-  ]);
+  const handleMouseUp = useCallback(() => {
+    if (dragInfo.type && dragInfo.layerId) {
+      if (!selectedLayerId) return;
+
+      setDragInfo({} as any);
+    }
+  }, [dragInfo]);
 
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
@@ -371,17 +295,20 @@ const Canvas = () => {
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  useEffect(() => {
-    if (selectedLayerId) {
-      const selectedLayer = layers.find((l) => l.id === selectedLayerId);
-      console.log("Selected Layer style:", selectedLayer?.style);
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      dispatch(setSelectedLayer(null));
+      setDragInfo({} as any);
     }
-  }, [layers, selectedLayerId]);
+  };
 
   return (
     <div className={styles.canvasContainer} ref={canvasRef}>
       <div className={styles.grid}></div>
-      <div className={styles.animatedElementContainer}>
+      <div
+        className={styles.animatedElementContainer}
+        onClick={handleCanvasClick}
+      >
         {layers.map((layer) => {
           if (layer.type === "code") {
             if (layer.parentId) return null;
@@ -391,7 +318,7 @@ const Canvas = () => {
               temp.innerHTML = parentLayer.customHtml || "";
               const el = temp.firstElementChild;
               if (!el) return null;
-              const tag = parentLayer.tag;
+              const tag = parentLayer.tag === "p" ? "h5" : parentLayer.tag;
               const children = layers
                 .filter((l) => l.parentId === parentLayer.id)
                 .map((childLayer) => renderLayerTree(childLayer));
@@ -419,7 +346,7 @@ const Canvas = () => {
                     cursor: isSelected ? "move" : "default",
                   },
                   onClick: () => {
-                    dispatch(toggleLayer(parentLayer.id));
+                    /* dispatch(toggleLayer(parentLayer.id)); */
                     dispatch(setSelectedLayer(parentLayer.id));
                   },
                   onMouseDown: (e: React.MouseEvent) => {
@@ -433,19 +360,47 @@ const Canvas = () => {
                     <>
                       <div
                         className={styles.cornerTopLeft}
-                        onMouseDown={(e) => handleMouseDown(e, parentLayer.id)}
+                        onMouseDown={(e) =>
+                          handleMouseDown(
+                            e,
+                            parentLayer.id,
+                            "resize",
+                            "TopLeft"
+                          )
+                        }
                       />
                       <div
                         className={styles.cornerTopRight}
-                        onMouseDown={(e) => handleMouseDown(e, parentLayer.id)}
+                        onMouseDown={(e) =>
+                          handleMouseDown(
+                            e,
+                            parentLayer.id,
+                            "resize",
+                            "TopRight"
+                          )
+                        }
                       />
                       <div
                         className={styles.cornerBottomLeft}
-                        onMouseDown={(e) => handleMouseDown(e, parentLayer.id)}
+                        onMouseDown={(e) =>
+                          handleMouseDown(
+                            e,
+                            parentLayer.id,
+                            "resize",
+                            "BottomLeft"
+                          )
+                        }
                       />
                       <div
                         className={styles.cornerBottomRight}
-                        onMouseDown={(e) => handleMouseDown(e, parentLayer.id)}
+                        onMouseDown={(e) =>
+                          handleMouseDown(
+                            e,
+                            parentLayer.id,
+                            "resize",
+                            "BottomRight"
+                          )
+                        }
                       />
                     </>
                   )}
@@ -464,7 +419,7 @@ const Canvas = () => {
                 }}
                 onMouseDown={(e) => handleMouseDown(e, layer.id)}
                 onClick={() => {
-                  dispatch(toggleLayer(layer.id));
+                  /* dispatch(toggleLayer(layer.id)); */
                   dispatch(setSelectedLayer(layer.id));
                 }}
                 style={{
@@ -482,31 +437,27 @@ const Canvas = () => {
                   <>
                     <span
                       className={styles.cornerTopLeft}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        handleMouseDown(e, layer.id);
-                      }}
+                      onMouseDown={(e) =>
+                        handleMouseDown(e, layer.id, "resize", "TopLeft")
+                      }
                     ></span>
                     <span
                       className={styles.cornerTopRight}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        handleMouseDown(e, layer.id);
-                      }}
+                      onMouseDown={(e) =>
+                        handleMouseDown(e, layer.id, "resize", "TopRight")
+                      }
                     ></span>
                     <span
                       className={styles.cornerBottomLeft}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        handleMouseDown(e, layer.id);
-                      }}
+                      onMouseDown={(e) =>
+                        handleMouseDown(e, layer.id, "resize", "BottomLeft")
+                      }
                     ></span>
                     <span
                       className={styles.cornerBottomRight}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        handleMouseDown(e, layer.id);
-                      }}
+                      onMouseDown={(e) =>
+                        handleMouseDown(e, layer.id, "resize", "BottomRight")
+                      }
                     ></span>
                   </>
                 )}

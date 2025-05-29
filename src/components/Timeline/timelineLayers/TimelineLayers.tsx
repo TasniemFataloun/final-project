@@ -19,6 +19,7 @@ import {
   Settings2,
   Trash2,
 } from "lucide-react";
+import { setEditMode } from "../../../redux/slices/editModeSlice";
 
 type TimelineLayersProps = {
   onOpenLayerSettings: () => void;
@@ -28,6 +29,8 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
   onOpenLayerSettings,
 }) => {
   const dispatch = useAppDispatch();
+  const editMode = useAppSelector((state) => state.editMode.value);
+
   const { layers, selectedLayerId } = useAppSelector(
     (state) => state.animation
   );
@@ -114,7 +117,16 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                 }
               />
             </div>
-            <Settings2 size={14} onClick={onOpenLayerSettings} />
+            <Settings2
+              size={14}
+              onClick={() => {
+                onOpenLayerSettings();
+                dispatch(
+                  setEditMode(editMode === "timeline" ? "class" : "timeline")
+                );
+              }}
+              className={editMode === "timeline" ? "active" : ""}
+            />
 
             <button
               className={style.deleteButton}

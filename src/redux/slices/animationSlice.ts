@@ -1,10 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AnimationConfigType, styleConfig } from "../../types/animationType";
 import { Layer, Propertykeyframes } from "../types/animations.type";
-import {
-  getDefaultConfig,
-  getDefaultPropertiesGroup,
-} from "../../helpers/GetDefaultPropertiesGroup";
+import { getDefaultConfig } from "../../helpers/GetDefaultPropertiesGroup";
 import { transformKeys } from "../../config/importElementsProperties.config";
 
 export interface AnimationState {
@@ -166,7 +163,6 @@ const animationSlice = createSlice({
         });
       }
       // 5. Sort keyframes
-      prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
     updateKeyframePercentage: (
       state,
@@ -193,8 +189,6 @@ const animationSlice = createSlice({
       keyframe.percentage = Math.round(
         Math.max(0, Math.min(100, newPercentage))
       );
-
-      prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
     copyKeyframe: (state, action: PayloadAction<Propertykeyframes>) => {
       state.copyKeyframe = action.payload;
@@ -227,7 +221,6 @@ const animationSlice = createSlice({
       };
 
       prop.keyframes.push(newKeyframe);
-      prop.keyframes.sort((a, b) => a.percentage - b.percentage);
     },
 
     updatePropertyValue: (

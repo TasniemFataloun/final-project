@@ -102,7 +102,18 @@ const TimelineControl = () => {
         </button>
         <button
           className={style.button}
-          onClick={() => dispatch(setIsPlaying(!isPlaying))}
+          onClick={() => {
+            if (
+              layers.length > 0 &&
+              layers.some(
+                (layer) =>
+                  Array.isArray(layer?.editedPropertiesGroup) &&
+                  layer.editedPropertiesGroup.length > 0
+              )
+            ) {
+              dispatch(setIsPlaying(!isPlaying));
+            }
+          }}
         >
           {isPlaying ? <Pause size={12} /> : <Play size={12} />}
         </button>
