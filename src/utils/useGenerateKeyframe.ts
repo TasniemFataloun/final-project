@@ -1,11 +1,14 @@
 import { Layer } from "../redux/types/animations.type";
 
+export const camelToKebab = (str: string) =>
+  str
+    .replace(/\s+/g, "-") // replace spaces
+    .replace(/[A-Z]/g, (match) => "-" + match.toLowerCase()); // camel to kebab
+
 export const UseGenerateKeyframes = (layer: Layer) => {
   if (!layer || !layer.editedPropertiesGroup) return "";
 
   const sanitizedLayerName = layer.name?.toLowerCase().replace(/\s+/g, "-");
-  const camelToKebab = (str: string) =>
-    str.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase());
 
   const className = `.${sanitizedLayerName}`;
   const baseStyles: string[] = [];
