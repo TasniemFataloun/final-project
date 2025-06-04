@@ -27,7 +27,7 @@ export interface Layer {
   style: styleConfig;
   editedPropertiesGroup?: PropertyItem[];
   customHtml?: any;
-  customCss?: string;
+ // customCss?: string;
   parentId?: string | null;
   selector?: string;
   config?: AnimationConfigType;

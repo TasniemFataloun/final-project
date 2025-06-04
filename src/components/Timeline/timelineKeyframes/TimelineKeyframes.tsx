@@ -17,6 +17,7 @@ import {
 } from "../../../redux/slices/timelineSlice";
 import { Diamond } from "lucide-react";
 import { Rnd } from "react-rnd";
+import { defaultLayerConfig } from "../../../config/importElementsProperties.config";
 
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
@@ -113,7 +114,9 @@ const TimelineKeyframes = () => {
     const selectedLayer = layers.find(
       (layer) => layer.id === selectedLayerId
     )?.config;
-    const duration = selectedLayer ? selectedLayer.duration * 1000 : 1;
+    const duration = selectedLayer
+      ? selectedLayer.duration * 1000
+      : defaultLayerConfig.duration * 1000;
 
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) {
@@ -243,7 +246,7 @@ const TimelineKeyframes = () => {
                     size={12}
                     className={`${style.keyframe} ${style.collapsedKeyframe}`}
                     style={{ left: `${keyframe.percentage}%` }}
-                    onClick={()=> setCurrentPosition(keyframe.percentage)}
+                    onClick={() => setCurrentPosition(keyframe.percentage)}
                   />
                 ))
               )}

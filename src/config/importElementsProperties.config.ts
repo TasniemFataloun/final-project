@@ -6,7 +6,7 @@ export const importCircleConfig: AnimationConfigType = {
   duration: 1,
   timingFunction: "ease-in-out",
   delay: 0,
-  iterationCount: "infinite",
+  iterationCount: Infinity,
 };
 
 export const importRectangleConfig: AnimationConfigType = {
@@ -14,7 +14,7 @@ export const importRectangleConfig: AnimationConfigType = {
   duration: 1,
   timingFunction: "ease-in-out",
   delay: 0,
-  iterationCount: "infinite",
+  iterationCount: Infinity,
 };
 
 export const importSquareConfig: AnimationConfigType = {
@@ -22,7 +22,7 @@ export const importSquareConfig: AnimationConfigType = {
   duration: 1,
   timingFunction: "ease-in-out",
   delay: 0,
-  iterationCount: "infinite",
+  iterationCount: Infinity,
 };
 
 export const importCodeConfig: AnimationConfigType = {
@@ -30,7 +30,15 @@ export const importCodeConfig: AnimationConfigType = {
   duration: 10,
   timingFunction: "ease-in-out",
   delay: 0,
-  iterationCount: "infinite",
+  iterationCount: Infinity,
+};
+
+export const defaultLayerConfig: AnimationConfigType = {
+  type: "code",
+  duration: 10,
+  timingFunction: "ease-in-out",
+  delay: 0,
+  iterationCount: Infinity,
 };
 
 //transform properties

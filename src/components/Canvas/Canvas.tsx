@@ -8,6 +8,7 @@ import {
   setSelectedLayer,
   updateLayer,
 } from "../../redux/slices/animationSlice";
+import { defaultConfig } from "../../config/propertiespanel.config";
 
 const Canvas = () => {
   const dispatch = useAppDispatch();
@@ -28,8 +29,6 @@ const Canvas = () => {
     startY: number;
     baseTranslateX: number;
     baseTranslateY: number;
-    currentTranslateX: number;
-    currentTranslateY: number;
     layerId: string | null;
     styleInfo: React.CSSProperties;
     corner?: string;
@@ -39,15 +38,13 @@ const Canvas = () => {
     startY: 0,
     baseTranslateX: 0,
     baseTranslateY: 0,
-    currentTranslateX: 0,
-    currentTranslateY: 0,
     layerId: null,
     styleInfo: {},
   });
 
   // Animation effects (keep your existing useEffect hooks)
   useEffect(() => {
-    if (!isPlaying) {
+    if (!isPlaying && editMode === "timeline") {
       layers.forEach((layer) => {
         const el = layerRef.current[layer.id];
         if (el && layer.visible) {
@@ -55,7 +52,7 @@ const Canvas = () => {
         }
       });
     }
-  }, [currentPosition, layers, isPlaying]);
+  }, [currentPosition, layers, isPlaying, editMode]);
 
   // Playback loop effect
   useEffect(() => {
@@ -69,11 +66,15 @@ const Canvas = () => {
         const el = layerRef.current[layer.id];
         if (!el || !layer.visible) return;
 
-        const layerDuration = layer.config?.duration || 1;
+        const layerDuration =
+          layer.config?.duration || defaultConfig.layerConfig.duration;
         const iterations =
-          layer.config?.iterationCount === "infinite"
+          layer.config?.iterationCount === Infinity
             ? Infinity
-            : parseInt(layer.config?.iterationCount || "1");
+            : parseInt(
+                layer.config?.iterationCount ||
+                  defaultConfig.layerConfig.iterationCount
+              );
 
         const totalDuration = layerDuration * iterations;
         const baseTime = (currentPosition / 100) * layerDuration;
@@ -147,8 +148,6 @@ const Canvas = () => {
       type,
       startX: e.clientX - canvasRect.left,
       startY: e.clientY - canvasRect.top,
-      currentTranslateX: 0,
-      currentTranslateY: 0,
       baseTranslateX: matrix.m41,
       baseTranslateY: matrix.m42,
       layerId,
@@ -425,7 +424,6 @@ const Canvas = () => {
                   ...layer.style,
                   position: "absolute",
                   visibility: layer.visible ? "visible" : "hidden",
-                  animationPlayState: isPlaying ? "running" : "paused",
                   cursor: layer.id === selectedLayerId ? "move" : "default",
                 }}
                 className={`${styles.animatedElement} layer-${layer.id} ${

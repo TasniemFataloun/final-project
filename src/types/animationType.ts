@@ -2,7 +2,7 @@ export type AnimationConfigType = {
   duration: number;
   timingFunction: string;
   delay: number;
-  iterationCount: string;
+  iterationCount: number;
   [key: string]: string | number;
 };
 

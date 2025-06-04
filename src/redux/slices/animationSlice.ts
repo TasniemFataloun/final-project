@@ -3,6 +3,7 @@ import { AnimationConfigType, styleConfig } from "../../types/animationType";
 import { Layer, Propertykeyframes } from "../types/animations.type";
 import { getDefaultConfig } from "../../helpers/GetDefaultPropertiesGroup";
 import { transformKeys } from "../../config/importElementsProperties.config";
+import { RootState } from "@reduxjs/toolkit/query";
 
 export interface AnimationState {
   layers: Layer[];
@@ -379,6 +380,6 @@ export type AnimationActionType =
   | typeof setLayerConfigSettings
   | typeof setSelectedKeyframe
   | typeof setCurrentPosition
-  | typeof removeSelectedKeyframe;
+  | typeof removeSelectedKeyframe; 
 
 export default animationSlice.reducer;

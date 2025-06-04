@@ -2,12 +2,19 @@ import { Clock8 } from "lucide-react";
 import style from "./TimelineHeader.module.css";
 import { useAppSelector } from "../../../redux/store";
 import React, { useMemo } from "react";
+import { defaultLayerConfig } from "../../../config/importElementsProperties.config";
 
 const TimelineHeader = () => {
   const { currentPosition } = useAppSelector((state) => state.animation);
+  const { layers, selectedLayerId } = useAppSelector(
+    (state) => state.animation
+  );
+  const selectedLayer = layers.find((l) => l.id == selectedLayerId)?.config;
 
   const formatTime = (position: number) => {
-    const duration = 1;
+    const duration = selectedLayer
+      ? selectedLayer.duration
+      : defaultLayerConfig.duration;
     const currentTime = (position / 100) * duration;
     return currentTime.toFixed(2);
   };
