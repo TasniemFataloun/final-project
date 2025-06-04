@@ -6,7 +6,6 @@ import {
   addKeyframe,
   setIsPlaying,
   setSelectedLayer,
-  updateLayer,
 } from "../../redux/slices/animationSlice";
 import { defaultConfig } from "../../config/propertiespanel.config";
 
@@ -44,7 +43,7 @@ const Canvas = () => {
 
   // Animation effects (keep your existing useEffect hooks)
   useEffect(() => {
-    if (!isPlaying && editMode === "timeline") {
+    if (!isPlaying) {
       layers.forEach((layer) => {
         const el = layerRef.current[layer.id];
         if (el && layer.visible) {
@@ -181,45 +180,31 @@ const Canvas = () => {
       const selectedLayer = layers.find((l) => l.id === layerId);
       if (!selectedLayer) return;
       let newStyle: Partial<React.CSSProperties> = {};
-
       const initWidth = styleInfo.width as number;
       const initHeight = styleInfo.height as number;
+      const addKeyframes = (
+        groupName: string,
+        propertyName: string,
+        value: any
+      ) => {
+        dispatch(
+          addKeyframe({
+            layerId: selectedLayer.id,
+            percentage: currentPosition,
+            groupName,
+            propertyName,
+            value: `${value}`,
+          })
+        );
+      };
 
       if (type === "drag") {
         const newX = Math.round(baseTranslateX + dx);
         const newY = Math.round(baseTranslateY + dy);
 
-        const updatedStyle = {
-          ...selectedLayer.style,
-          transform: `translate(${newX}px, ${newY}px)`,
-        };
-
         if (editMode === "timeline") {
-          dispatch(
-            addKeyframe({
-              layerId: selectedLayer.id,
-              percentage: currentPosition,
-              groupName: "transform",
-              propertyName: "translateX",
-              value: `${newX}`,
-            })
-          );
-          dispatch(
-            addKeyframe({
-              layerId: selectedLayer.id,
-              percentage: currentPosition,
-              groupName: "transform",
-              propertyName: "translateY",
-              value: `${newY}`,
-            })
-          );
-        } else {
-          dispatch(
-            updateLayer({
-              id: dragInfo.layerId,
-              updates: { style: updatedStyle },
-            })
-          );
+          addKeyframes("transform", "translateX", newX);
+          addKeyframes("transform", "translateY", newY);
         }
       } else if (type === "resize") {
         if (corner?.includes("Right")) {
@@ -235,41 +220,8 @@ const Canvas = () => {
           newStyle.height = initHeight - dy;
         }
 
-        const updatedStyle = {
-          ...selectedLayer.style,
-          width: `${newStyle.width}px`,
-          height: `${newStyle.height}px`,
-        };
-
-        // Always update the layer's style
-        dispatch(
-          updateLayer({
-            id: dragInfo.layerId,
-            updates: { style: updatedStyle },
-          })
-        );
-
-        // Only add keyframes in timeline mode
-        if (editMode === "timeline") {
-          dispatch(
-            addKeyframe({
-              layerId: selectedLayer.id,
-              percentage: currentPosition,
-              groupName: "size",
-              propertyName: "width",
-              value: `${newStyle.width}`,
-            })
-          );
-          dispatch(
-            addKeyframe({
-              layerId: selectedLayer.id,
-              percentage: currentPosition,
-              groupName: "size",
-              propertyName: "height",
-              value: `${newStyle.height}`,
-            })
-          );
-        }
+        addKeyframes("size", "width", newStyle.width);
+        addKeyframes("size", "height", newStyle.height);
       }
     },
     [dragInfo, canvasRef, layers, dispatch, editMode, currentPosition]

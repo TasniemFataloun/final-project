@@ -65,7 +65,55 @@ export const animateLayer = (
     if (kfs.length == 0) return;
     let prev = kfs[0];
     let next = kfs[kfs.length - 1];
+    if (kfs.length === 1) {
+      const kf = kfs[0];
+      let defaultValue = layer.style[prop.propertyName] || "0";
 
+      if (
+        prop.propertyName.includes("translate") ||
+        prop.propertyName === "scale" ||
+        prop.propertyName === "rotate"
+      ) {
+        const transform = layer.style.transform || "none";
+        const matrix = new DOMMatrix(transform);
+
+        switch (prop.propertyName) {
+          case "translateX":
+            defaultValue = `${matrix.m41}px`;
+            break;
+          case "translateY":
+            defaultValue = `${matrix.m42}px`;
+            break;
+          case "scale":
+            defaultValue = matrix.a.toString();
+            break;
+          case "rotate":
+            const angleRad = Math.atan2(matrix.b, matrix.a);
+            const angleDeg = (angleRad * 180) / Math.PI;
+            defaultValue = `${angleDeg}deg`;
+            break;
+        }
+      }
+
+      let localProgress = time / kf.percentage;
+      if (time >= kf.percentage) localProgress = 1;
+      else if (time <= 0) localProgress = 0;
+
+      if (kf.value.startsWith("#") && defaultValue.startsWith("#")) {
+        style[prop.propertyName] = interpolateColor(
+          defaultValue,
+          kf.value,
+          localProgress
+        );
+      } else {
+        const from = parseFloat(defaultValue);
+        const to = parseFloat(kf.value);
+        const interpolated = interpolate(from, to, localProgress);
+        style[prop.propertyName] = `${interpolated}${kf.unit}`;
+      }
+
+      continue;
+    }
     for (let i = 0; i < kfs.length - 1; i++) {
       if (time >= kfs[i].percentage && time <= kfs[i + 1].percentage) {
         prev = kfs[i];

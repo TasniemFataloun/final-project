@@ -5,7 +5,7 @@ import { setLayerConfigSettings } from "../../redux/slices/animationSlice";
 
 const LayerConfigSetting = () => {
   const dispatch = useAppDispatch();
-  const editMode = useAppSelector((state) => state.editMode.value); // Add this line
+  const editMode = useAppSelector((state) => state.editMode.value); 
 
   const selectedLayerId = useAppSelector(
     (state) => state.animation.selectedLayerId

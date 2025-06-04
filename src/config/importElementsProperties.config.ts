@@ -35,7 +35,7 @@ export const importCodeConfig: AnimationConfigType = {
 
 export const defaultLayerConfig: AnimationConfigType = {
   type: "code",
-  duration: 10,
+  duration: 1,
   timingFunction: "ease-in-out",
   delay: 0,
   iterationCount: Infinity,

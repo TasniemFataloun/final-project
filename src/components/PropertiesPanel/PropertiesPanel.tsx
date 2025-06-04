@@ -9,9 +9,7 @@ import { ChevronDown, ChevronRight, PanelRightClose } from "lucide-react";
 import {
   addKeyframe,
   setConfig,
-  updateLayer,
 } from "../../redux/slices/animationSlice";
-
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -62,47 +60,6 @@ const PropertiesPanel = () => {
     if (!selectedLayerId || !selectedLayer) return;
 
     // For transform properties
-    if (groupName === "transform") {
-      const currentTransform = selectedLayer.style?.transform || ""
-
-
-      // Preserve all transform properties
-      const newTransform = {
-        currentTransform,
-        [propertyName]: newValue,
-      };
-
-      // Convert back to transform string
-      const transformString = `translate(${newTransform.translateX || 0}px, ${
-        newTransform.translateY || 0
-      }px)`;
-
-      dispatch(
-        updateLayer({
-          id: selectedLayerId,
-          updates: {
-            style: {
-              ...selectedLayer.style,
-              transform: transformString,
-            },
-          },
-        })
-      );
-    }
-    // For regular style properties
-    else {
-      dispatch(
-        updateLayer({
-          id: selectedLayerId,
-          updates: {
-            style: {
-              ...selectedLayer.style,
-              [propertyName]: newValue,
-            },
-          },
-        })
-      );
-    }
 
     dispatch(
       addKeyframe({
@@ -162,8 +119,6 @@ const PropertiesPanel = () => {
         break;
       }
     }
-
-    
 
     return (
       activeKeyframe?.value ||
