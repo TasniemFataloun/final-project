@@ -214,6 +214,7 @@ const TimelineKeyframes = () => {
 
   return (
     <div
+      data-tour="timeline-keyframes"
       className={`${style.keyframesContainer} ${style.scrole}`}
       onClick={handleTimelineClick}
       onMouseDown={handleMouseDown}
@@ -327,6 +328,7 @@ const TimelineKeyframes = () => {
                       }}
                     >
                       <Diamond
+                        data-tour="keyframe"
                         size={17}
                         fill="var(--selectedLayer)"
                         className={`${style.keyframe} ${

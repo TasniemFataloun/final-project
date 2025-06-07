@@ -2,12 +2,14 @@ import style from "./Header.module.css";
 import ExportCss from "../ExportCss/ExportCss";
 import ToggleSwitch from "../ToggleSwitch/ToggleSwitch";
 import { useAppSelector } from "../../redux/store";
+import { Info } from "lucide-react";
 
 type HeaderProps = {
   onToggleGenerateCss: () => void;
+  onStartTour: () => void;
 };
 
-const Header = ({ onToggleGenerateCss }: HeaderProps) => {
+const Header = ({ onToggleGenerateCss, onStartTour }: HeaderProps) => {
   const layers = useAppSelector((state) => state.animation.layers);
 
   return (
@@ -20,6 +22,7 @@ const Header = ({ onToggleGenerateCss }: HeaderProps) => {
 
         <div className={style.cssAndToggleContainer}>
           {layers.length > 0 && <ExportCss onClick={onToggleGenerateCss} />}
+          <Info onClick={onStartTour} className={style.tourButton} />
           <ToggleSwitch />
         </div>
       </div>

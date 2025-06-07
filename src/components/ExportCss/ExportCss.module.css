@@ -1,8 +1,8 @@
 .exportCss {
   padding: 1rem 3rem;
-  background-color: var(--selectedLayer);
+  background-color: #ff69b4;
   border-radius: 4rem;
-  color:var(--bg);
+  color: var(--bg);
   text-align: center;
   cursor: pointer;
 }

@@ -6,6 +6,7 @@ import {
   addKeyframe,
   setIsPlaying,
   setSelectedLayer,
+  updateLayer,
 } from "../../redux/slices/animationSlice";
 import { defaultConfig } from "../../config/propertiespanel.config";
 
@@ -43,7 +44,7 @@ const Canvas = () => {
 
   // Animation effects (keep your existing useEffect hooks)
   useEffect(() => {
-    if (!isPlaying) {
+    if (!isPlaying && editMode === "timeline") {
       layers.forEach((layer) => {
         const el = layerRef.current[layer.id];
         if (el && layer.visible) {
@@ -68,7 +69,7 @@ const Canvas = () => {
         const layerDuration =
           layer.config?.duration || defaultConfig.layerConfig.duration;
         const iterations =
-          layer.config?.iterationCount === Infinity
+          layer.config?.iterationCount === "infinite"
             ? Infinity
             : parseInt(
                 layer.config?.iterationCount ||
@@ -172,17 +173,15 @@ const Canvas = () => {
       } = dragInfo;
 
       const canvasRect = canvasRef.current.getBoundingClientRect();
-      const mouseXRelativeToCanvas = e.clientX - canvasRect.left;
-      const mouseYRelativeToCanvas = e.clientY - canvasRect.top;
-      const dx = mouseXRelativeToCanvas - startX;
-      const dy = mouseYRelativeToCanvas - startY;
-
+      const dx = e.clientX - canvasRect.left - startX;
+      const dy = e.clientY - canvasRect.top - startY;
       const selectedLayer = layers.find((l) => l.id === layerId);
       if (!selectedLayer) return;
+
       let newStyle: Partial<React.CSSProperties> = {};
       const initWidth = styleInfo.width as number;
       const initHeight = styleInfo.height as number;
-      const addKeyframes = (
+      const addKayframes = (
         groupName: string,
         propertyName: string,
         value: any
@@ -201,10 +200,23 @@ const Canvas = () => {
       if (type === "drag") {
         const newX = Math.round(baseTranslateX + dx);
         const newY = Math.round(baseTranslateY + dy);
+        const updatedStyle = {
+          ...selectedLayer.style,
+          transform: `translate(${newX}px, ${newY}px)`,
+        };
 
         if (editMode === "timeline") {
-          addKeyframes("transform", "translateX", newX);
-          addKeyframes("transform", "translateY", newY);
+          addKayframes("transform", "translateX", newX);
+          addKayframes("transform", "translateY", newY);
+        }
+
+        if (editMode !== "timeline") {
+          dispatch(
+            updateLayer({
+              id: dragInfo.layerId,
+              updates: { style: updatedStyle },
+            })
+          );
         }
       } else if (type === "resize") {
         if (corner?.includes("Right")) {
@@ -220,8 +232,10 @@ const Canvas = () => {
           newStyle.height = initHeight - dy;
         }
 
-        addKeyframes("size", "width", newStyle.width);
-        addKeyframes("size", "height", newStyle.height);
+        addKayframes("size", "width", newStyle.width);
+        addKayframes("size", "height", newStyle.height);
+        if (editMode === "timeline") {
+        }
       }
     },
     [dragInfo, canvasRef, layers, dispatch, editMode, currentPosition]
@@ -247,13 +261,13 @@ const Canvas = () => {
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      //dispatch(setSelectedLayer(null));
+      dispatch(setSelectedLayer(null));
       setDragInfo({} as any);
     }
   };
 
   return (
-    <div className={styles.canvasContainer} ref={canvasRef}>
+    <div className={styles.canvasContainer} ref={canvasRef} data-tour="canvas">
       <div className={styles.grid}></div>
       <div
         className={styles.animatedElementContainer}

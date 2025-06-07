@@ -89,18 +89,27 @@ const TimelineControl = () => {
   };
 
   return (
-    <div className={style.header}>
+    <div className={style.header} data-tour="timeline-controls">
       <div className={style.controlsSection}>
-        <button className={style.button} onClick={restart}>
+        <button className={style.button} onClick={restart} data-tour="restart">
           <SkipBack size={12} />
         </button>
-        <button className={style.button} onClick={stepBackward}>
+        <button
+          className={style.button}
+          onClick={stepBackward}
+          data-tour="step-backward"
+        >
           <ChevronLeft size={12} />
         </button>
-        <button className={style.button} onClick={moveToPreviousKeyframe}>
+        <button
+          className={style.button}
+          onClick={moveToPreviousKeyframe}
+          data-tour="move-to-previous-keyframe"
+        >
           <Diamond size={8} /> <ChevronLeft size={12} />
         </button>
         <button
+          data-tour="play-pause"
           className={style.button}
           onClick={() => {
             if (
@@ -117,14 +126,26 @@ const TimelineControl = () => {
         >
           {isPlaying ? <Pause size={12} /> : <Play size={12} />}
         </button>
-        <button className={style.button} onClick={moveToNextKeyframe}>
+        <button
+          data-tour="move-to-next-keyframe"
+          className={style.button}
+          onClick={moveToNextKeyframe}
+        >
           <ChevronRight size={12} />
           <Diamond size={8} />
         </button>
-        <button className={style.button} onClick={stepForward}>
+        <button
+          className={style.button}
+          onClick={stepForward}
+          data-tour="step-forward"
+        >
           <ChevronRight size={12} />
         </button>
-        <button className={style.button} onClick={jumpToEnd}>
+        <button
+          className={style.button}
+          onClick={jumpToEnd}
+          data-tour="jump-to-end"
+        >
           <SkipForward size={12} />
         </button>
       </div>

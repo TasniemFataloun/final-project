@@ -20,6 +20,7 @@
 
   /* Padding */
   --padding: 1rem;
+  --general-padding: 0 1rem;
 
   /* Font Sizes */
   --font-size-h1: 1.5rem;
@@ -69,6 +70,11 @@ body,
   padding: 0;
   overflow: hidden;
   width: 100%;
+}
+
+.popover {
+  color: black;
+  background-color: green;
 }
 
 .appContainer {

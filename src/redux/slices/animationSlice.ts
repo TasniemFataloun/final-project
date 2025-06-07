@@ -225,6 +225,34 @@ const animationSlice = createSlice({
 
       prop.keyframes.push(newKeyframe);
     },
+    duplicateLayer: (state, action: PayloadAction<string>) => {
+      const layerId = action.payload;
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer) return;
+      const newLayer: Layer = {
+        ...layer,
+        id: `${layer.id} copy`, // Ensure unique ID
+        name: `${layer.name} copy`, // Ensure unique name
+        editedPropertiesGroup:
+          layer.editedPropertiesGroup?.map((prop) => ({
+            ...prop,
+            keyframes: prop.keyframes.map((kf) => ({
+              ...kf,
+              id: `${kf.id}-copy-${Date.now()}`, // Ensure unique ID
+            })),
+          })) || [],
+        style: { ...layer.style }, // Duplicate style
+        config: {
+          ...layer.config,
+          duration: layer.config?.duration ?? 0,
+          timingFunction: layer.config?.timingFunction ?? "linear",
+          delay: layer.config?.delay ?? 0,
+          iterationCount: layer.config?.iterationCount ?? 1,
+        },
+      };
+      state.layers.push(newLayer);
+      state.selectedLayerId = newLayer.id;
+    },
 
     updatePropertyValue: (
       state,
@@ -351,6 +379,7 @@ export const {
   renameLayer,
   updateKeyframePercentage,
   copyKeyframe,
+  duplicateLayer,
   pasteKeyframe,
   updatePropertyValue,
   removeLayer,
@@ -370,6 +399,7 @@ export type AnimationActionType =
   | typeof renameLayer
   | typeof updateKeyframePercentage
   | typeof copyKeyframe
+  | typeof duplicateLayer
   | typeof pasteKeyframe
   | typeof updatePropertyValue
   | typeof removeLayer
@@ -380,6 +410,6 @@ export type AnimationActionType =
   | typeof setLayerConfigSettings
   | typeof setSelectedKeyframe
   | typeof setCurrentPosition
-  | typeof removeSelectedKeyframe; 
+  | typeof removeSelectedKeyframe;
 
 export default animationSlice.reducer;

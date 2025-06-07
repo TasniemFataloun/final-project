@@ -10,29 +10,16 @@ type HtmlCssCodeProps = {
 
 const defultHtml = `
       <div id="card">
-    <h1 id="image"></h1>
   </div>
 `.trim();
 
 const defultCss = `
 #card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  background:#f2ff00;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  max-width: 300px;
-}
-
-#image {
-  width: 200px;
-  height: 100px;
-  background: red;
-  border-radius: 100px / 50px;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 100px solid red;
 }
 
 `.trim();

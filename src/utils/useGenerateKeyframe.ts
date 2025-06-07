@@ -41,8 +41,8 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   // Now handle transforms
   Object.entries(transformMap).forEach(([pctStr, transforms]) => {
     const pct = Number(pctStr);
-    const x = transforms.translateX; // fallback to 0px if missing
-    const y = transforms.translateY;
+    const x = transforms.translateX || 0; // fallback to 0px if missing
+    const y = transforms.translateY || 0;
 
     const transformLine = `    transform: translate(${x}, ${y});`;
 

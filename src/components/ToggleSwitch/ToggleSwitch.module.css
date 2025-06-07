@@ -1,86 +1,59 @@
-.themeToggle {
-  color: var(--selectedLayer);
-  width: 3rem;
-  transition: transform 0.4s ease;
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
-.sunMoonToggleBtn {
+.toggle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
   position: relative;
-  cursor: pointer;
+  overflow: hidden;
+  transition: 0.3s ease transform;
 }
 
-.themeToggleInput {
-  opacity: 0;
-  width: 100%;
-  aspect-ratio: 1;
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  cursor: pointer;
-}
-
-.themeToggle:hover {
+.toggle:hover {
   transform: scale(1.1);
 }
 
-.sunMoonToggleBtn svg {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.4s ease;
-  transform: rotate(40deg);
+.input {
+  display: none;
 }
 
-.sunMoon {
-  transform-origin: center center;
-  transition: inherit;
+.icon {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  transition: transform 500ms ease;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Moon icon styles */
+.icon--moon {
+  color: var(--panel-bg);
+  transition-delay: 200ms;
   transform: scale(1);
 }
 
-.sunRay {
-  transform-origin: center center;
+/* Sun icon styles */
+.icon--sun {
+  color: yellow;
   transform: scale(0);
 }
 
-.sunRay2 {
-  animation-delay: 0.05s !important;
-}
-.sunRay3 {
-  animation-delay: 0.1s !important;
-}
-.sunRay4 {
-  animation-delay: 0.17s !important;
-}
-.sunRay5 {
-  animation-delay: 0.25s !important;
-}
-.sunRay6 {
-  animation-delay: 0.29s !important;
+/* Toggle ON (light mode): show sun, hide moon */
+.input:checked ~ .icon--moon {
+  transform: rotate(360deg) scale(0);
 }
 
-.themeToggleInput:checked + svg {
-  transform: rotate(90deg);
-}
-
-.themeToggleInput:checked + svg mask > circle {
-  transform: translate(16px, -3px);
-  transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
-}
-
-.themeToggleInput:checked + svg .sunMoon {
-  transform: scale(0.55);
-}
-
-.themeToggleInput:checked + svg .sunRay {
-  animation: showRay1832 0.4s ease 0s 1 forwards;
-}
-
-@keyframes showRay1832 {
-  0% {
-    transform: scale(0);
-  }
-  100% {
-    transform: scale(1);
-  }
+.input:checked ~ .icon--sun {
+  transform: scale(1) rotate(360deg);
+  transition-delay: 200ms;
 }

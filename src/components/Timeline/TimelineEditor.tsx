@@ -12,7 +12,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   onOpenLayerSettings,
 }) => {
   return (
-    <div className={style.container}>
+    <div className={style.container} data-tour="timeline">
       <TimelineControl />
       <TimelineHeader />
       <div className={`${style.timelineBody} ${style.scrole}`}>

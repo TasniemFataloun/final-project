@@ -6,10 +6,7 @@ import {
 } from "../../config/propertiespanel.config";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, PanelRightClose } from "lucide-react";
-import {
-  addKeyframe,
-  setConfig,
-} from "../../redux/slices/animationSlice";
+import { addKeyframe, setConfig } from "../../redux/slices/animationSlice";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -129,6 +126,7 @@ const PropertiesPanel = () => {
 
   return (
     <aside
+      data-tour="properties-panel-sidebar"
       className={` ${style.container} ${
         isPropertiesPanelOpen ? style.openContainer : style.closeContainer
       }`}
@@ -163,7 +161,11 @@ const PropertiesPanel = () => {
             };
 
             return (
-              <div key={sectionKey} className={style.section}>
+              <div
+                key={sectionKey}
+                className={style.section}
+                data-tour="properties-panel-config"
+              >
                 <div className={style.chevronH3} onClick={toggleSection}>
                   {isOpen ? (
                     <ChevronDown size={14} />
@@ -270,7 +272,11 @@ const PropertiesPanel = () => {
             const selectedKeyframeProperty = selectedKeyframe?.property;
 
             return (
-              <div key={sectionKey} className={style.section}>
+              <div
+                key={sectionKey}
+                className={style.section}
+                data-tour="properties-panel-properties"
+              >
                 <div
                   className={style.chevronH3}
                   onClick={toggleSection}

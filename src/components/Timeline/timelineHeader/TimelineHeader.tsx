@@ -42,7 +42,7 @@ const TimelineHeader = () => {
   }, []);
 
   return (
-    <div className={style.timelineHeader}>
+    <div className={style.timelineHeader} data-tour="timeline-header">
       <div className={style.currentProgressTime}>
         <span className={style.timeLable}>{Math.round(currentPosition)}%</span>
         <span className={style.timeLable}>

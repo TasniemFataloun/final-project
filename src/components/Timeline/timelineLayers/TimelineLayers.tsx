@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import style from "./TimelineLayers.module.css";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import {
+  duplicateLayer,
   removeLayer,
   removeSelectedKeyframe,
   renameLayer,
@@ -12,6 +13,7 @@ import { toggleLayer } from "../../../redux/slices/timelineSlice";
 import {
   ChevronDown,
   ChevronRight,
+  Copy,
   Eye,
   EyeOff,
   Lock,
@@ -51,7 +53,7 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
   }, [layers, selectedLayerId, dispatch]);
 
   return (
-    <div className={style.layerList}>
+    <div className={style.layerList} data-tour="timeline-layer-row">
       {layers.map((layer) => (
         <React.Fragment key={layer.id}>
           {/* Layer Header */}
@@ -101,6 +103,14 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
               }
             >
               {layer.locked ? <Lock size={14} /> : <LockOpen size={14} />}
+            </button>
+
+            <button
+              className={style.layerButtons}
+              onClick={() => dispatch(duplicateLayer(layer.id))}
+              title="Duplicate Layer"
+            >
+              <Copy size={14} />
             </button>
             <div
               className={style.layerName}
