@@ -9,17 +9,16 @@ type HtmlCssCodeProps = {
 };
 
 const defultHtml = `
-      <div id="card">
-  </div>
+<div id="egg"></div>
 `.trim();
 
 const defultCss = `
-#card {
-  width: 0;
-  height: 0;
-  border-left: 50px solid transparent;
-  border-right: 50px solid transparent;
-  border-bottom: 100px solid red;
+#egg {
+  display: block;
+  width: 126px;
+  height: 180px;
+  background-color: red;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
 }
 
 `.trim();

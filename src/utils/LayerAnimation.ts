@@ -62,7 +62,47 @@ export const animateLayer = (
   const properties = layer.editedPropertiesGroup || [];
   for (const prop of properties) {
     const kfs = [...prop.keyframes].sort((a, b) => a.percentage - b.percentage);
+
+    // when no keyframe at 100%
+    //if (!kfs || kfs.length === 0) continue;
     if (kfs.length == 0) return;
+    /*     if (kfs[kfs.length - 1].percentage < 100) {
+      const firstKf = kfs[0];
+      let defaultValue = layer.style[prop.propertyName] || "0";
+
+      if (
+        prop.propertyName.includes("translate") ||
+        prop.propertyName === "scale" ||
+        prop.propertyName === "rotate"
+      ) {
+        const transform = layer.style.transform || "none";
+        const matrix = new DOMMatrix(transform);
+
+        switch (prop.propertyName) {
+          case "translateX":
+            defaultValue = `${matrix.m41}px`;
+            break;
+          case "translateY":
+            defaultValue = `${matrix.m42}px`;
+            break;
+          case "scale":
+            defaultValue = matrix.a.toString();
+            break;
+          case "rotate":
+            const angleRad = Math.atan2(matrix.b, matrix.a);
+            const angleDeg = (angleRad * 180) / Math.PI;
+            defaultValue = `${angleDeg}deg`;
+            break;
+        }
+      }
+
+      kfs.push({
+        percentage: 100,
+        value: defaultValue,
+        unit: firstKf.unit ?? "",
+      });
+    } */
+
     let prev = kfs[0];
     let next = kfs[kfs.length - 1];
     if (kfs.length === 1) {
@@ -79,7 +119,7 @@ export const animateLayer = (
 
         switch (prop.propertyName) {
           case "translateX":
-            defaultValue = `${matrix.m41}px`;
+            defaultValue = `${matrix.m41}`;
             break;
           case "translateY":
             defaultValue = `${matrix.m42}px`;
@@ -155,8 +195,10 @@ export const animateLayer = (
 
         return def;
       })();
-
-      const localProgress = time / firstKf.percentage;
+      //
+      let localProgress = time / firstKf.percentage;
+      if (time >= firstKf.percentage) localProgress = 1;
+      else if (time <= 0) localProgress = 0;
 
       if (firstKf.value.startsWith("#") && defaultValue.startsWith("#")) {
         style[prop.propertyName] = interpolateColor(

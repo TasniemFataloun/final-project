@@ -4,6 +4,7 @@ import styles from "./Canvas.module.css";
 import { animateLayer } from "../../utils/LayerAnimation";
 import {
   addKeyframe,
+  removeLayer,
   setIsPlaying,
   setSelectedLayer,
   updateLayer,
@@ -111,8 +112,6 @@ const Canvas = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    dispatch(setSelectedLayer(layerId));
-
     const el = layerRef.current[layerId];
     const canvas = canvasRef.current;
     if (!el || !canvas) return;
@@ -121,7 +120,9 @@ const Canvas = () => {
     const canvasRect = canvas.getBoundingClientRect();
 
     const selectedLayer = layers.find((l) => l.id === layerId);
-    if (!selectedLayer) return;
+    if (!selectedLayer || selectedLayer.locked) return;
+
+    dispatch(setSelectedLayer(layerId));
     dispatch(setIsPlaying(false));
 
     const computedStyle = window.getComputedStyle(el);
@@ -266,6 +267,20 @@ const Canvas = () => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Backspace" || e.key === "Delete") {
+        if (!selectedLayerId) return;
+        dispatch(removeLayer(selectedLayerId));
+        setDragInfo({} as any);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedLayerId, dispatch, setDragInfo]);
+
   return (
     <div className={styles.canvasContainer} ref={canvasRef} data-tour="canvas">
       <div className={styles.grid}></div>
@@ -310,20 +325,21 @@ const Canvas = () => {
                     cursor: isSelected ? "move" : "default",
                   },
                   onClick: () => {
-                    /* dispatch(toggleLayer(parentLayer.id)); */
-                    dispatch(setSelectedLayer(parentLayer.id));
+                    if (!layer.locked) {
+                      dispatch(setSelectedLayer(parentLayer.id));
+                    }
                   },
                   onMouseDown: (e: React.MouseEvent) => {
                     e.stopPropagation();
-                    handleMouseDown(e, parentLayer.id);
+                    if (!layer.locked) handleMouseDown(e, parentLayer.id);
                   },
                 },
                 <>
                   {children.length > 0 ? children : textContent}
-                  {isSelected && (
+                  {isSelected && !parentLayer.locked && (
                     <>
                       <div
-                        className={styles.cornerTopLeft}
+                        className={`${styles.handle} ${styles.cornerTopLeft}`}
                         onMouseDown={(e) =>
                           handleMouseDown(
                             e,
@@ -332,9 +348,11 @@ const Canvas = () => {
                             "TopLeft"
                           )
                         }
-                      />
+                      >
+                        {"\u2194"}
+                      </div>
                       <div
-                        className={styles.cornerTopRight}
+                        className={`${styles.handle} ${styles.cornerTopRight}`}
                         onMouseDown={(e) =>
                           handleMouseDown(
                             e,
@@ -343,9 +361,11 @@ const Canvas = () => {
                             "TopRight"
                           )
                         }
-                      />
+                      >
+                        {"\u2194"}
+                      </div>
                       <div
-                        className={styles.cornerBottomLeft}
+                        className={`${styles.handle} ${styles.cornerBottomLeft}`}
                         onMouseDown={(e) =>
                           handleMouseDown(
                             e,
@@ -354,9 +374,11 @@ const Canvas = () => {
                             "BottomLeft"
                           )
                         }
-                      />
+                      >
+                        <span>{"\u2194"}</span>{" "}
+                      </div>
                       <div
-                        className={styles.cornerBottomRight}
+                        className={`${styles.handle} ${styles.cornerBottomRight}`}
                         onMouseDown={(e) =>
                           handleMouseDown(
                             e,
@@ -365,7 +387,9 @@ const Canvas = () => {
                             "BottomRight"
                           )
                         }
-                      />
+                      >
+                        <span>{"\u2194"}</span>{" "}
+                      </div>
                     </>
                   )}
                 </>
@@ -381,10 +405,13 @@ const Canvas = () => {
                 ref={(el) => {
                   if (el) layerRef.current[layer.id] = el;
                 }}
-                onMouseDown={(e) => handleMouseDown(e, layer.id)}
+                onMouseDown={(e) => {
+                  if (!layer.locked) handleMouseDown(e, layer.id);
+                }}
                 onClick={() => {
-                  /* dispatch(toggleLayer(layer.id)); */
-                  dispatch(setSelectedLayer(layer.id));
+                  if (!layer.locked) {
+                    dispatch(setSelectedLayer(layer.id));
+                  }
                 }}
                 style={{
                   ...layer.style,
@@ -396,32 +423,40 @@ const Canvas = () => {
                   layer.id === selectedLayerId ? styles.selected : ""
                 }`}
               >
-                {layer.id === selectedLayerId && (
+                {layer.id === selectedLayerId && !layer.locked && (
                   <>
                     <span
-                      className={styles.cornerTopLeft}
+                      className={`${styles.handle} ${styles.cornerTopLeft}`}
                       onMouseDown={(e) =>
                         handleMouseDown(e, layer.id, "resize", "TopLeft")
                       }
-                    ></span>
+                    >
+                      {"\u2194"}
+                    </span>
                     <span
-                      className={styles.cornerTopRight}
+                      className={`${styles.handle} ${styles.cornerTopRight}`}
                       onMouseDown={(e) =>
                         handleMouseDown(e, layer.id, "resize", "TopRight")
                       }
-                    ></span>
+                    >
+                      {"\u2194"}
+                    </span>
                     <span
-                      className={styles.cornerBottomLeft}
+                      className={`${styles.handle} ${styles.cornerBottomLeft}`}
                       onMouseDown={(e) =>
                         handleMouseDown(e, layer.id, "resize", "BottomLeft")
                       }
-                    ></span>
+                    >
+                      {"\u2194"}
+                    </span>
                     <span
-                      className={styles.cornerBottomRight}
+                      className={`${styles.handle} ${styles.cornerBottomRight}`}
                       onMouseDown={(e) =>
                         handleMouseDown(e, layer.id, "resize", "BottomRight")
                       }
-                    ></span>
+                    >
+                      {"\u2194"}
+                    </span>
                   </>
                 )}
               </div>

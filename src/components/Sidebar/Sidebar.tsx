@@ -99,7 +99,7 @@ const Sidebar = () => {
 
   return (
     <div className={style.sidebar} data-tour="sidebar">
-      <h2>Add elements </h2>
+      <h2>Add shape </h2>
       <div className={style.iconContainer} data-tour="shapes">
         <RectangleHorizontal
           color="var(--white)"
@@ -125,8 +125,11 @@ const Sidebar = () => {
           onClick={() => handleAddElement("square")}
         />
       </div>
-      <button onClick={() => setShowCodeComponent(true)} data-tour="shapes-htmlcss">
-        Add your own element
+      <button
+        onClick={() => setShowCodeComponent(true)}
+        data-tour="shapes-htmlcss"
+      >
+        Add your own shape
       </button>
 
       {showCodeComponent && (

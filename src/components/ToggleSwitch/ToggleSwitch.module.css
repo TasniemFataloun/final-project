@@ -28,7 +28,7 @@
 .icon {
   grid-column: 1 / 1;
   grid-row: 1 / 1;
-  transition: transform 500ms ease;
+  transition: transform 0.4s ease;
   position: absolute;
   display: flex;
   align-items: center;
@@ -37,8 +37,8 @@
 
 /* Moon icon styles */
 .icon--moon {
-  color: var(--panel-bg);
-  transition-delay: 200ms;
+  color: white;
+  transition-delay: 50ms;
   transform: scale(1);
 }
 

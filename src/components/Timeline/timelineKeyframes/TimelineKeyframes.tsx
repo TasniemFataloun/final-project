@@ -324,7 +324,7 @@ const TimelineKeyframes = () => {
                           })
                         );
                         dispatch(setSelectedLayer(layer.id));
-                        dispatch(setCurrentPosition(kf.percentage));
+                        dispatch(setCurrentPosition(kf.percentage));                        
                       }}
                     >
                       <Diamond

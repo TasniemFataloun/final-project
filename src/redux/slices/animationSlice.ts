@@ -3,7 +3,7 @@ import { AnimationConfigType, styleConfig } from "../../types/animationType";
 import { Layer, Propertykeyframes } from "../types/animations.type";
 import { getDefaultConfig } from "../../helpers/GetDefaultPropertiesGroup";
 import { transformKeys } from "../../config/importElementsProperties.config";
-import { RootState } from "@reduxjs/toolkit/query";
+import { defaultUnits } from "../../config/defaultUnits.config";
 
 export interface AnimationState {
   layers: Layer[];
@@ -16,6 +16,7 @@ export interface AnimationState {
     keyframe: Propertykeyframes;
   } | null;
   copyKeyframe: Propertykeyframes | null;
+  selectedUnit: string | null;
 }
 
 export const initialState: AnimationState = {
@@ -25,6 +26,7 @@ export const initialState: AnimationState = {
   currentPosition: 0,
   selectedKeyframe: null,
   copyKeyframe: null,
+  selectedUnit: null,
 };
 
 const animationSlice = createSlice({
@@ -101,7 +103,6 @@ const animationSlice = createSlice({
         layer.name = newName;
       }
     },
-
     setSelectedLayer: (state, action: PayloadAction<string | null>) => {
       state.selectedLayerId = action.payload;
     },
@@ -116,10 +117,16 @@ const animationSlice = createSlice({
         propertyName: string;
         percentage: number;
         value: any;
+        unit?: string;
       }>
     ) => {
-      const { layerId, propertyName, groupName, percentage, value } =
-        action.payload;
+      const {
+        layerId,
+        propertyName,
+        percentage,
+        value,
+        unit: unitFromPayload,
+      } = action.payload;
       const roundedPercentage = Math.round(
         Math.max(0, Math.min(100, percentage))
       );
@@ -139,17 +146,12 @@ const animationSlice = createSlice({
         layer.editedPropertiesGroup.push(prop);
       }
 
+      // use unit from payload if provided, otherwise fallback to default
       const unit =
-        groupName === "transform" && propertyName === "rotate"
-          ? "deg"
-          : groupName === "opacity"
-          ? ""
-          : groupName === "backgroundColor" &&
-            propertyName === "backgroundColor"
-          ? ""
-          : groupName === "transform" && propertyName === "scale"
-          ? ""
-          : "px";
+        (unitFromPayload && unitFromPayload !== "" ? unitFromPayload : null) ||
+        defaultUnits[propertyName] ||
+        defaultUnits["default"] ||
+        "";
 
       const existingKeyframe = prop.keyframes.find(
         (kf) => kf.percentage === roundedPercentage
@@ -157,6 +159,7 @@ const animationSlice = createSlice({
 
       if (existingKeyframe) {
         existingKeyframe.value = value;
+        if (unit !== undefined) existingKeyframe.unit = unit;
       } else {
         prop.keyframes.push({
           id: `${propertyName}-${roundedPercentage}`,
@@ -165,8 +168,34 @@ const animationSlice = createSlice({
           percentage: roundedPercentage,
         });
       }
-      // 5. Sort keyframes
     },
+
+    updateKeyframeUnit: (
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        propertyName: string;
+        percentage: number;
+        unit: string;
+      }>
+    ) => {
+      const { layerId, propertyName, percentage, unit } = action.payload;
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer || !layer.editedPropertiesGroup) return;
+
+      const prop = layer.editedPropertiesGroup.find(
+        (p) => p.propertyName === propertyName
+      );
+      if (!prop) return;
+
+      const keyframe = prop.keyframes.find(
+        (kf) => kf.percentage === percentage
+      );
+      if (keyframe) {
+        keyframe.unit = unit;
+      }
+    },
+
     updateKeyframePercentage: (
       state,
       action: PayloadAction<{
@@ -247,7 +276,7 @@ const animationSlice = createSlice({
           duration: layer.config?.duration ?? 0,
           timingFunction: layer.config?.timingFunction ?? "linear",
           delay: layer.config?.delay ?? 0,
-          iterationCount: layer.config?.iterationCount ?? 1,
+          iterationCount: layer.config?.iterationCount ?? "1",
         },
       };
       state.layers.push(newLayer);
@@ -370,12 +399,29 @@ const animationSlice = createSlice({
         })
         .filter((prop) => prop.keyframes.length > 0);
     },
+    setSelectedUnit: (state, action: PayloadAction<string | null>) => {
+      state.selectedUnit = action.payload;
+    },
+    lockLayer: (
+      state,
+      action: PayloadAction<{ id: string; locked: boolean }>
+    ) => {
+      const { id, locked } = action.payload;
+      const layer = state.layers.find((l) => l.id === id);
+      if (layer) {
+        layer.locked = locked;
+      }
+    },
+    updateLayerOrder(state, action: PayloadAction<Layer[]>) {
+      state.layers = action.payload;
+    },
   },
 });
 
 export const {
   addLayer,
   addKeyframe,
+  updateKeyframeUnit,
   renameLayer,
   updateKeyframePercentage,
   copyKeyframe,
@@ -391,11 +437,15 @@ export const {
   setSelectedKeyframe,
   setCurrentPosition,
   removeSelectedKeyframe,
+  setSelectedUnit,
+  lockLayer,
+  updateLayerOrder,
 } = animationSlice.actions;
 
 export type AnimationActionType =
   | typeof addLayer
   | typeof addKeyframe
+  | typeof updateKeyframeUnit
   | typeof renameLayer
   | typeof updateKeyframePercentage
   | typeof copyKeyframe
@@ -410,6 +460,9 @@ export type AnimationActionType =
   | typeof setLayerConfigSettings
   | typeof setSelectedKeyframe
   | typeof setCurrentPosition
-  | typeof removeSelectedKeyframe;
+  | typeof removeSelectedKeyframe
+  | typeof setSelectedUnit
+  | typeof lockLayer
+  | typeof updateLayerOrder;
 
 export default animationSlice.reducer;

@@ -6,7 +6,16 @@ import {
 } from "../../config/propertiespanel.config";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, PanelRightClose } from "lucide-react";
-import { addKeyframe, setConfig } from "../../redux/slices/animationSlice";
+import {
+  addKeyframe,
+  setConfig,
+  setSelectedKeyframe,
+  updateKeyframeUnit,
+} from "../../redux/slices/animationSlice";
+import {
+  defaultUnits,
+  getAllowedUnits,
+} from "../../config/defaultUnits.config";
 
 const PropertiesPanel = () => {
   const dispatch = useAppDispatch();
@@ -20,12 +29,24 @@ const PropertiesPanel = () => {
   const selectedLayer = layers.find((el) => el.id === selectedLayerId);
 
   const [openSections, setOpenSections] = useState<string[]>([]);
+  // track unit selections for each property
+  const [unitSelections, setUnitSelections] = useState<Record<string, string>>(
+    () => {
+      const defaults: Record<string, string> = {};
+      Object.entries(propertiesSchema).forEach(([_, sectionData]) => {
+        Object.keys(sectionData.fields).forEach((fieldKey) => {
+          defaults[fieldKey] =
+            defaultUnits[fieldKey] || defaultUnits["default"] || "";
+        });
+      });
+      return defaults;
+    }
+  );
 
   useEffect(() => {
     if (!selectedKeyframe?.property) return;
     let containingSectionKey: string | undefined;
 
-    // Search in propertiesSchema because properties live there
     for (const [sectionKey, sectionData] of Object.entries(propertiesSchema)) {
       if (sectionData.fields.hasOwnProperty(selectedKeyframe.property)) {
         containingSectionKey = sectionKey;
@@ -56,15 +77,37 @@ const PropertiesPanel = () => {
   ) => {
     if (!selectedLayerId || !selectedLayer) return;
 
-    // For transform properties
+    const percentage = Math.round(currentPosition);
+    const unit =
+      unitSelections[propertyName] ||
+      defaultUnits[propertyName] ||
+      defaultUnits["default"] ||
+      "";
 
     dispatch(
       addKeyframe({
         layerId: selectedLayerId,
         groupName,
         propertyName,
-        percentage: Math.round(currentPosition),
+        percentage,
         value: newValue,
+        unit,
+      })
+    );
+
+    const newKeyframeId = `${propertyName}-${percentage}`;
+    const newKeyframe = {
+      id: newKeyframeId,
+      value: newValue,
+      unit: unit,
+      percentage,
+    };
+
+    dispatch(
+      setSelectedKeyframe({
+        layerId: selectedLayerId,
+        property: propertyName,
+        keyframe: newKeyframe,
       })
     );
   };
@@ -123,6 +166,38 @@ const PropertiesPanel = () => {
       (propertyName.includes("translate") ? "0px" : 0)
     );
   };
+
+  // Update selected keyframe when current position changes
+  useEffect(() => {
+    if (!selectedKeyframe || !selectedLayerId) return;
+
+    const layer = layers.find((l) => l.id === selectedLayerId);
+    if (!layer) return;
+
+    const prop = layer.editedPropertiesGroup?.find(
+      (p) => p.propertyName === selectedKeyframe.property
+    );
+    if (!prop) return;
+
+    const keyframe = prop.keyframes.find(
+      (kf) => kf.percentage === Math.round(currentPosition)
+    );
+    if (!keyframe) return;
+
+    dispatch(
+      setSelectedKeyframe({
+        layerId: selectedLayerId,
+        property: selectedKeyframe.property,
+        keyframe: keyframe,
+      })
+    );
+  }, [
+    layers,
+    selectedKeyframe?.property,
+    currentPosition,
+    selectedLayerId,
+    dispatch,
+  ]);
 
   return (
     <aside
@@ -322,51 +397,97 @@ const PropertiesPanel = () => {
                                   )}
                               </select>
                             ) : (
-                              <input
-                                type={fieldProps.type}
-                                value={getValueAtCurrentPosition(fieldKey)}
-                                step={
-                                  fieldProps.type === "number" &&
-                                  "step" in fieldProps
-                                    ? (fieldProps.step as
-                                        | string
-                                        | number
-                                        | undefined)
-                                    : undefined
-                                }
-                                min={
-                                  fieldProps.type === "number" &&
-                                  "min" in fieldProps
-                                    ? (fieldProps.min as
-                                        | string
-                                        | number
-                                        | undefined)
-                                    : undefined
-                                }
-                                max={
-                                  fieldProps.type === "number" &&
-                                  "max" in fieldProps
-                                    ? (fieldProps.max as
-                                        | string
-                                        | number
-                                        | undefined)
-                                    : undefined
-                                }
-                                onChange={(e) =>
-                                  handlePropertyChange(
-                                    fieldKey,
-                                    e.target.value,
-                                    sectionKey
-                                  )
-                                }
-                                className={`${style.input} ${
-                                  (selectedLayer?.editedPropertiesGroup
-                                    ?.length ?? 0) > 0 &&
-                                  selectedKeyframeProperty === fieldKey
-                                    ? style.selectedKeyframeProperty
-                                    : ""
-                                }`}
-                              />
+                              <>
+                                <input
+                                  type={fieldProps.type}
+                                  value={getValueAtCurrentPosition(fieldKey)}
+                                  step={
+                                    fieldProps.type === "number" &&
+                                    "step" in fieldProps
+                                      ? (fieldProps.step as
+                                          | string
+                                          | number
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  min={
+                                    fieldProps.type === "number" &&
+                                    "min" in fieldProps
+                                      ? (fieldProps.min as
+                                          | string
+                                          | number
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  max={
+                                    fieldProps.type === "number" &&
+                                    "max" in fieldProps
+                                      ? (fieldProps.max as
+                                          | string
+                                          | number
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  onChange={(e) =>
+                                    handlePropertyChange(
+                                      fieldKey,
+                                      e.target.value,
+                                      sectionKey
+                                    )
+                                  }
+                                  className={`${style.input} ${
+                                    (selectedLayer?.editedPropertiesGroup
+                                      ?.length ?? 0) > 0 &&
+                                    selectedKeyframeProperty === fieldKey
+                                      ? style.selectedKeyframeProperty
+                                      : ""
+                                  }`}
+                                />
+                                {getAllowedUnits(fieldKey).length > 0 && (
+                                  <select
+                                    value={
+                                      selectedKeyframe?.property === fieldKey
+                                        ? selectedKeyframe?.keyframe?.unit
+                                        : unitSelections[fieldKey] || ""
+                                    }
+                                    onChange={(e) => {
+                                      const unit = e.target.value;
+                                      setUnitSelections((prev) => ({
+                                        ...prev,
+                                        [fieldKey]: unit,
+                                      }));
+
+                                      if (!selectedLayerId) return;
+
+                                      if (
+                                        selectedKeyframe?.property === fieldKey
+                                      ) {
+                                        dispatch(
+                                          updateKeyframeUnit({
+                                            layerId: selectedLayerId,
+                                            propertyName:
+                                              selectedKeyframe.property,
+                                            percentage:
+                                              Math.round(currentPosition),
+                                            unit,
+                                          })
+                                        );
+                                      }
+                                    }}
+                                    className={style.unitSelect}
+                                    disabled={
+                                      getAllowedUnits(fieldKey).length === 0
+                                    }
+                                  >
+                                    <option value="">Unit</option>
+                                    {getAllowedUnits(fieldKey).map((unit) => (
+                                      <option key={unit} value={unit}>
+                                        {unit}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                              </>
                             )}
                           </div>
                         );

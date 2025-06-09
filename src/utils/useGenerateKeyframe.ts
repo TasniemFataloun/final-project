@@ -38,11 +38,16 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     });
   });
 
-  // Now handle transforms
+  let lastX = "0px";
+  let lastY = "0px";
+
   Object.entries(transformMap).forEach(([pctStr, transforms]) => {
     const pct = Number(pctStr);
-    const x = transforms.translateX || 0; // fallback to 0px if missing
-    const y = transforms.translateY || 0;
+    const x = transforms.translateX ?? lastX;
+    const y = transforms.translateY ?? lastY;
+
+    lastX = x;
+    lastY = y;
 
     const transformLine = `    transform: translate(${x}, ${y});`;
 

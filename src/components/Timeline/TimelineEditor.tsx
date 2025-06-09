@@ -3,6 +3,8 @@ import TimelineControl from "./timelineControl/TimelineControl";
 import TimelineHeader from "./timelineHeader/TimelineHeader";
 import TimelineLayers from "./timelineLayers/TimelineLayers";
 import TimelineKeyframes from "./timelineKeyframes/TimelineKeyframes";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 type TimelineEditorProps = {
   onOpenLayerSettings: () => void;
@@ -16,7 +18,10 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
       <TimelineControl />
       <TimelineHeader />
       <div className={`${style.timelineBody} ${style.scrole}`}>
-        <TimelineLayers onOpenLayerSettings={onOpenLayerSettings} />{" "}
+        <DndProvider backend={HTML5Backend}>
+          <TimelineLayers onOpenLayerSettings={onOpenLayerSettings} />{" "}
+        </DndProvider>
+
         <TimelineKeyframes />
       </div>
     </div>
