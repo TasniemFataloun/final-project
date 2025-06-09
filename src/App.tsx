@@ -21,6 +21,7 @@ function AppContent() {
   const handleOpenLayerSettings = () => setShowLayerSettings((prev) => !prev);
   const handleToggleGenerateCss = () => setShowGenerateCss((prev) => !prev);
 
+
   return (
     <div className="appContainer">
       {/*  {showSplash && <SplashScreen />}
@@ -50,7 +51,7 @@ function AppContent() {
             onOpenLayerSettings={handleOpenLayerSettings}
             data-tour="timeline"
           />
-      
+
           {showGenerateCss && (
             <GenerateCss
               onClose={handleToggleGenerateCss}

@@ -17,6 +17,9 @@ const Canvas = () => {
   const { layers, selectedLayerId } = useAppSelector(
     (state) => state.animation
   );
+  const selectedKeyframe = useAppSelector(
+    (state) => state.animation.selectedKeyframe
+  );
   const { isPlaying, currentPosition } = useAppSelector(
     (state) => state.animation
   );
@@ -270,16 +273,18 @@ const Canvas = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Backspace" || e.key === "Delete") {
-        if (!selectedLayerId) return;
-        dispatch(removeLayer(selectedLayerId));
-        setDragInfo({} as any);
+        // Only delete layer if no keyframe is selected (empty selection counts as no selection)
+        if (!selectedKeyframe?.layerId && selectedLayerId) {
+          dispatch(removeLayer(selectedLayerId));
+          setDragInfo({} as any);
+        }
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedLayerId, dispatch, setDragInfo]);
+  }, [selectedLayerId, dispatch, setDragInfo, selectedKeyframe]);
 
   return (
     <div className={styles.canvasContainer} ref={canvasRef} data-tour="canvas">

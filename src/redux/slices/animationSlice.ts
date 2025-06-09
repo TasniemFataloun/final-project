@@ -260,17 +260,17 @@ const animationSlice = createSlice({
       if (!layer) return;
       const newLayer: Layer = {
         ...layer,
-        id: `${layer.id} copy`, // Ensure unique ID
-        name: `${layer.name} copy`, // Ensure unique name
+        id: `${layer.id} copy`,
+        name: `${layer.name} copy`,
         editedPropertiesGroup:
           layer.editedPropertiesGroup?.map((prop) => ({
             ...prop,
             keyframes: prop.keyframes.map((kf) => ({
               ...kf,
-              id: `${kf.id}-copy-${Date.now()}`, // Ensure unique ID
+              id: `${kf.id}-copy-${Date.now()}`,
             })),
           })) || [],
-        style: { ...layer.style }, // Duplicate style
+        style: { ...layer.style },
         config: {
           ...layer.config,
           duration: layer.config?.duration ?? 0,

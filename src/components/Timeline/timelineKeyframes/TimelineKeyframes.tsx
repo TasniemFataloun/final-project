@@ -33,6 +33,9 @@ const TimelineKeyframes = () => {
     (state) => state.animation.selectedKeyframe
   );
 
+  console.log("selectedKeyframe", selectedKeyframe);
+  
+
   //find the layer id
   const layerId = layers.find((layer) => layer.id === selectedLayerId)?.id;
 
@@ -205,6 +208,19 @@ const TimelineKeyframes = () => {
         selectedKeyframe?.keyframe
       ) {
         dispatch(removeSelectedKeyframe());
+        dispatch(
+          setSelectedKeyframe({
+            layerId: "",
+            property: "",
+            keyframe: {
+              id: "",
+              percentage: 0,
+              value: "",
+              unit: "",
+            },
+          })
+        );
+
       }
     };
 

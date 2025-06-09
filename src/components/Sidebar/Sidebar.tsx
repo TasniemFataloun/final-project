@@ -1,7 +1,7 @@
 import style from "./Sidebar.module.css";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { addLayer } from "../../redux/slices/animationSlice";
-import { Square, Circle, RectangleHorizontal } from "lucide-react";
+import { Square, Circle, RectangleHorizontal, Shapes } from "lucide-react";
 import { ElementType, Layer } from "../../redux/types/animations.type";
 import HtmlCssCode from "../HtmlCssCode/HtmlCssCode";
 import { useState } from "react";
@@ -129,6 +129,7 @@ const Sidebar = () => {
         onClick={() => setShowCodeComponent(true)}
         data-tour="shapes-htmlcss"
       >
+        <Shapes size={14} />
         Add your own shape
       </button>
 

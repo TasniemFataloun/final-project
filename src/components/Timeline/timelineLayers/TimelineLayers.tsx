@@ -15,7 +15,7 @@ import { toggleLayer } from "../../../redux/slices/timelineSlice";
 import {
   ChevronDown,
   ChevronRight,
-  Copy,
+  CopyPlus,
   Eye,
   EyeOff,
   Lock,
@@ -124,13 +124,6 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                   {layer.locked ? <Lock size={14} /> : <LockOpen size={14} />}
                 </button>
 
-                <button
-                  className={style.layerButtons}
-                  onClick={() => dispatch(duplicateLayer(layer.id))}
-                  title="Duplicate Layer"
-                >
-                  <Copy size={14} />
-                </button>
                 <div
                   className={style.layerName}
                   onClick={() => dispatch(setSelectedLayer(layer.id))}
@@ -146,6 +139,15 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                     }
                   />
                 </div>
+
+                <button
+                  className={style.layerButtons}
+                  onClick={() => dispatch(duplicateLayer(layer.id))}
+                  title="Duplicate Layer"
+                >
+                  <CopyPlus size={14} />
+                </button>
+
                 <Settings2
                   size={14}
                   onClick={() => {

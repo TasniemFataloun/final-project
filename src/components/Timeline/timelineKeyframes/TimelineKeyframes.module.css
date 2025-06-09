@@ -38,9 +38,9 @@
 }
 
 .selectedKeyframe {
-  stroke: rgb(255, 132, 0);
+  stroke: rgb(255, 0, 128);
+  stroke-width: 3px;
   cursor: grab;
-  scale: 1.1;
 }
 
 .playHead {
