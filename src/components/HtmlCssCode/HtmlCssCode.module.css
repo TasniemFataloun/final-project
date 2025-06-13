@@ -53,7 +53,7 @@ textarea {
 }
 
 .previewContainer {
-  background: var( --timeline-bg);
+  background: var(--timeline-bg);
   border-radius: 4px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -94,3 +94,10 @@ textarea {
   background: #2563eb;
 }
 
+.btnError {
+  background-color: #ef4444;
+}
+.btnError:hover {
+  cursor: not-allowed;
+  background: #ec2e2e;
+}

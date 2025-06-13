@@ -1,37 +1,58 @@
-const interpolate = (from: any, to: any, t: number) => {
+const interpolate = (from: number, to: number, t: number) => {
   return from + (to - from) * t;
 };
 
-const interpolateColor = (from: string, to: string, t: number): string => {
-  // Converts a hex color (#rrggbb) to RGB object { r, g, b }
-  const hexToRgb = (hex: string) => {
-    const cleanHex = hex.replace("#", "");
-    const bigint = parseInt(cleanHex, 16);
-    return {
-      r: (bigint >> 16) & 255,
-      g: (bigint >> 8) & 255,
-      b: bigint & 255,
-    };
-  };
+const hexToRgba = (hex: string) => {
+  if (hex === "transparent") {
+    return { r: 0, g: 0, b: 0, a: 0 };
+  }
 
-  // Converts RGB values back to hex color string
-  const rgbToHex = (r: number, g: number, b: number) => {
-    const toHex = (value: number) => value.toString(16).padStart(2, "0");
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  };
+  const cleanHex = hex.replace("#", "");
+  const bigint = parseInt(cleanHex, 16);
+  let r = 0,
+    g = 0,
+    b = 0,
+    a = 1;
 
-  // Get RGB from both input colors
-  const fromRgb = hexToRgb(from);
-  const toRgb = hexToRgb(to);
+  if (cleanHex.length === 6) {
+    r = (bigint >> 16) & 255;
+    g = (bigint >> 8) & 255;
+    b = bigint & 255;
+  } else if (cleanHex.length === 8) {
+    r = (bigint >> 24) & 255;
+    g = (bigint >> 16) & 255;
+    b = (bigint >> 8) & 255;
+    a = (bigint & 255) / 255;
+  }
 
-  // Interpolate each color channel
-  const r = Math.round(interpolate(fromRgb.r, toRgb.r, t));
-  const g = Math.round(interpolate(fromRgb.g, toRgb.g, t));
-  const b = Math.round(interpolate(fromRgb.b, toRgb.b, t));
-
-  // Convert back to hex
-  return rgbToHex(r, g, b);
+  return { r, g, b, a };
 };
+const rgbToHex = (r: number, g: number, b: number): string => {
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+const interpolateColor = (from: string, to: string, t: number): string => {
+  //transparent color
+  if (from === "transparent" && to === "transparent") {
+    return "transparent";
+  }
+
+  const fromRgba = hexToRgba(from);
+  const toRgba = hexToRgba(to);
+
+  const r = Math.round(interpolate(fromRgba.r, toRgba.r, t));
+  const g = Math.round(interpolate(fromRgba.g, toRgba.g, t));
+  const b = Math.round(interpolate(fromRgba.b, toRgba.b, t));
+  const a = interpolate(fromRgba.a, toRgba.a, t);
+
+  if (a === 0) {
+    return "transparent";
+  }
+
+  return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
+};
+
 function isValidCSSValue(property: string, valueWithUnit: string): boolean {
   const testEl = document.createElement("div");
   testEl.style[property as any] = "";
@@ -52,108 +73,142 @@ const isValidTransformFunction = (fnName: string, value: string): boolean => {
   }
 };
 
+const getDefaultValue = (propertyName: string, layer: any): string => {
+  if (
+    propertyName.includes("translate") ||
+    propertyName === "scale" ||
+    propertyName === "rotate"
+  ) {
+    const matrix = new DOMMatrix(layer.style.transform || "none");
+
+    switch (propertyName) {
+      case "translateX":
+        return `${matrix.m41}px`;
+      case "translateY":
+        return `${matrix.m42}px`;
+      case "scale":
+        return matrix.a.toString();
+      case "rotate": {
+        const angle = (Math.atan2(matrix.b, matrix.a) * 180) / Math.PI;
+        return `${angle}deg`;
+      }
+    }
+  }
+
+  return layer.style[propertyName] || "0";
+};
+
+const extractUnit = (value: string): string => {
+  const match = value.match(/[a-z%]+$/i);
+  return match ? match[0] : "";
+};
+
+const convert = (value: number, unit: string): number => {
+  switch (unit) {
+    case "px":
+      return value;
+    case "rem":
+      return value * 16;
+    case "deg":
+      return value;
+    case "rad":
+      return value * (180 / Math.PI);
+    default:
+      return value;
+  }
+};
+
+const applyInterpolatedStyle = (
+  style: Record<string, string>,
+  propertyName: string,
+  fromVal: string,
+  toVal: string,
+  progress: number,
+  fromUnit: string = "",
+  toUnit: string = ""
+) => {
+  if (
+    (fromVal.startsWith("#") || fromVal === "transparent") &&
+    (toVal.startsWith("#") || toVal === "transparent")
+  ) {
+    style[propertyName] = interpolateColor(
+      fromVal === "transparent" ? "#00000000" : fromVal,
+      toVal === "transparent" ? "#00000000" : toVal,
+      progress
+    );
+  } else {
+    const from = convert(parseFloat(fromVal), fromUnit);
+    const to = convert(parseFloat(toVal), toUnit);
+    const interpolated = interpolate(from, to, progress);
+
+    if (propertyName === "rotate") {
+      style[propertyName] = `${interpolated}deg`;
+    } else if (propertyName === "borderStyle") {
+      // Discrete interpolation for borderStyle
+      style[propertyName] = progress < 0.5 ? fromVal : toVal;
+    } else if (propertyName === "opacity" || propertyName === "scale") {
+      style[propertyName] = `${interpolated}`;
+    } else {
+      style[propertyName] = `${interpolated}px`;
+    }
+  }
+};
+
 export const animateLayer = (
   element: HTMLElement,
   layer: any,
   time: number
 ) => {
   const style: Record<string, string> = {};
-
   const properties = layer.editedPropertiesGroup || [];
+
+  // Handle border properties separately
+  const borderProps = {
+    width: layer.style?.borderWidth || "0px",
+    color: layer.style?.borderColor || "#000000",
+    style: layer.style?.borderStyle || "solid",
+  };
+
   for (const prop of properties) {
     const kfs = [...prop.keyframes].sort((a, b) => a.percentage - b.percentage);
+    if (kfs.length === 0) continue;
 
-    // when no keyframe at 100%
-    //if (!kfs || kfs.length === 0) continue;
-    if (kfs.length == 0) return;
-    /*     if (kfs[kfs.length - 1].percentage < 100) {
-      const firstKf = kfs[0];
-      let defaultValue = layer.style[prop.propertyName] || "0";
+    // 2. Inject default at 0% if missing
+    if (kfs[0].percentage > 0) {
+      const defaultValue = getDefaultValue(prop.propertyName, layer);
+      const unit = extractUnit(defaultValue);
+      kfs.unshift({
+        percentage: 0,
+        value: defaultValue,
+        unit: unit,
+      });
+    }
 
-      if (
-        prop.propertyName.includes("translate") ||
-        prop.propertyName === "scale" ||
-        prop.propertyName === "rotate"
-      ) {
-        const transform = layer.style.transform || "none";
-        const matrix = new DOMMatrix(transform);
-
-        switch (prop.propertyName) {
-          case "translateX":
-            defaultValue = `${matrix.m41}px`;
-            break;
-          case "translateY":
-            defaultValue = `${matrix.m42}px`;
-            break;
-          case "scale":
-            defaultValue = matrix.a.toString();
-            break;
-          case "rotate":
-            const angleRad = Math.atan2(matrix.b, matrix.a);
-            const angleDeg = (angleRad * 180) / Math.PI;
-            defaultValue = `${angleDeg}deg`;
-            break;
-        }
-      }
-
+    // 3. Inject dummy at 100% if needed
+    if (kfs[kfs.length - 1].percentage < 100) {
+      const defaultValue = getDefaultValue(prop.propertyName, layer);
+      const unit = extractUnit(defaultValue);
       kfs.push({
         percentage: 100,
         value: defaultValue,
-        unit: firstKf.unit ?? "",
+        unit: unit,
       });
-    } */
+    }
+
+    // Ensure there's a keyframe at 100%
+    if (kfs[kfs.length - 1].percentage < 100) {
+      const defaultValue = getDefaultValue(prop.propertyName, layer);
+      const unit = extractUnit(defaultValue);
+      kfs.push({
+        percentage: 100,
+        value: defaultValue,
+        unit: unit,
+      });
+    }
 
     let prev = kfs[0];
     let next = kfs[kfs.length - 1];
-    if (kfs.length === 1) {
-      const kf = kfs[0];
-      let defaultValue = layer.style[prop.propertyName] || "0";
 
-      if (
-        prop.propertyName.includes("translate") ||
-        prop.propertyName === "scale" ||
-        prop.propertyName === "rotate"
-      ) {
-        const transform = layer.style.transform || "none";
-        const matrix = new DOMMatrix(transform);
-
-        switch (prop.propertyName) {
-          case "translateX":
-            defaultValue = `${matrix.m41}`;
-            break;
-          case "translateY":
-            defaultValue = `${matrix.m42}px`;
-            break;
-          case "scale":
-            defaultValue = matrix.a.toString();
-            break;
-          case "rotate":
-            const angleRad = Math.atan2(matrix.b, matrix.a);
-            const angleDeg = (angleRad * 180) / Math.PI;
-            defaultValue = `${angleDeg}deg`;
-            break;
-        }
-      }
-
-      let localProgress = time / kf.percentage;
-      if (time >= kf.percentage) localProgress = 1;
-      else if (time <= 0) localProgress = 0;
-
-      if (kf.value.startsWith("#") && defaultValue.startsWith("#")) {
-        style[prop.propertyName] = interpolateColor(
-          defaultValue,
-          kf.value,
-          localProgress
-        );
-      } else {
-        const from = parseFloat(defaultValue);
-        const to = parseFloat(kf.value);
-        const interpolated = interpolate(from, to, localProgress);
-        style[prop.propertyName] = `${interpolated}${kf.unit}`;
-      }
-
-      continue;
-    }
     for (let i = 0; i < kfs.length - 1; i++) {
       if (time >= kfs[i].percentage && time <= kfs[i + 1].percentage) {
         prev = kfs[i];
@@ -162,86 +217,41 @@ export const animateLayer = (
       }
     }
 
-    if (time <= kfs[0].percentage) {
-      const firstKf = kfs[0];
-      const defaultValue = (() => {
-        let def = layer.style[prop.propertyName] || "0";
-
-        if (
-          prop.propertyName.includes("translate") ||
-          prop.propertyName === "scale" ||
-          prop.propertyName === "rotate"
-        ) {
-          const transform = layer.style.transform || "none";
-          const matrix = new DOMMatrix(transform);
-
-          switch (prop.propertyName) {
-            case "translateX":
-              def = `${matrix.m41}px`;
-              break;
-            case "translateY":
-              def = `${matrix.m42}px`;
-              break;
-            case "scale":
-              def = matrix.a.toString();
-              break;
-            case "rotate":
-              const angleRad = Math.atan2(matrix.b, matrix.a);
-              const angleDeg = (angleRad * 180) / Math.PI;
-              def = `${angleDeg}deg`;
-              break;
-          }
-        }
-
-        return def;
-      })();
-      //
-      let localProgress = time / firstKf.percentage;
-      if (time >= firstKf.percentage) localProgress = 1;
-      else if (time <= 0) localProgress = 0;
-
-      if (firstKf.value.startsWith("#") && defaultValue.startsWith("#")) {
-        style[prop.propertyName] = interpolateColor(
-          defaultValue,
-          firstKf.value,
-          localProgress
-        );
-      } else {
-        const from = parseFloat(defaultValue);
-        const to = parseFloat(firstKf.value);
-        const interpolated = interpolate(from, to, localProgress);
-        style[prop.propertyName] = `${interpolated}${firstKf.unit}`;
-      }
-
-      continue;
-    } else if (time >= kfs[kfs.length - 1].percentage) {
-      prev = next = kfs[kfs.length - 1];
-    }
-    const localProgress =
+    let progress =
       prev === next
         ? 0
         : (time - prev.percentage) / (next.percentage - prev.percentage);
 
-    if (prev.value.startsWith("#") && next.value.startsWith("#")) {
-      style[prop.propertyName] = interpolateColor(
-        prev.value,
-        next.value,
-        localProgress
-      );
-    } else {
-      const interpolated = interpolate(
-        parseFloat(prev.value),
-        parseFloat(next.value),
-        localProgress
-      );
-      style[prop.propertyName] = `${interpolated}${prev.unit}`;
+    applyInterpolatedStyle(
+      style,
+      prop.propertyName,
+      prev.value,
+      next.value,
+      progress,
+      prev.unit,
+      next.unit
+    );
+    if (prop.propertyName === "borderWidth") {
+      borderProps.width = style[prop.propertyName];
+      delete style[prop.propertyName];
+    } else if (prop.propertyName === "borderColor") {
+      borderProps.color = style[prop.propertyName];
+      delete style[prop.propertyName];
+    } else if (prop.propertyName === "borderStyle") {
+      borderProps.style = style[prop.propertyName];
+      delete style[prop.propertyName];
     }
+
+    style.border = `${borderProps.width} ${borderProps.style} ${borderProps.color}`;
+    delete style.borderColor;
+    delete style.borderStyle;
+    continue;
   }
 
-  const transformProperties = ["translateX", "translateY", "scale", "rotate"];
+  const transformProps = ["translateX", "translateY", "scale", "rotate"];
   const validTransforms: string[] = [];
 
-  for (const tf of transformProperties) {
+  for (const tf of transformProps) {
     const val = style[tf];
     if (val && isValidTransformFunction(tf, val)) {
       validTransforms.push(`${tf}(${val})`);
@@ -256,7 +266,7 @@ export const animateLayer = (
   }
 
   for (const [key, value] of Object.entries(style)) {
-    if (!transformProperties.includes(key) && value !== undefined) {
+    if (!transformProps.includes(key) && value !== undefined) {
       if (key in element.style) {
         if (isValidCSSValue(key, value)) {
           (element.style as any)[key] = value;

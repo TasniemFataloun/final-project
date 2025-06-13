@@ -4,6 +4,7 @@
   padding: 0.75rem 1rem;
   background: var(--timeline-bg);
   border-bottom: 1px solid var(--border);
+  margin-right: 1rem;
 }
 .controlsSection {
   display: flex;

@@ -1,6 +1,6 @@
 import { AnimationType } from "../types/animationType";
 
-export const defaultConfig:AnimationType = {
+export const defaultConfig: AnimationType = {
   size: {
     width: "",
     height: "",
@@ -56,8 +56,8 @@ export const propertiesSchema = {
   size: {
     title: "Size",
     fields: {
-      width: { label: "Width (px)", type: "number", step: "1", min: "0" },
-      height: { label: "Height (px)", type: "number", step: "1", min: "0" },
+      width: { label: "Width", type: "number", step: "1", min: "0" },
+      height: { label: "Height", type: "number", step: "1", min: "0" },
     },
   },
   opacity: {
@@ -83,8 +83,39 @@ export const propertiesSchema = {
       },
     },
   },
+  border: {
+    title: "Border",
+    fields: {
+      borderWidth: {
+        label: "Border Width",
+        type: "number",
+        step: "1",
+        min: "0",
+      },
+      borderColor: {
+        label: "Border color",
+        type: "color",
+      },
+      borderStyle: {
+        label: "Border style",
+        type: "select",
+        options: [
+          "solid",
+          "dashed",
+          "dotted",
+          "double",
+          "groove",
+          "ridge",
+          "inset",
+          "outset",
+          "none",
+          "hidden",
+        ],
+      },
+    },
+  },
   backgroundColor: {
-    title: "Background",
+    title: "Background Color",
     fields: {
       backgroundColor: { label: "", type: "color" },
     },
@@ -94,8 +125,8 @@ export const propertiesSchema = {
     fields: {
       scale: { label: "Scale", type: "number", step: "0.1", min: "0" },
       rotate: { label: "Rotate (degrees)", type: "number" },
-      translateX: { label: "Translate X (px)", type: "number" },
-      translateY: { label: "Translate Y (px)", type: "number" },
+      translateX: { label: "Translate X", type: "number" },
+      translateY: { label: "Translate Y", type: "number" },
     },
   },
 };

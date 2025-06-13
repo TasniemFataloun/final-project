@@ -1,10 +1,10 @@
 /* 848484 */
 :root {
   --white: #ffffff;
-  --panel-bg: #e2e2e2;
-  --bg: hsl(0, 0%, 23%);
-  --header-bg: #2a2a2a;
-  --timeline-bg: #2d2d2f;
+  --panel-bg: #ffffff;
+  --bg: rgb(61, 65, 76); /*#494c50*/
+  --header-bg: #1f2024;
+  --timeline-bg: #1c1e22;
   --button-bg: #5a5b60;
 
   --border: #ffffff;
@@ -40,7 +40,6 @@ body[data-theme="light"] {
   --bg: #f3f4f6;
   --header-bg: #b5b8bd;
 
-  --text-color: #1e2025;
   --timeline-bg: #d7d8dd;
 
   --button-hover-bg: #c9ccd3;
@@ -56,7 +55,6 @@ body[data-theme="light"] {
 
 body {
   font-family: "Source Sans Pro", sans-serif;
-  color: var(--text-color);
   margin: 0;
   padding: 0;
 }
@@ -84,13 +82,14 @@ body,
   overflow: hidden;
 }
 
-/* Main Content */
+/* main content */
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background-color: var(--bg);
 }
 
 .canvasTimelineContainer {
@@ -100,6 +99,7 @@ body,
 }
 
 .canvasPropertiesTimeline {
+  flex: 1;
   display: flex;
   overflow: hidden;
 }
@@ -107,13 +107,11 @@ body,
 h1 {
   font-size: var(--font-size-h1);
   font-weight: var(--font-weight-bold);
-  color: var(--text-color);
 }
 
 h2 {
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-semibold);
-  color: var(--text-color);
 }
 
 h3 {
@@ -121,15 +119,19 @@ h3 {
   font-weight: var(--font-weight-bold);
   margin-top: 16px;
   margin-bottom: 0.5rem;
-  color: var(--text-color);
 }
 
 label {
   font-size: var(--font-size-label);
   font-weight: var(--font-weight-medium);
-  color: var(--text-color);
 }
 
 button:focus {
   outline: none;
+}
+
+.css-error-decoration {
+  text-decoration: wavy underline #ef4444;
+  text-decoration-skip-ink: none;
+  font-weight: bold;
 }

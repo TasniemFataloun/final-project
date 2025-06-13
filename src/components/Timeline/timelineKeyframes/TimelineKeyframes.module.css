@@ -1,9 +1,11 @@
 .keyframesContainer {
   position: relative;
-  flex: 1;
-  cursor: pointer;
+  padding-right: 1rem;
   width: 30rem;
   margin-left: 0.2rem;
+  flex: 1;
+  height: 100%; /* ✅ match parent height */
+  cursor: pointer;
 }
 
 .row {
@@ -38,7 +40,7 @@
 }
 
 .selectedKeyframe {
-  stroke: rgb(255, 0, 128);
+  stroke: var(--keyframe-color);
   stroke-width: 3px;
   cursor: grab;
 }
@@ -46,10 +48,48 @@
 .playHead {
   position: absolute;
   width: 2px;
-  height: 100%;
+  /* Remove height: 100% */
   background-color: var(--playhead);
   top: 0;
   transform: translateX(-50%);
+  /* Add bottom position to match the visible area */
+  bottom: 0;
+}
+.playHeadContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  /* This will make sure the playhead stays above all layers */
+  z-index: 10;
+}
+
+.playHead::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 8px solid var(--playhead);
+}
+
+.playHead::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background-color: var(--playhead);
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
 }
 
 .scrole::-webkit-scrollbar {

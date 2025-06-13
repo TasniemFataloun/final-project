@@ -2,8 +2,17 @@ import { Layer } from "../redux/types/animations.type";
 
 export const camelToKebab = (str: string) =>
   str
-    .replace(/\s+/g, "-") // replace spaces
-    .replace(/[A-Z]/g, (match) => "-" + match.toLowerCase()); // camel to kebab
+    .replace(/\s+/g, "-")
+    .replace(/[A-Z]/g, (match) => "-" + match.toLowerCase());
+
+interface KeyframeStep {
+  styles: string[];
+  borderProps?: {
+    width?: string;
+    color?: string;
+    style?: string;
+  };
+}
 
 export const UseGenerateKeyframes = (layer: Layer) => {
   if (!layer || !layer.editedPropertiesGroup) return "";
@@ -12,7 +21,7 @@ export const UseGenerateKeyframes = (layer: Layer) => {
 
   const className = `.${sanitizedLayerName}`;
   const baseStyles: string[] = [];
-  const keyframeSteps: Record<number, string[]> = {};
+  const keyframeSteps: Record<number, KeyframeStep> = {};
 
   const transformMap: Record<number, Record<string, string>> = {};
 
@@ -20,17 +29,19 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     group.keyframes.forEach((kf) => {
       const percentage = kf.percentage;
       const prop = group.propertyName;
-      const val = `${kf.value}${kf.unit}`;
+      const val = `${kf.value}${
+        kf.unit || (prop === "borderWidth" ? "px" : "")
+      }`;
 
       if (!keyframeSteps[percentage]) {
-        keyframeSteps[percentage] = [];
+        keyframeSteps[percentage] = { styles: [] };
       }
 
       if (prop === "translateX" || prop === "translateY") {
         if (!transformMap[percentage]) transformMap[percentage] = {};
         transformMap[percentage][prop] = val;
       } else {
-        keyframeSteps[percentage].push(`    ${prop}: ${val};`);
+        keyframeSteps[percentage].styles.push(`    ${prop}: ${val};`);
         if (percentage === 0) {
           baseStyles.push(`  ${prop}: ${val};`);
         }
@@ -51,13 +62,13 @@ export const UseGenerateKeyframes = (layer: Layer) => {
 
     const transformLine = `    transform: translate(${x}, ${y});`;
 
-    if (!keyframeSteps[pct]) keyframeSteps[pct] = [];
+    if (!keyframeSteps[pct]) keyframeSteps[pct] = { styles: [] };
 
-    const alreadyHasTransform = keyframeSteps[pct].some((line) =>
+    const alreadyHasTransform = keyframeSteps[pct].styles.some((line) =>
       line.trim().startsWith("transform:")
     );
     if (!alreadyHasTransform) {
-      keyframeSteps[pct].push(transformLine);
+      keyframeSteps[pct].styles.push(transformLine);
     }
 
     if (pct === 0) {
@@ -80,18 +91,13 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     if (key === "type") return false;
     if (value === "" || value === null || value === undefined) return false;
 
-    const zeroValues = new Set(["0", "0px", "0deg", "0%", 0]);
-
     if (typeof value === "object" && value !== null) {
       const subKeys = Object.keys(value);
       const allSubPropsExist = subKeys.every((subKey) => styleKeys.has(subKey));
       if (allSubPropsExist) return false;
     }
 
-    if (typeof value === "string") {
-      const normalized = value.trim().toLowerCase();
-      if (zeroValues.has(normalized)) return false;
-    } else if (typeof value === "number") {
+    if (typeof value === "number") {
       if (value === 0) return false;
     }
 
@@ -119,12 +125,12 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     anim?.iterationCount || "infinite"
   };`;
 
-  const baseClassCss = `${`
+  const baseClassCss = `
 ${className} {
 ${propsClassName}
 ${animationCss}
-  }
-`}`.trim();
+}
+`.trim();
 
   const sortedPercentages = Object.keys(keyframeSteps)
     .map((k) => parseFloat(k))
@@ -135,7 +141,7 @@ ${animationCss}
       ? `
 @keyframes ${animationName} {
 ${sortedPercentages
-  .map((pct) => `  ${pct}% {\n${keyframeSteps[pct].join("\n")}\n  }`)
+  .map((pct) => `  ${pct}% {\n${keyframeSteps[pct].styles.join("\n")}\n  }`)
   .join("\n")}
 }`
       : "";

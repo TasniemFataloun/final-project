@@ -1,17 +1,140 @@
 .sidebar {
-  min-width: 20rem;
-  max-width: 20rem;
-  width: 20rem;
+  min-width: 15px; /* enforce min width */
+  max-width: 40rem;
   background-color: var(--bg);
-  padding: var(--padding);  
+  padding: var(--padding);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 90%;
+}
+
+.shapesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .iconContainer {
   display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .iconButton {
   background-color: transparent;
-  width: 100%;
   border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.iconButton:hover {
+  transform: scale(1.15);
+}
+
+.handlerContainer {
+  text-align: center;
+}
+
+.resizeHandleHorizontal {
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
+  z-index: 1;
+  background-color: var(--control-colors);
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  font-size: 14px;
+  color: var(--bg);
+  /* Center content */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  cursor: col-resize;
+  user-select: none;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+  margin: 0 auto;
+  transform: rotate(90deg);
+}
+
+.resizeHandleHorizontal:hover {
+  background: var(--button-hover-bg);
+}
+
+.sidebarButtons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(
+    135deg,
+    var(--control-colors) 0%,
+    var(--button-hover-bg) 100%
+  );
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 1px 4px var(--highlight-color);
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.shape {
+  width: 30%;
+}
+
+.text {
+  width: 50%;
+}
+.sidebarButtons:hover {
+  background: var(--highlight-color);
+  transform: translateY(-2px);
+}
+
+.sidebarButtons:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.resetButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--danger-color, #ff4d4f);
+  background: transparent;
+  border: 2px solid var(--danger-color, #ff4d4f);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.resetButton:hover {
+  background: var(--danger-color, #ff4d4f);
+  color: white;
+}
+
+.resetButton:active {
+  transform: scale(0.98);
 }

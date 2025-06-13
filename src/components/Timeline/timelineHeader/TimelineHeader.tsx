@@ -2,7 +2,7 @@ import { Clock8 } from "lucide-react";
 import style from "./TimelineHeader.module.css";
 import { useAppSelector } from "../../../redux/store";
 import React, { useMemo } from "react";
-import { defaultLayerConfig } from "../../../config/importElementsProperties.config";
+import { defaultLayerConfig } from "../../../config/elementsProperties.config";
 
 const TimelineHeader = () => {
   const { currentPosition } = useAppSelector((state) => state.animation);

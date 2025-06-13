@@ -1,9 +1,31 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
 import { AnimationConfigType, styleConfig } from "../../types/animationType";
 import { Layer, Propertykeyframes } from "../types/animations.type";
 import { getDefaultConfig } from "../../helpers/GetDefaultPropertiesGroup";
-import { transformKeys } from "../../config/importElementsProperties.config";
+import { transformKeys } from "../../config/elementsProperties.config";
 import { defaultUnits } from "../../config/defaultUnits.config";
+
+const loadStateFromLocalStorage = (): AnimationState | undefined => {
+  try {
+    const serializedState = localStorage.getItem("animationState");
+    if (serializedState === null) return undefined;
+    return JSON.parse(serializedState) as AnimationState;
+  } catch (e) {
+    console.error("Failed to load state", e);
+    return undefined;
+  }
+};
+
+const persistedState = loadStateFromLocalStorage();
+
+export const initialState: AnimationState = persistedState || {
+  layers: [],
+  selectedLayerId: null,
+  isPlaying: false,
+  currentPosition: 0,
+  selectedKeyframe: null,
+  copyKeyframe: null,
+};
 
 export interface AnimationState {
   layers: Layer[];
@@ -16,18 +38,7 @@ export interface AnimationState {
     keyframe: Propertykeyframes;
   } | null;
   copyKeyframe: Propertykeyframes | null;
-  selectedUnit: string | null;
 }
-
-export const initialState: AnimationState = {
-  layers: [],
-  selectedLayerId: null,
-  isPlaying: false,
-  currentPosition: 0,
-  selectedKeyframe: null,
-  copyKeyframe: null,
-  selectedUnit: null,
-};
 
 const animationSlice = createSlice({
   name: "animationSlice",
@@ -113,7 +124,6 @@ const animationSlice = createSlice({
       state,
       action: PayloadAction<{
         layerId: string;
-        groupName: string;
         propertyName: string;
         percentage: number;
         value: any;
@@ -162,7 +172,7 @@ const animationSlice = createSlice({
         if (unit !== undefined) existingKeyframe.unit = unit;
       } else {
         prop.keyframes.push({
-          id: `${propertyName}-${roundedPercentage}`,
+          id: `${propertyName}-${roundedPercentage}-${nanoid()}`,
           value,
           unit,
           percentage: roundedPercentage,
@@ -196,31 +206,30 @@ const animationSlice = createSlice({
       }
     },
 
-    updateKeyframePercentage: (
+    updateKeyframe: (
       state,
       action: PayloadAction<{
         layerId: string;
         property: string;
-        keyframeId: string;
-        newPercentage: number;
+        keyframe: Propertykeyframes;
       }>
     ) => {
-      const { layerId, property, keyframeId, newPercentage } = action.payload;
+      const { layerId, property, keyframe } = action.payload;
       const layer = state.layers.find((l) => l.id === layerId);
-      if (!layer) return;
 
-      const prop = layer.editedPropertiesGroup?.find(
-        (p) => p.propertyName === property
-      );
-      if (!prop) return;
+      if (!layer || !layer.editedPropertiesGroup) return;
 
-      const keyframe = prop.keyframes.find((kf) => kf.id === keyframeId);
-      if (!keyframe) return;
+      layer.editedPropertiesGroup = layer.editedPropertiesGroup.map((prop) => {
+        if (prop.propertyName !== property) return prop;
 
-      // Clamp and round to 2 decimal places
-      keyframe.percentage = Math.round(
-        Math.max(0, Math.min(100, newPercentage))
-      );
+        const updatedKeyframes = prop.keyframes.map((kf) =>
+          kf.id === keyframe.id ? keyframe : kf
+        );
+        return {
+          ...prop,
+          keyframes: updatedKeyframes,
+        };
+      });
     },
     copyKeyframe: (state, action: PayloadAction<Propertykeyframes>) => {
       state.copyKeyframe = action.payload;
@@ -248,7 +257,7 @@ const animationSlice = createSlice({
       // Create a new keyframe with the NEW position (not the copied one)
       const newKeyframe = {
         ...copied,
-        id: `${copied.id}-pasted-${Date.now()}`, // Ensure unique ID
+        id: `${copied.id}-pasted-${nanoid()}`, // Ensure unique ID
         percentage: Math.round(Math.max(0, Math.min(100, newPercentage))), // Use newPercentage
       };
 
@@ -260,7 +269,7 @@ const animationSlice = createSlice({
       if (!layer) return;
       const newLayer: Layer = {
         ...layer,
-        id: `${layer.id} copy`,
+        id: `${layer.id} copy -${nanoid()}`,
         name: `${layer.name} copy`,
         editedPropertiesGroup:
           layer.editedPropertiesGroup?.map((prop) => ({
@@ -399,9 +408,7 @@ const animationSlice = createSlice({
         })
         .filter((prop) => prop.keyframes.length > 0);
     },
-    setSelectedUnit: (state, action: PayloadAction<string | null>) => {
-      state.selectedUnit = action.payload;
-    },
+
     lockLayer: (
       state,
       action: PayloadAction<{ id: string; locked: boolean }>
@@ -423,7 +430,7 @@ export const {
   addKeyframe,
   updateKeyframeUnit,
   renameLayer,
-  updateKeyframePercentage,
+  updateKeyframe,
   copyKeyframe,
   duplicateLayer,
   pasteKeyframe,
@@ -437,7 +444,6 @@ export const {
   setSelectedKeyframe,
   setCurrentPosition,
   removeSelectedKeyframe,
-  setSelectedUnit,
   lockLayer,
   updateLayerOrder,
 } = animationSlice.actions;
@@ -447,7 +453,7 @@ export type AnimationActionType =
   | typeof addKeyframe
   | typeof updateKeyframeUnit
   | typeof renameLayer
-  | typeof updateKeyframePercentage
+  | typeof updateKeyframe
   | typeof copyKeyframe
   | typeof duplicateLayer
   | typeof pasteKeyframe
@@ -461,7 +467,6 @@ export type AnimationActionType =
   | typeof setSelectedKeyframe
   | typeof setCurrentPosition
   | typeof removeSelectedKeyframe
-  | typeof setSelectedUnit
   | typeof lockLayer
   | typeof updateLayerOrder;
 

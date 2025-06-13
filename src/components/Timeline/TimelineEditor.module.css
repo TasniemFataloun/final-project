@@ -1,42 +1,68 @@
-.container {
-  flex: 1;
-  overflow-y: auto;
+.timelineWrapper {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+}
+
+.timelineEditorContainer {
   display: flex;
+  padding-top: 1.5rem;
   flex-direction: column;
   background-color: var(--timeline-bg);
-  flex-grow: 10;
+  overflow: hidden;
+  resize: none;
+  height: 300px;
+  min-height: 150px;
   overflow: auto;
-  padding-right: 1rem;
+  overflow-y: visible;
+  
+}
+
+.timelineControlSticky {
+  flex-shrink: 0;
+  
 }
 
 .timelineBody {
+  flex: 1;
   display: flex;
   box-sizing: border-box;
   position: relative;
   background-color: var(--timeline-bg);
+  position: relative;
 }
 
-.timelineEditorContainer::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.handleContainer {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  border: 2px green;
+  text-align: center;
 }
 
-.timelineEditorContainer::-webkit-scrollbar-track {
-  background: var(--panel-bg);
+.resizeHandle {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  background-color: var(--control-colors);
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  color: var(--bg);
+  cursor: row-resize;
+  text-align: center;
+  font-size: 14px;
+  user-select: none;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+  top: 0.25rem; /* place inside container instead of -12px */
 }
 
-.timelineEditorContainer::-webkit-scrollbar-thumb {
+.resizeHandle:hover {
   background: var(--button-hover-bg);
-  border-radius: 4px;
-}
-
-.timelineEditorContainer::-webkit-scrollbar-thumb:hover {
-  background: var(--highlight-color);
-}
-
-@supports (-moz-appearance: none) {
-  .timelineEditorContainer {
-    scrollbar-width: thin;
-    scrollbar-color: var(--button-hover-bg) var(--panel-bg); /* thumb color + track color */
-  }
 }

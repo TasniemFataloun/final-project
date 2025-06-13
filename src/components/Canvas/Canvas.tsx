@@ -9,7 +9,7 @@ import {
   setSelectedLayer,
   updateLayer,
 } from "../../redux/slices/animationSlice";
-import { defaultConfig } from "../../config/propertiespanel.config";
+import { defaultConfig } from "../../config/PropertiesMenu.config";
 
 const Canvas = () => {
   const dispatch = useAppDispatch();
@@ -28,7 +28,7 @@ const Canvas = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [dragInfo, setDragInfo] = useState<{
-    type: "drag" | "resize" | null;
+    type: "drag" | "resize" | "rotate" | null;
     startX: number;
     startY: number;
     baseTranslateX: number;
@@ -36,12 +36,19 @@ const Canvas = () => {
     layerId: string | null;
     styleInfo: React.CSSProperties;
     corner?: string;
+    baseRotation: number;
+    centerX?: number;
+    centerY?: number;
+    scale: number;
+    startAngle?: number;
   }>({
     type: null,
     startX: 0,
     startY: 0,
     baseTranslateX: 0,
     baseTranslateY: 0,
+    scale: 1,
+    baseRotation: 0,
     layerId: null,
     styleInfo: {},
   });
@@ -57,6 +64,22 @@ const Canvas = () => {
       });
     }
   }, [currentPosition, layers, isPlaying, editMode]);
+
+  //easing
+  const getEasingFunction = (name: string, t: number) => {
+    switch (name) {
+      case "ease":
+      case "ease-in-out":
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      case "ease-in":
+        return t * t;
+      case "ease-out":
+        return t * (2 - t);
+      case "linear":
+      default:
+        return t;
+    }
+  };
 
   // Playback loop effect
   useEffect(() => {
@@ -80,14 +103,26 @@ const Canvas = () => {
                   defaultConfig.layerConfig.iterationCount
               );
 
+        const delay = layer.config?.delay || 0; // seconds
+        const timingFunction = layer.config?.timingFunction || "linear";
+
         const totalDuration = layerDuration * iterations;
         const baseTime = (currentPosition / 100) * layerDuration;
-        const elapsed = (timestamp - startTime!) / 1000 + baseTime;
+
+        const elapsedRaw = (timestamp - startTime!) / 1000 + baseTime;
+        const elapsed = elapsedRaw - delay;
+
+        if (elapsed < 0) {
+          return; // Delay not reached yet
+        }
 
         const localElapsed = Math.min(elapsed, totalDuration);
         const iterationIndex = Math.floor(localElapsed / layerDuration);
         const progress = (localElapsed % layerDuration) / layerDuration;
-        const percentTime = progress * 100;
+
+        // Apply easing here
+        const easedProgress = getEasingFunction(timingFunction, progress);
+        const percentTime = easedProgress * 100;
 
         if (iterationIndex < iterations) {
           animateLayer(el, layer, percentTime);
@@ -104,12 +139,12 @@ const Canvas = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isPlaying, layers, currentPosition]);
+  }, [isPlaying, layers]);
 
   const handleMouseDown = (
     e: React.MouseEvent,
     layerId: string,
-    type: "drag" | "resize" = "drag",
+    type: "drag" | "resize" | "rotate" = "drag",
     corner?: string
   ) => {
     e.preventDefault();
@@ -131,21 +166,15 @@ const Canvas = () => {
     const computedStyle = window.getComputedStyle(el);
     const transform = computedStyle.transform;
     const matrix = new DOMMatrix(transform);
-
-    const width =
-      parseFloat(selectedLayer.style?.width as string) ||
-      parseFloat(selectedLayer.style?.maxWidth as string) ||
-      parseFloat(selectedLayer.style?.minWidth as string) ||
-      elRect.width;
-    const height =
-      parseFloat(selectedLayer.style?.height as string) ||
-      parseFloat(selectedLayer.style?.maxHeight as string) ||
-      parseFloat(selectedLayer.style?.minHeight as string) ||
-      elRect.height;
+    const scaleX = Math.sqrt(matrix.a * matrix.a + matrix.b * matrix.b);
+    const scaleY = Math.sqrt(matrix.c * matrix.c + matrix.d * matrix.d);
+    const rawScale = (scaleX + scaleY) / 2;
+    const scale = parseFloat(rawScale.toFixed(2));
+    const rotate = Math.round(Math.atan2(matrix.b, matrix.a) * (180 / Math.PI));
 
     const style = {
-      width,
-      height,
+      width: elRect.width,
+      height: elRect.height,
     };
 
     setDragInfo({
@@ -154,11 +183,63 @@ const Canvas = () => {
       startY: e.clientY - canvasRect.top,
       baseTranslateX: matrix.m41,
       baseTranslateY: matrix.m42,
+      scale,
+      baseRotation: rotate,
       layerId,
       styleInfo: style,
       corner,
     });
+
+    if (type === "rotate") {
+      // calculate center point of the element relative to canvas
+      const centerX = elRect.left - canvasRect.left + elRect.width / 2;
+      const centerY = elRect.top - canvasRect.top + elRect.height / 2;
+
+      // get current rotation from transform matrix
+      const angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+
+      // calculate initial angle between mouse and center
+      const mouseX = e.clientX - canvasRect.left;
+      const mouseY = e.clientY - canvasRect.top;
+      const startAngle =
+        Math.atan2(mouseY - centerY, mouseX - centerX) * (180 / Math.PI);
+
+      setDragInfo({
+        type: "rotate",
+        startX: mouseX,
+        startY: mouseY,
+        baseTranslateX: matrix.m41,
+        baseTranslateY: matrix.m42,
+        layerId,
+        styleInfo: style,
+        baseRotation: angle,
+        scale,
+        centerX,
+        centerY,
+        startAngle,
+      });
+      return;
+    }
   };
+
+  const [shiftPressed, setShiftPressed] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setShiftPressed(true);
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setShiftPressed(false);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [selectedLayerId, selectedKeyframe, dispatch]);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -174,6 +255,10 @@ const Canvas = () => {
         baseTranslateX,
         baseTranslateY,
         corner,
+        baseRotation,
+        scale,
+        centerX,
+        centerY,
       } = dragInfo;
 
       const canvasRect = canvasRef.current.getBoundingClientRect();
@@ -185,33 +270,80 @@ const Canvas = () => {
       let newStyle: Partial<React.CSSProperties> = {};
       const initWidth = styleInfo.width as number;
       const initHeight = styleInfo.height as number;
-      const addKayframes = (
-        groupName: string,
-        propertyName: string,
-        value: any
-      ) => {
+
+      const addKayframes = (propertyName: string, value: any) => {
         dispatch(
           addKeyframe({
             layerId: selectedLayer.id,
             percentage: currentPosition,
-            groupName,
             propertyName,
             value: `${value}`,
           })
         );
       };
+      if (
+        type === "rotate" &&
+        centerX !== undefined &&
+        centerY !== undefined &&
+        dragInfo.startAngle
+      ) {
+        const canvasRect = canvasRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - canvasRect.left;
+        const mouseY = e.clientY - canvasRect.top;
 
-      if (type === "drag") {
-        const newX = Math.round(baseTranslateX + dx);
-        const newY = Math.round(baseTranslateY + dy);
+        const angle =
+          Math.atan2(mouseY - centerY, mouseX - centerX) * (180 / Math.PI);
+        const delta = angle - dragInfo.startAngle;
+        let newRotation = Math.round(baseRotation + delta);
+
+        if (shiftPressed) {
+          newRotation = Math.round(newRotation / 45) * 45;
+        }
+
+        const transform = `translate(${baseTranslateX}px, ${baseTranslateY}px) rotate(${newRotation}deg) scale(${scale})`;
+
         const updatedStyle = {
           ...selectedLayer.style,
-          transform: `translate(${newX}px, ${newY}px)`,
+          transform,
         };
 
         if (editMode === "timeline") {
-          addKayframes("transform", "translateX", newX);
-          addKayframes("transform", "translateY", newY);
+          addKayframes("rotate", newRotation);
+        } else {
+          dispatch(
+            updateLayer({
+              id: layerId,
+              updates: { style: updatedStyle },
+            })
+          );
+        }
+
+        return;
+      }
+
+      if (type === "drag") {
+        let newX = baseTranslateX + dx;
+        let newY = baseTranslateY + dy;
+
+        if (shiftPressed) {
+          // Lock movement to the dominant axis (whichever has a larger delta)
+          if (Math.abs(dx) > Math.abs(dy)) {
+            newY = baseTranslateY; // Lock Y
+          } else {
+            newX = baseTranslateX; // Lock X
+          }
+        }
+
+        const updatedStyle = {
+          ...selectedLayer.style,
+          transform: `translateX(${Math.round(newX)}px) translateY(${Math.round(
+            newY
+          )}px) rotate(${baseRotation}deg) scale(${scale})`,
+        };
+
+        if (editMode === "timeline") {
+          addKayframes("translateX", Math.round(newX));
+          addKayframes("translateY", Math.round(newY));
         }
 
         if (editMode !== "timeline") {
@@ -223,22 +355,48 @@ const Canvas = () => {
           );
         }
       } else if (type === "resize") {
-        if (corner?.includes("Right")) {
-          newStyle.width = initWidth + dx;
-        }
-        if (corner?.includes("Left")) {
-          newStyle.width = initWidth - dx;
-        }
-        if (corner?.includes("Bottom")) {
-          newStyle.height = initHeight + dy;
-        }
-        if (corner?.includes("Top")) {
-          newStyle.height = initHeight - dy;
+        let newWidth = initWidth;
+        let newHeight = initHeight;
+        const theta = (baseRotation * Math.PI) / 180;
+        const localDX = dx * Math.cos(theta) + dy * Math.sin(theta);
+        const localDY = -dx * Math.sin(theta) + dy * Math.cos(theta);
+
+        if (corner?.includes("Right")) newWidth = initWidth + localDX;
+        if (corner?.includes("Left")) newWidth = initWidth - localDX;
+        if (corner?.includes("Bottom")) newHeight = initHeight + localDY;
+        if (corner?.includes("Top")) newHeight = initHeight - localDY;
+
+        if (shiftPressed) {
+          // Maintain aspect ratio
+          const aspectRatio = initWidth / initHeight;
+
+          // Decide whether to scale width or height based on greater delta
+          if (Math.abs(dx) > Math.abs(dy)) {
+            newHeight = newWidth / aspectRatio;
+          } else {
+            newWidth = newHeight * aspectRatio;
+          }
         }
 
-        addKayframes("size", "width", newStyle.width);
-        addKayframes("size", "height", newStyle.height);
+        newStyle.width = Math.round(newWidth);
+        newStyle.height = Math.round(newHeight);
         if (editMode === "timeline") {
+          addKayframes("width", newStyle.width);
+          addKayframes("height", newStyle.height);
+        } else {
+          const updatedStyle = {
+            ...selectedLayer.style,
+            width: `${newStyle.width}px`,
+            height: `${newStyle.height}px`,
+          };
+
+          // Always update the layer's style
+          dispatch(
+            updateLayer({
+              id: dragInfo.layerId,
+              updates: { style: updatedStyle },
+            })
+          );
         }
       }
     },
@@ -270,24 +428,52 @@ const Canvas = () => {
     }
   };
 
+  const [isMouseInCanvas, setIsMouseInCanvas] = useState(false);
+
+  useEffect(() => {
+    const canvasElement = document.getElementById("canvas-id");
+
+    const handleMouseEnter = () => setIsMouseInCanvas(true);
+    const handleMouseLeave = () => setIsMouseInCanvas(false);
+
+    canvasElement?.addEventListener("mouseenter", handleMouseEnter);
+    canvasElement?.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      canvasElement?.removeEventListener("mouseenter", handleMouseEnter);
+      canvasElement?.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Backspace" || e.key === "Delete") {
-        // Only delete layer if no keyframe is selected (empty selection counts as no selection)
+      if ((e.key === "Backspace" || e.key === "Delete") && isMouseInCanvas) {
         if (!selectedKeyframe?.layerId && selectedLayerId) {
           dispatch(removeLayer(selectedLayerId));
           setDragInfo({} as any);
         }
       }
     };
+
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedLayerId, dispatch, setDragInfo, selectedKeyframe]);
+  }, [
+    selectedLayerId,
+    dispatch,
+    setDragInfo,
+    selectedKeyframe,
+    isMouseInCanvas,
+  ]);
 
   return (
-    <div className={styles.canvasContainer} ref={canvasRef} data-tour="canvas">
+    <div
+      className={styles.canvasContainer}
+      ref={canvasRef}
+      data-tour="canvas"
+      id="canvas-id"
+    >
       <div className={styles.grid}></div>
       <div
         className={styles.animatedElementContainer}
@@ -309,7 +495,6 @@ const Canvas = () => {
               const textContent =
                 el.childElementCount === 0 ? el.textContent?.trim() : null;
 
-              // Check if this layer is selected (to show resize handles)
               const isSelected = parentLayer.id === selectedLayerId;
 
               return React.createElement(
@@ -420,7 +605,6 @@ const Canvas = () => {
                 }}
                 style={{
                   ...layer.style,
-                  position: "absolute",
                   visibility: layer.visible ? "visible" : "hidden",
                   cursor: layer.id === selectedLayerId ? "move" : "default",
                 }}
@@ -462,6 +646,15 @@ const Canvas = () => {
                     >
                       {"\u2194"}
                     </span>
+
+                    <div
+                      className={`${styles.handle} ${styles.rotationHandle}`}
+                      onMouseDown={(e) =>
+                        handleMouseDown(e, layer.id, "rotate")
+                      }
+                    >
+                      {"\u21BB"}
+                    </div>
                   </>
                 )}
               </div>

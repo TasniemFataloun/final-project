@@ -4,8 +4,6 @@
 
 .animatedElementContainer {
   display: flex;
-  align-items: center;
-  justify-content: center;
   height: 100%;
   background-color: var(--panel-bg);
   position: relative;
@@ -14,7 +12,6 @@
 
 .selected {
   border: 1px var(--bg) solid;
-  box-shadow: 0 0 10px var(--bg);
   position: relative;
   border: 2px solid #005eff;
 }
@@ -41,6 +38,7 @@
   left: -12px;
   cursor: nwse-resize;
   transform: rotate(45deg);
+  user-select: none;
 }
 
 .cornerTopRight {
@@ -48,6 +46,7 @@
   right: -12px;
   cursor: nesw-resize;
   transform: rotate(-45deg);
+  user-select: none;
 }
 
 .cornerBottomLeft {
@@ -55,6 +54,7 @@
   left: -12px;
   cursor: nesw-resize;
   transform: rotate(-45deg);
+  user-select: none;
 }
 
 .cornerBottomRight {
@@ -62,4 +62,15 @@
   right: -12px;
   cursor: nwse-resize;
   transform: rotate(45deg);
+  user-select: none;
+}
+
+.rotationHandle {
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>')
+      8 8,
+    auto;
+  user-select: none;
 }

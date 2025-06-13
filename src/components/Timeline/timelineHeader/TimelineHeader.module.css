@@ -1,6 +1,7 @@
 .timelineHeader {
   display: flex;
   height: 40px;
+  margin-right: 1rem;
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
 }

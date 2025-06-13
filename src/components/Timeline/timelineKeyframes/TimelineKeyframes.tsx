@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import style from "./TimelineKeyframes.module.css";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import {
@@ -9,23 +9,28 @@ import {
   setIsPlaying,
   setSelectedKeyframe,
   setSelectedLayer,
-  updateKeyframePercentage,
+  updateKeyframe,
 } from "../../../redux/slices/animationSlice";
-import {
-  setEndTimeRef,
-  setIsDragging,
-} from "../../../redux/slices/timelineSlice";
+import { setEndTimeRef } from "../../../redux/slices/timelineSlice";
 import { Diamond } from "lucide-react";
-import { Rnd } from "react-rnd";
-import { defaultLayerConfig } from "../../../config/importElementsProperties.config";
+import { defaultLayerConfig } from "../../../config/elementsProperties.config";
+import { Propertykeyframes } from "../../../redux/types/animations.type";
 
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
   const { layers, selectedLayerId, isPlaying, currentPosition } =
     useAppSelector((state) => state.animation);
-  const { expandedLayers, isDragging, endTimeRef } = useAppSelector(
+  const { expandedLayers, endTimeRef } = useAppSelector(
     (state) => state.timeline
   );
+  const [isDragging, setIsDragging] = useState(false);
+
+  const [draggedKeyframe, setDraggedKeyframe] = useState<{
+    layerId: string;
+    property: string;
+    newKeyframe: Propertykeyframes;
+  } | null>(null);
+
   const { copyKeyframe: copiedKeyframe } = useAppSelector(
     (state) => state.animation
   );
@@ -33,10 +38,6 @@ const TimelineKeyframes = () => {
     (state) => state.animation.selectedKeyframe
   );
 
-  console.log("selectedKeyframe", selectedKeyframe);
-  
-
-  //find the layer id
   const layerId = layers.find((layer) => layer.id === selectedLayerId)?.id;
 
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -57,7 +58,7 @@ const TimelineKeyframes = () => {
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const position = (x / rect.width) * 100;
-    const clampedPosition = Math.max(0, Math.min(100, position));
+    const clampedPosition = Math.round(Math.max(0, Math.min(100, position)));
 
     dispatch(setCurrentPosition(clampedPosition));
     dispatch(setEndTimeRef(clampedPosition));
@@ -91,25 +92,41 @@ const TimelineKeyframes = () => {
   };
 
   const handleMouseDown = () => {
-    dispatch(setIsDragging(true));
+    setIsDragging(true);
     dispatch(setIsPlaying(false));
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !timelineRef.current) return;
-
+    const selectedlayer = layers.find((layer) => layer.id === selectedLayerId);
+    if (selectedlayer?.locked) return;
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const position = (x / rect.width) * 100;
-    const clampedPosition = Math.max(0, Math.min(100, position));
-
-    dispatch(setCurrentPosition(clampedPosition));
-    dispatch(setEndTimeRef(clampedPosition));
-    startTimeRef.current = null;
+    const clampedPosition = Math.round(Math.max(0, Math.min(100, position)));
+    if (draggedKeyframe) {
+      dispatch(
+        updateKeyframe({
+          ...draggedKeyframe,
+          keyframe: {
+            ...draggedKeyframe.newKeyframe,
+            percentage: clampedPosition,
+          },
+        })
+      );
+      dispatch(setCurrentPosition(clampedPosition));
+      dispatch(setEndTimeRef(clampedPosition));
+      startTimeRef.current = null;
+    } else {
+      dispatch(setCurrentPosition(clampedPosition));
+      dispatch(setEndTimeRef(clampedPosition));
+      startTimeRef.current = null;
+    }
   };
 
   const handleMouseUp = () => {
-    dispatch(setIsDragging(false));
+    setIsDragging(false);
+    setDraggedKeyframe(null);
   };
 
   //useEffect
@@ -155,13 +172,22 @@ const TimelineKeyframes = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.code === "KeyC" && selectedKeyframe?.keyframe?.id) {
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        e.code === "KeyC" &&
+        selectedKeyframe?.keyframe?.id
+      ) {
         e.preventDefault();
         dispatch(copyKeyframe(selectedKeyframe.keyframe));
         justCopiedRef.current = true;
       }
 
-      if (e.metaKey && e.code === "KeyV" && layerId && copiedKeyframe) {
+      if (
+        (e.metaKey || e.code) &&
+        e.code === "KeyV" &&
+        layerId &&
+        copiedKeyframe
+      ) {
         e.preventDefault();
         justPastedRef.current = true;
 
@@ -193,10 +219,25 @@ const TimelineKeyframes = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [dispatch, selectedKeyframe, copiedKeyframe, currentPosition]);
 
-  // Separate effect for play/pause and delete
+  // useeffect for play/pause and delete
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
+      const activeTag = (
+        document.activeElement as HTMLElement
+      )?.tagName.toLowerCase();
+      const isTyping =
+        activeTag === "input" ||
+        activeTag === "textarea" ||
+        (document.activeElement as HTMLElement)?.isContentEditable;
+
+      if (
+        !isTyping &&
+        layers.length !== 0 &&
+        layers.some(
+          (l) => l.editedPropertiesGroup && l.editedPropertiesGroup.length > 0
+        ) &&
+        e.code === "Space"
+      ) {
         e.preventDefault();
         dispatch(setIsPlaying(!isPlaying));
       }
@@ -220,7 +261,6 @@ const TimelineKeyframes = () => {
             },
           })
         );
-
       }
     };
 
@@ -240,125 +280,107 @@ const TimelineKeyframes = () => {
       ref={timelineRef}
     >
       {/* Playhead */}
+
       {layers.length > 0 && (
         <div
-          className={style.playHead}
-          style={{ left: `${currentPosition}%` }}
-        />
+          className={style.playHeadContainer}
+          style={{ minHeight: `${layers.length * 40}px` }}
+        >
+          <div
+            className={style.playHead}
+            style={{ left: `${currentPosition}%` }}
+          />
+        </div>
       )}
       {/* Keyframes */}
 
-      {layers.map((layer) => (
-        <React.Fragment key={layer.id}>
-          <div
-            className={`${style.row} ${
-              selectedLayerId === layer.id ? style.selectedLayer : ""
-            } ${!expandedLayers[layer.id] ? style.collapsedRow : ""}`}
-          >
-            {!expandedLayers[layer.id] &&
-              layer.editedPropertiesGroup?.flatMap((prop) =>
-                prop.keyframes.map((keyframe) => (
-                  <Diamond
-                    key={keyframe.id}
-                    size={12}
-                    className={`${style.keyframe} ${style.collapsedKeyframe}`}
-                    style={{ left: `${keyframe.percentage}%` }}
-                    onClick={() => setCurrentPosition(keyframe.percentage)}
-                  />
-                ))
-              )}
-          </div>
+      {[...layers]
+        .slice()
+        .reverse()
+        .map((layer) => (
+          <React.Fragment key={layer.id}>
+            <div
+              className={`${style.row} ${
+                selectedLayerId === layer.id ? style.selectedLayer : ""
+              } ${!expandedLayers[layer.id] ? style.collapsedRow : ""}`}
+            >
+              {!expandedLayers[layer.id] &&
+                layer.editedPropertiesGroup?.flatMap((prop) =>
+                  prop.keyframes.map((keyframe) => (
+                    <Diamond
+                      key={keyframe.id}
+                      size={12}
+                      className={`${style.keyframe} ${style.collapsedKeyframe}`}
+                      style={{ left: `${keyframe.percentage}%` }}
+                      onClick={() => setCurrentPosition(keyframe.percentage)}
+                    />
+                  ))
+                )}
+            </div>
 
-          {expandedLayers[layer.id] &&
-            layer.editedPropertiesGroup?.map((prop) => (
-              <div
-                key={`${layer.id}-${prop.propertyName}`}
-                className={`${style.row} ${style.keyframeRow}`}
-              >
-                {prop.keyframes.map((kf) => {
-                  const isThisKeyframeSelected =
-                    selectedKeyframe?.layerId === layer.id &&
-                    selectedKeyframe?.property === prop.propertyName &&
-                    selectedKeyframe?.keyframe?.id === kf.id;
+            {expandedLayers[layer.id] &&
+              layer.editedPropertiesGroup?.map((prop) => (
+                <div
+                  key={`${layer.id}-${prop.propertyName}`}
+                  className={`${style.row} ${style.keyframeRow}`}
+                >
+                  {prop.keyframes.map((kf) => {
+                    const isThisKeyframeSelected =
+                      selectedKeyframe?.layerId === layer.id &&
+                      selectedKeyframe?.property === prop.propertyName &&
+                      selectedKeyframe?.keyframe?.id === kf.id;
 
-                  return (
-                    <Rnd
-                      key={kf.id}
-                      style={{ position: "relative" }}
-                      default={{
-                        x:
-                          (kf.percentage / 100) *
-                          (timelineRef.current?.clientWidth || 0),
-                        y: 0,
-                        width: 20,
-                        height: 20,
-                      }}
-                      bounds="parent"
-                      enableResizing={false}
-                      dragAxis="x"
-                      onDragStop={(_e, d) => {
-                        if (!timelineRef.current) return;
-                        const newPercentage =
-                          (d.x / timelineRef.current.clientWidth) * 100;
-                        const clamped = Math.max(
-                          0,
-                          Math.min(100, newPercentage)
-                        );
-
-                        dispatch(
-                          updateKeyframePercentage({
-                            layerId: layer.id,
-                            property: prop.propertyName,
-                            keyframeId: kf.id,
-                            newPercentage: clamped,
-                          })
-                        );
-
-                        if (
-                          selectedKeyframe?.layerId === layer.id &&
-                          selectedKeyframe?.property === prop.propertyName &&
-                          selectedKeyframe?.keyframe?.id === kf.id
-                        ) {
-                          dispatch(setCurrentPosition(clamped));
+                    return (
+                      <div
+                        key={kf.id}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
                           dispatch(
                             setSelectedKeyframe({
                               layerId: layer.id,
                               property: prop.propertyName,
-                              keyframe: { ...kf, percentage: clamped },
+                              keyframe: kf,
                             })
                           );
-                        }
-                      }}
-                      dragHandleClassName={style.keyframe}
-                      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                        e.stopPropagation();
-                        dispatch(
-                          setSelectedKeyframe({
+                          setIsDragging(true);
+                          setDraggedKeyframe({
                             layerId: layer.id,
                             property: prop.propertyName,
-                            keyframe: kf,
-                          })
-                        );
-                        dispatch(setSelectedLayer(layer.id));
-                        dispatch(setCurrentPosition(kf.percentage));                        
-                      }}
-                    >
-                      <Diamond
-                        data-tour="keyframe"
-                        size={17}
-                        fill="var(--selectedLayer)"
-                        className={`${style.keyframe} ${
-                          isThisKeyframeSelected ? style.selectedKeyframe : ""
-                        }`}
-                        style={{ cursor: "pointer", userSelect: "none" }}
-                      />
-                    </Rnd>
-                  );
-                })}
-              </div>
-            ))}
-        </React.Fragment>
-      ))}
+                            newKeyframe: kf,
+                          });
+                        }}
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                          e.stopPropagation();
+                          dispatch(
+                            setSelectedKeyframe({
+                              layerId: layer.id,
+                              property: prop.propertyName,
+                              keyframe: kf,
+                            })
+                          );
+                          dispatch(setSelectedLayer(layer.id));
+                          dispatch(setCurrentPosition(kf.percentage));
+                        }}
+                      >
+                        <Diamond
+                          size={17}
+                          fill="var(--selectedLayer)"
+                          className={`${style.keyframe} ${
+                            isThisKeyframeSelected ? style.selectedKeyframe : ""
+                          }`}
+                          style={{
+                            left: `${kf.percentage}%`,
+                            cursor: "pointer",
+                            userSelect: "none",
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+          </React.Fragment>
+        ))}
     </div>
   );
 };

@@ -1,13 +1,20 @@
 import style from "./Sidebar.module.css";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { addLayer } from "../../redux/slices/animationSlice";
-import { Square, Circle, RectangleHorizontal, Shapes } from "lucide-react";
+import {
+  Square,
+  Circle,
+  RectangleHorizontal,
+  Shapes,
+  ListRestart,
+} from "lucide-react";
 import { ElementType, Layer } from "../../redux/types/animations.type";
 import HtmlCssCode from "../HtmlCssCode/HtmlCssCode";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import * as cssParser from "css";
 import { getDefaultPropertiesGroup } from "../../helpers/GetDefaultPropertiesGroup";
 import { nanoid } from "nanoid";
+import { clearLocalStorage } from "../../utils/Localstorage";
 
 const parseHtmlToLayers = (
   html: string,
@@ -97,48 +104,132 @@ const Sidebar = () => {
     setShowCodeComponent(false);
   };
 
+  //resize handler
+  const MIN_WIDTH = 150;
+  const MAX_WIDTH = 400;
+
+  const [sidebarWidth, setSidebarWidth] = useState(MAX_WIDTH);
+  const isResizing = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = sidebarWidth;
+
+    document.body.style.cursor = "ew-resize";
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing.current) return;
+    const delta = startX.current - e.clientX;
+    const newWidth = Math.min(
+      MAX_WIDTH,
+      Math.max(MIN_WIDTH, startWidth.current - delta)
+    );
+    setSidebarWidth(newWidth);
+  };
+
+  const handleMouseUp = () => {
+    isResizing.current = false;
+    document.body.style.cursor = "default";
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
   return (
-    <div className={style.sidebar} data-tour="sidebar">
-      <h2>Add shape </h2>
-      <div className={style.iconContainer} data-tour="shapes">
-        <RectangleHorizontal
-          color="var(--white)"
-          size={45}
-          strokeWidth="none"
-          className={style.iconButton}
-          onClick={() => handleAddElement("rectangle")}
-        />
-
-        <Circle
-          size={45}
-          strokeWidth="none"
-          color="var(--white)"
-          className={style.iconButton}
-          onClick={() => handleAddElement("circle")}
-        />
-
-        <Square
-          size={45}
-          strokeWidth="none"
-          color="var(--white)"
-          className={style.iconButton}
-          onClick={() => handleAddElement("square")}
-        />
+    <div style={{ position: "relative", width: sidebarWidth }}>
+      <div className={style.handlerContainer}>
+        <div
+          className={style.resizeHandleHorizontal}
+          onMouseDown={handleMouseDown}
+        >
+          ↕
+        </div>
       </div>
-      <button
-        onClick={() => setShowCodeComponent(true)}
-        data-tour="shapes-htmlcss"
-      >
-        <Shapes size={14} />
-        Add your own shape
-      </button>
+      <div className={style.sidebar} data-tour="sidebar">
+        <div className={style.shapesContainer}>
+          <div className={style.defaultShapes}>
+            <h2>Add shape </h2>
+            <div className={style.iconContainer} data-tour="shapes">
+              <RectangleHorizontal
+                color="var(--white)"
+                size={45}
+                strokeWidth="none"
+                className={style.iconButton}
+                onClick={() => handleAddElement("rectangle")}
+              />
+              <Circle
+                size={45}
+                strokeWidth="none"
+                color="var(--white)"
+                className={style.iconButton}
+                onClick={() => handleAddElement("circle")}
+              />
+              <Square
+                size={45}
+                strokeWidth="none"
+                color="var(--white)"
+                className={style.iconButton}
+                onClick={() => handleAddElement("square")}
+              />
+              <button
+                style={{ transform: "scaleX(1.1)" }}
+                onClick={() => handleAddElement("oval")}
+                className={style.iconButton}
+              >
+                <svg
+                  className={style.iconButton}
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="45"
+                  height="45"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <ellipse
+                    cx="12"
+                    cy="12"
+                    rx="8"
+                    ry="5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
 
-      {showCodeComponent && (
-        <HtmlCssCode
-          onSave={(html: string, css: string) => handleSaveHtmlCss(html, css)}
-          onCancel={() => setShowCodeComponent(false)}
-        />
-      )}
+          <button
+            onClick={() => setShowCodeComponent(true)}
+            data-tour="shapes-htmlcss"
+            className={style.sidebarButtons}
+          >
+            <div className={style.shape}>
+              <Shapes size={20} />
+            </div>
+            <div className={style.text}>Add your own shape {"</>"} </div>
+          </button>
+          {showCodeComponent && (
+            <HtmlCssCode
+              onSave={(html: string, css: string) =>
+                handleSaveHtmlCss(html, css)
+              }
+              onCancel={() => setShowCodeComponent(false)}
+            />
+          )}
+        </div>
+        <button onClick={clearLocalStorage} className={style.resetButton}>
+          <ListRestart size={18} />
+          <span>Reset animation</span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -33,7 +33,7 @@ const TimelineControl = () => {
   };
   /* stepper */
   const stepBackward = () => {
-    const newPosition = Math.min(100, currentPosition - 1);
+    const newPosition = Math.max(0, currentPosition - 1);
     dispatch(setCurrentPosition(newPosition));
     dispatch(setEndTimeRef(newPosition));
   };
@@ -112,14 +112,12 @@ const TimelineControl = () => {
           data-tour="play-pause"
           className={style.button}
           onClick={() => {
-            if (
-              layers.length > 0 &&
-              layers.some(
-                (layer) =>
-                  Array.isArray(layer?.editedPropertiesGroup) &&
-                  layer.editedPropertiesGroup.length > 0
-              )
-            ) {
+            const hasEditedProps = layers.some(
+              (l) =>
+                l.editedPropertiesGroup &&
+                l.editedPropertiesGroup.flat().length > 0
+            );
+            if (layers.length > 0 && hasEditedProps) {
               dispatch(setIsPlaying(!isPlaying));
             }
           }}

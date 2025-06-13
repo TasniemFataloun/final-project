@@ -15,21 +15,38 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
   const { layers } = useAppSelector((state) => state.animation);
 
   const generateCSS = () => {
-    return layers.map((layer) => UseGenerateKeyframes(layer)).join("\n\n");
+    const containerCSS = `
+.animatedElementContainer {
+  display: flex;
+}
+  `.trim();
+
+    const keyframesCSS = layers
+      .map((layer) => UseGenerateKeyframes(layer))
+      .join("\n\n");
+
+    return `${containerCSS}\n\n${keyframesCSS}`;
   };
 
   return (
     <div id="generated-css" className={style.container}>
-      <SquareX onClick={onClose} className={style.closeButton} />
+      <SquareX onClick={onClose} size={20} className={style.closeButton} />
 
       <h2>HTML Code </h2>
       <div className={style.code}>
         <div className={style.copyContainer}>
           <div className={style.iconCopy}>
             <CopyToClipboard
-              css={`<div class="${layers
-                .map((layer) => camelToKebab(layer.name || "layer"))
-                .join(" ")}"></div>`}
+              css={[
+                `<div class="animatedElementContainer">`,
+                ...layers.map(
+                  (layer) =>
+                    `  <div class="${camelToKebab(
+                      layer.name || "layer"
+                    )}"></div>`
+                ),
+                `</div>`,
+              ].join("\n")}
             />
           </div>
           {layers.length === 0 ? (
@@ -38,11 +55,15 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
             </div>
           ) : (
             <div className={style.cssContainer}>
+              <p>{`<div class="animatedElementContainer">`}</p>
               {layers.map((layer, index) => (
                 <div key={index} className={style.layerCss}>
-                  <p>{camelToKebab(`<div class="${layer.name}"></div>`)}</p>
+                  <p>{`  <div class="${camelToKebab(
+                    layer.name || "layer"
+                  )}"></div>`}</p>
                 </div>
               ))}
+              <p>{`</div>`}</p>
             </div>
           )}
         </div>

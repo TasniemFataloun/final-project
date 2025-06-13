@@ -6,20 +6,23 @@ export const defaultUnits: Record<string, string> = {
   opacity: "",
   backgroundColor: "",
   borderRadius: "%",
-  width: "px", 
+  border: "px",
+  borderColor: "",
+  width: "px",
   height: "px",
   // fallback
   size: "px",
 };
 
 export const propertiesUnits: Record<string, string[]> = {
-  width: ["px", "rem", "%"],
-  height: ["px", "rem", "%"],
+  width: ["px", "rem"],
+  height: ["px", "rem"],
   borderRadius: ["px", "rem", "%"],
+  borderWidth: ["px", "rem"],
   opacity: [],
-  background: [],
-  translateX: ["px", "rem", "%"],
-  translateY: ["px", "rem", "%"],
+  transform: ["px", "rem", "deg", "rad"],
+  translateX: ["px", "rem"],
+  translateY: ["px", "rem"],
   rotate: ["deg", "rad"],
   scale: [],
 };

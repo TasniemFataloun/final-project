@@ -1,6 +1,6 @@
 import "./App.css";
 import Canvas from "./components/Canvas/Canvas";
-import PropertiesPanel from "./components/PropertiesPanel/PropertiesPanel";
+import PropertiesMenu from "./components/PropertiesMenu/PropertiesMenu";
 import GenerateCss from "./components/GenerateCss/GenerateCss";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -20,7 +20,6 @@ function AppContent() {
 
   const handleOpenLayerSettings = () => setShowLayerSettings((prev) => !prev);
   const handleToggleGenerateCss = () => setShowGenerateCss((prev) => !prev);
-
 
   return (
     <div className="appContainer">
@@ -44,7 +43,7 @@ function AppContent() {
             {showLayerSettings ? (
               <LayerConfigSetting data-tour="layer-settings" />
             ) : (
-              <PropertiesPanel />
+              <PropertiesMenu />
             )}
           </div>
           <TimelineEditor
@@ -66,65 +65,58 @@ function AppContent() {
 
 const tourSteps = [
   {
-    selector: '[data-tour="sidebar"]',
-    content:
-      "This is the sidebar where you can add elements to your animation.",
-  },
-  {
     selector: '[data-tour="shapes"]',
-    content: "You can choose shapes from here.",
+    content: "You can choose shapes from here",
   },
   {
     selector: '[data-tour="shapes-htmlcss"]',
-    content: "You can also add custom HTML/CSS shape here.",
+    content: "You can also add your own shapes using HTML and CSS",
   },
   {
     selector: '[data-tour="canvas"]',
-    content: "Here is your main canvas where the animation happens.",
-  },
-  {
-    selector: '[data-tour="properties-panel-sidebar"]',
-    content: "This is config",
+    content: "Here is the main canvas where the animation happens",
   },
   {
     selector: '[data-tour="properties-panel-config"]',
-    content: "This is config",
+    content:
+      "Here you can configure the animation properties of the selected layer",
   },
   {
     selector: '[data-tour="properties-panel-properties"]',
-    content: "This is config",
+    content:
+      "This is the properties panel where you can edit styles and properties of the selected layer",
   },
   {
     selector: '[data-tour="timeline"]',
-    content: "This is the timeline editor for keyframes and timing.",
+    content: "This is the timeline editor for keyframes and timing",
   },
   {
     selector: '[data-tour="timeline-controls"]',
-    content: "These are the controls to navigate through your animation.",
+    content: "These are the controls to navigate through your animation",
   },
   //
   {
     selector: '[data-tour="restart"]',
-    content: "Click here to restart the animation.",
+    content: "Click here to restart the animation",
   },
   {
     selector: '[data-tour="step-backward"]',
-    content: "Click here to one second backward in the animation.",
+    content: "Click here to move one second backward in the animation",
   },
   {
     selector: '[data-tour="move-to-previous-keyframe"]',
     content:
-      "This button moves the playhead to the previous keyframe in the timeline.",
+      "This button moves the playhead to the previous keyframe in the timeline",
   },
   {
     selector: '[data-tour="play-pause"]',
     content:
-      "Click here to play or pause the animation. You can also use the spacebar.",
+      "Click here to play or pause the animation. You can also use the spacebar",
   },
   {
     selector: '[data-tour="move-to-next-keyframe"]',
     content:
-      "This button moves the playhead to the next keyframe in the timeline.",
+      "This button moves the playhead to the next keyframe in the timeline",
   },
   {
     selector: '[data-tour="step-forward"]',
@@ -132,31 +124,27 @@ const tourSteps = [
   },
   {
     selector: '[data-tour="jump-to-end"]',
-    content: "Click here to jump to the end of the animation.",
+    content: "Click here to jump to the end of the animation",
   },
   //
   {
     selector: '[data-tour="timeline-header"]',
-    content: "This is the timeline header with current progress and time.",
-  },
-  {
-    selector: '[data-tour="timeline-header"]',
-    content: "Here you can see the current progress and time.",
+    content: "Here you can see the time and progress of the animation",
   },
   {
     selector: '[data-tour="timeline-layer-row"]',
     content:
-      "This is a layer row where you can manage individual layers. You can rename, delete, or hide the layer. ",
+      "This is a layer row where you can manage individual layers. You can rename, delete, or hide the layer. You can also drag the layers to reorder them",
   },
   {
     selector: '[data-tour="timeline-keyframes"]',
     content:
-      "Here you can view, manage, and add keyframes for the selected layer. You can add keyframes by placing the playhead and edit a property in the properties menu.",
+      "Here you can view, manage, and add keyframes for the selected layer. You can add keyframes by placing the playhead and edit a property in the properties menu",
   },
   {
     selector: '[data-tour="keyframe"]',
     content:
-      "You can move a keyframe by dragging, delete it with Backspace, or edit by aligning the playhead with the keyframe.",
+      "You can move a keyframe by dragging it, delete it with Backspace, or edit by aligning the playhead with the keyframe. You can alo copy a keyframe by selecting it and pressing Ctrl+C, keep it selected, then paste it with Ctrl+V",
   },
   {
     selector: '[data-tour="generate-css"]',

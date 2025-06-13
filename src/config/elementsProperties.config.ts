@@ -27,7 +27,15 @@ export const importSquareConfig: AnimationConfigType = {
 
 export const importCodeConfig: AnimationConfigType = {
   type: "code",
-  duration: 10,
+  duration: 3,
+  timingFunction: "ease-in-out",
+  delay: 0,
+  iterationCount: "infinite",
+};
+
+export const importOvalConfig: AnimationConfigType = {
+  type: "oval",
+  duration: 1,
   timingFunction: "ease-in-out",
   delay: 0,
   iterationCount: "infinite",
@@ -58,6 +66,10 @@ export const importCircleProps: styleConfig = {
   height: "50px",
   backgroundColor: "#FFFFFF",
   borderRadius: "50%",
+  border: "",
+  borderWidth: "",
+  borderColor: "",
+  borderStyle: "",
   opacity: "1",
   transform: "scale(1) rotate(0deg) translateX(0px) translateY(0px)",
 };
@@ -78,6 +90,16 @@ export const importSquareProps: styleConfig = {
   height: "50px",
   backgroundColor: "#fab687",
   borderRadius: "0%",
+  opacity: "1",
+  transform: "scale(1) rotate(0deg) translateX(0px) translateY(0px)",
+};
+
+export const importOvalProps: styleConfig = {
+  type: "oval",
+  width: "200px",
+  height: "100px",
+  backgroundColor: "#FFFFFF",
+  borderRadius: "100px / 50px",
   opacity: "1",
   transform: "scale(1) rotate(0deg) translateX(0px) translateY(0px)",
 };

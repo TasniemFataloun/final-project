@@ -21,8 +21,7 @@
 }
 
 .container input[type="text"],
-.container input[type="color"] 
-{
+.container input[type="color"] {
   width: 100%;
   border: none;
   border-radius: 0.4rem;
@@ -40,7 +39,6 @@
   box-shadow: 0 0 0 2px var(--accent);
 }
 
-
 .container input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 14px;
@@ -57,4 +55,141 @@
   background: var(--accent);
   border-radius: 50%;
   cursor: pointer;
+}
+
+.input,
+.select {
+  border: 0.2px var(--white) solid;
+}
+
+.container {
+  transition: width 0.3s ease;
+  background-color: var(--bg);
+  box-shadow: var(--box-shadow);
+  color: var(--white);
+  overflow: auto;
+  width: 20rem;
+  padding: var(--padding);
+  height: 35rem;
+  position: relative;
+}
+
+.iconh2 {
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.iconClosePanel {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transform: scale(1);
+  transition: left 0.3s ease;
+}
+.closeContainer .iconClosePanel {
+  left: 3rem;
+}
+
+.iconClosePanel:hover {
+  transform: scale(1.1);
+}
+
+.openContainer {
+  min-width: 20rem;
+  max-width: 20rem;
+  width: 20rem;
+}
+
+.closeContainer {
+  width: 4rem;
+  height: 100%;
+}
+
+.chevronH3 {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.section {
+  grid-template-columns: 1fr fr;
+  margin-bottom: 2rem;
+}
+.optionsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+  color: var(--white);
+}
+
+.input,
+.select {
+  width: 80%;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.selectedKeyframeProperty {
+  border: 3px var(--selectedLayer) solid;
+}
+
+.input:focus,
+.select:focus {
+  border-color: none;
+}
+
+.select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 32px;
+}
+
+.colorInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorInput {
+  appearance: none;
+  border: none;
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.colorInput::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.colorInput::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.colorInput::-moz-color-swatch {
+  border: none;
+  border-radius: 6px;
 }

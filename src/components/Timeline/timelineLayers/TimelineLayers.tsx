@@ -68,9 +68,6 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
         .slice()
         .reverse()
         .map((layer, index) => {
-          console.log("Rendering layer:", layer.name, "at index:", index);
-          console.log(layers);
-
           return (
             <DraggableLayer
               key={layer.id}
@@ -131,7 +128,7 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                   <input
                     type="text"
                     className={style.layerNameInput}
-                    value={layer.name}
+                    value={layer.type === "code" ? layer.selector : layer.name}
                     onChange={(e) =>
                       dispatch(
                         renameLayer({ id: layer.id, newName: e.target.value })

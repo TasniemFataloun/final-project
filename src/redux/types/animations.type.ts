@@ -3,7 +3,7 @@ import {
   styleConfig,
 } from "../../types/animationType";
 
-export type ElementType = "rectangle" | "circle" | "square" | "code";
+export type ElementType = "rectangle" | "circle" | "square" | "oval" | "code";
 
 export interface Propertykeyframes {
   id: string;

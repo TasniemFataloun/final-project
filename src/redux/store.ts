@@ -3,7 +3,8 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import animationReducer, { AnimationActionType } from "./slices/animationSlice";
 import alertReducer from "./slices/alertSlice";
 import timelineReducer from "./slices/timelineSlice";
-import editModeReducer from "./slices/editModeSlice"; 
+import editModeReducer from "./slices/editModeSlice";
+import { saveStateToLocalStorage } from "../utils/Localstorage";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,11 @@ const store = configureStore({
     timeline: timelineReducer,
     editMode: editModeReducer,
   },
+});
+
+store.subscribe(() => {
+  const state = store.getState();
+  saveStateToLocalStorage(state.animation);
 });
 
 export type AppStateType = ReturnType<typeof store.getState>;
