@@ -43,7 +43,7 @@ function AppContent() {
         setShowSplash(false);
         checkTourStatus();
         setLastSeenSplash(now);
-      }, 2000);
+      }, 4000);
     } else {
       checkTourStatus();
     }

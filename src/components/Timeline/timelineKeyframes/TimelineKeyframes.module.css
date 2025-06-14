@@ -41,7 +41,7 @@
 }
 
 .selectedKeyframe {
-  stroke: var(--keyframe-color);
+  stroke: var(--highlight-color);
   stroke-width: 3px;
   cursor: grab;
 }

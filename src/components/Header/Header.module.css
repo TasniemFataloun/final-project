@@ -12,6 +12,8 @@
 .logoTitleContainer {
   display: flex;
   align-items: center;
+  font-family: "Montserrat Alternates", sans-serif;
+  font-weight: 100;
 }
 
 .logo {

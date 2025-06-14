@@ -95,13 +95,13 @@ const Sidebar = () => {
       const parsed = JSON.parse(saved);
       setSavedState({ layers: parsed.layers });
     } else {
-      const current = store.getState().animation;
+      const current = store.getState().animation.present;
       setSavedState(current);
     }
   }, []);
 
   useEffect(() => {
-    const state = store.getState().animation;
+    const state = store.getState().animation.present;
 
     if (JSON.stringify(state) !== JSON.stringify(savedState)) {
       setHasUnsavedChanges(true);
@@ -123,9 +123,9 @@ const Sidebar = () => {
   }, [hasUnsavedChanges]);
 
   const saveChanges = () => {
-    const state = store.getState();
-    saveStateToLocalStorage(state.animation);
-    setSavedState(state.animation);
+    const state = store.getState().animation.present;
+    saveStateToLocalStorage(state);
+    setSavedState(state);
     setHasUnsavedChanges(false);
   };
 

@@ -28,6 +28,7 @@
   width: 100%;
   cursor: text;
   color: var(--white);
+  font-family: "Raleway", sans-serif;
 }
 .layerNameInput:focus {
   outline: none;
