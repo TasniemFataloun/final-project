@@ -1,7 +1,6 @@
 import style from "./Header.module.css";
 import ExportCss from "../ExportCss/ExportCss";
 import ToggleSwitch from "../ToggleSwitch/ToggleSwitch";
-import { useAppSelector } from "../../redux/store";
 import { Info } from "lucide-react";
 
 type HeaderProps = {

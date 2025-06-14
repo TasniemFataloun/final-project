@@ -25,7 +25,7 @@ import {
 function AppContent() {
   const [showSplash, setShowSplash] = useState(false);
   const [showGenerateCss, setShowGenerateCss] = useState(false);
-  const [showLayerSettings, setShowLayerSettings] = useState(false);
+  const [, setShowLayerSettings] = useState(false);
   const [showOnboardingPrompt, setShowOnboardingPrompt] = useState(false);
   const { setIsOpen, setCurrentStep } = useTour();
 
@@ -97,9 +97,7 @@ function AppContent() {
               )}
             </div>
             <TimelineEditor
-              onOpenLayerSettings={() =>
-                setShowLayerSettings((prev) => !prev)
-              }
+              onOpenLayerSettings={() => setShowLayerSettings((prev) => !prev)}
               data-tour="timeline"
             />
             {showGenerateCss && (
