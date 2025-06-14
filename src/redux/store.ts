@@ -29,6 +29,7 @@ export const store = configureStore({
           "animationSlice/lockLayer",
           "animationSlice/setEditMode",
           "animationSlice/setLayerConfig",
+          "animationSlice/addKeyframesToLayer",
         ];
         return allowedActions.includes(action.type);
       },

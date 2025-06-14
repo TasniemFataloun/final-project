@@ -94,6 +94,7 @@
 @supports (-moz-appearance: none) {
   .timelineEditorContainer {
     scrollbar-width: thin;
-    scrollbar-color: var(--button-hover-bg) var(--panel-bg); /* thumb color + track color */
+    scrollbar-color: var(--button-hover-bg) var(--panel-bg); 
   }
 }
+

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import style from "./TimelineEditor.module.css";
 import TimelineControl from "./timelineControl/TimelineControl";
 import TimelineHeader from "./timelineHeader/TimelineHeader";
@@ -18,6 +18,12 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   const isDragging = useRef(false);
   const startY = useRef(0);
   const startHeight = useRef(0);
+
+  useEffect(() => {
+    const defaultHeight =
+      window.innerWidth >= 600 && window.innerWidth <= 1024 ? 250 : 300;
+    setTimelineHeight(defaultHeight);
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,11 +52,40 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    startY.current = e.touches[0].clientY;
+    startHeight.current = timelineHeight;
+
+    document.body.style.cursor = "row-resize";
+
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging.current) return;
+    const delta = e.touches[0].clientY - startY.current;
+    const newHeight = Math.max(150, startHeight.current - delta);
+
+    setTimelineHeight(newHeight);
+  };
+
+  const handleTouchEnd = () => {
+    isDragging.current = false;
+    document.body.style.cursor = "default";
+    document.removeEventListener("touchmove", handleTouchMove);
+    document.removeEventListener("touchend", handleTouchEnd);
+  };
+
   return (
     <div className={style.timelineWrapper} data-tour="timeline">
       <button
         className={style.resizeHandle}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleMouseUp}
         aria-label="Resize timeline editor"
       >
         ↕

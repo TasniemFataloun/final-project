@@ -91,10 +91,9 @@
   color: var(--white);
 }
 
-.propertyAndUnitContainer{
+.propertyAndUnitContainer {
   display: flex;
   gap: 0.2rem;
-
 }
 
 .input,
@@ -202,4 +201,61 @@
   padding: 0.6rem 1.5rem;
   font-size: 0.9rem;
   border-radius: 6px;
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  .sidebarContainer {
+    width: 14rem;
+    padding: 1rem 1.5rem;
+    max-width: 14rem;
+  }
+
+  .openContainer {
+    width: 100%;
+    max-width: 14rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .input,
+  .select {
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .propertyAndUnitContainer {
+    gap: 0.6rem;
+  }
+
+  .colorInputWrapper,
+  .colorAndTransparentWrapper {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .transparentButton {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .iconClosePanel {
+    top: 1rem;
+    left: -1rem;
+    padding: 0.5rem;
+  }
+
+  .label {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .optionsContainer {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Make scroll container smooth and padding comfortable */
+  .containerScroll {
+    padding-right: 1rem;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
+  }
 }

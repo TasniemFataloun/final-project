@@ -39,7 +39,6 @@
 }
 
 .sidebar {
-  max-width: 40rem;
   background-color: var(--bg);
   padding: var(--padding);
   display: flex;
@@ -212,4 +211,27 @@
   width: 1.7rem;
   height: 1.7rem;
   transition: fill 0.3s ease;
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  .openContainer {
+    width: 2rem;
+    width: 100%;
+    max-width: 14rem;
+  }
+
+  .sidebar {
+    padding: 1rem 1.5rem;
+    max-width: 14rem;
+  }
+
+  .closeContainer {
+    width: 6rem;
+    visibility: visible;
+  }
+
+  .storageButtons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
