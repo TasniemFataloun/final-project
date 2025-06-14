@@ -1,0 +1,41 @@
+.onboardingPrompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.onboardingBox {
+  background: #1e1e1e;
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.onboardingBox .buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.onboardingBox button {
+  background: #ff69b4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.onboardingBox button:hover {
+  background: #ff85c1;
+}

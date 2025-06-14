@@ -34,7 +34,6 @@ const PropertiesMenu = () => {
   const selectedLayer = layers.find((el) => el.id === selectedLayerId);
 
   const [openSections, setOpenSections] = useState<string[]>([]);
-  // track unit selections for each property
   const [unitSelections, setUnitSelections] = useState<Record<string, string>>(
     () => {
       const defaults: Record<string, string> = {};
@@ -49,7 +48,6 @@ const PropertiesMenu = () => {
   );
 
   useEffect(() => {
-    //if selected keyframe --> open its folder
     if (selectedKeyframe && selectedLayer) {
       const propertySection = Object.keys(propertiesSchema).find((sectionKey) =>
         Object.keys(
@@ -61,7 +59,6 @@ const PropertiesMenu = () => {
         setOpenSections((prev) => [...prev, propertySection]);
       }
     } else {
-      // If no keyframe is selected, close all sections
       setOpenSections([]);
     }
   }, [selectedKeyframe]);
@@ -171,7 +168,7 @@ const PropertiesMenu = () => {
     );
   };
 
-  // Update selected keyframe when current position changes
+  // update selected keyframe when current position changes
   useEffect(() => {
     if (!selectedKeyframe || !selectedLayerId) return;
 
@@ -435,12 +432,6 @@ const PropertiesMenu = () => {
                                                   : getValueAtCurrentPosition(
                                                       fieldKey
                                                     )
-                                              }
-                                              onChange={(e) =>
-                                                handlePropertyChange(
-                                                  fieldKey,
-                                                  e.target.value
-                                                )
                                               }
                                               onChange={(e) =>
                                                 handlePropertyChange(

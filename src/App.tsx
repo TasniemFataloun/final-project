@@ -4,63 +4,113 @@ import PropertiesMenu from "./components/PropertiesMenu/PropertiesMenu";
 import GenerateCss from "./components/GenerateCss/GenerateCss";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppSelector } from "./redux/store";
 import Alert from "./components/GenerateCss/Alert/Alert";
 import TimelineEditor from "./components/Timeline/TimelineEditor";
 import LayerConfigSetting from "./components/LayerConfigSetting/LayerConfigSetting";
 
 import { TourProvider, useTour } from "@reactour/tour";
+import OnboardingPrompt from "./components/OnboardingPrompt/OnboardingPrompt";
+import SplashScreen from "./components/SplashScreen/SplashScreen";
+
+import {
+  getLastSeenSplash,
+  setLastSeenSplash,
+  setHasSeenTour,
+  resetTourIfExpired,
+  setTourSeen,
+} from "./utils/Localstorage";
 
 function AppContent() {
+  const [showSplash, setShowSplash] = useState(false);
   const [showGenerateCss, setShowGenerateCss] = useState(false);
-  const alertOpen = useAppSelector((state) => state.alert.isOpen);
   const [showLayerSettings, setShowLayerSettings] = useState(false);
+  const [showOnboardingPrompt, setShowOnboardingPrompt] = useState(false);
   const { setIsOpen, setCurrentStep } = useTour();
 
-  const handleOpenLayerSettings = () => setShowLayerSettings((prev) => !prev);
-  const handleToggleGenerateCss = () => setShowGenerateCss((prev) => !prev);
-
+  const alertOpen = useAppSelector((state) => state.alert.isOpen);
   const editMode = useAppSelector((state) => state.editMode.value);
+
+  useEffect(() => {
+    resetTourIfExpired();
+    const lastSeen = getLastSeenSplash();
+    const now = Date.now();
+
+    if (!lastSeen || now - lastSeen > 2 * 60 * 60 * 1000) {
+      setShowSplash(true);
+      setTimeout(() => {
+        setShowSplash(false);
+        checkTourStatus();
+        setLastSeenSplash(now);
+      }, 2000);
+    } else {
+      checkTourStatus();
+    }
+  }, []);
+
+  const checkTourStatus = () => {
+    if (!setHasSeenTour()) {
+      setShowOnboardingPrompt(true);
+    }
+  };
+
+  const handleAcceptTour = () => {
+    setCurrentStep(0);
+    setIsOpen(true);
+    setShowOnboardingPrompt(false);
+    setTourSeen();
+  };
+
+  const handleDeclineTour = () => {
+    setShowOnboardingPrompt(false);
+    setTourSeen();
+  };
 
   return (
     <div className="appContainer">
-      {/*  {showSplash && <SplashScreen />}
-      {!showSplash && */}{" "}
-      {/* ( */}
-      <>
-        <Header
-          onToggleGenerateCss={handleToggleGenerateCss}
-          onStartTour={() => {
-            setCurrentStep(0);
-            setIsOpen(true);
-          }}
+      {showSplash && <SplashScreen />}
+      {!showSplash && showOnboardingPrompt && (
+        <OnboardingPrompt
+          onAccept={handleAcceptTour}
+          onDecline={handleDeclineTour}
         />
-        {alertOpen && <Alert message="Copied CSS Code" />}
-
-        <main className="main">
-          <div className="canvasPropertiesTimeline">
-            <Sidebar />
-            <Canvas data-tour="canvas" />
-            {editMode === "class" ? (
-              <LayerConfigSetting data-tour="layer-settings" />
-            ) : (
-              <PropertiesMenu />
-            )}
-          </div>
-          <TimelineEditor
-            onOpenLayerSettings={handleOpenLayerSettings}
-            data-tour="timeline"
+      )}
+      {!showSplash && (
+        <>
+          <Header
+            onToggleGenerateCss={() => setShowGenerateCss((prev) => !prev)}
+            onStartTour={() => {
+              setCurrentStep(0);
+              setIsOpen(true);
+            }}
           />
-
-          {showGenerateCss && (
-            <GenerateCss
-              onClose={handleToggleGenerateCss}
-              data-tour="generate-css"
+          {alertOpen && <Alert message="Copied CSS Code" />}
+          <main className="main">
+            <div className="canvasPropertiesTimeline">
+              <Sidebar />
+              <Canvas data-tour="canvas" />
+              {editMode === "class" ? (
+                <LayerConfigSetting data-tour="layer-settings" />
+              ) : (
+                <PropertiesMenu />
+              )}
+            </div>
+            <TimelineEditor
+              onOpenLayerSettings={() =>
+                setShowLayerSettings((prev) => !prev)
+              }
+              data-tour="timeline"
             />
-          )}
-        </main>
-      </>
+            {showGenerateCss && (
+              <GenerateCss
+                onClose={() => setShowGenerateCss((prev) => !prev)}
+                data-tour="generate-css"
+              />
+            )}
+          </main>
+        </>
+      )}
     </div>
   );
 }
@@ -156,7 +206,7 @@ const tourSteps = [
   },
   {
     selector: '[data-tour="generate-css"]',
-    content: "Click here to export your animation as CSS code.",
+    content: "Click here to export your animation as HTML and CSS code",
   },
 ];
 
@@ -169,7 +219,7 @@ function App() {
           ...base,
           backgroundColor: "#1e1e1e",
           color: "white",
-          padding: "20px",
+          padding: "33px",
           borderRadius: "6px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
           maxWidth: "320px",
@@ -177,7 +227,7 @@ function App() {
         }),
         maskArea: (base) => ({
           ...base,
-          rx: 12, // rounded corners for highlight
+          rx: 12,
         }),
         maskWrapper: (base) => ({
           ...base,
@@ -190,11 +240,14 @@ function App() {
         controls: (base) => ({
           ...base,
           marginTop: "16px",
+          width: "100%",
         }),
         close: (base) => ({
           ...base,
           color: "#ccc",
-          fontSize: "1.5rem",
+          fontSize: "1rem",
+          width: "0.8rem",
+          height: "0.8rem",
         }),
         arrow: (base) => ({
           ...base,

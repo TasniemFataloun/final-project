@@ -45,8 +45,7 @@ export const ConfigSchema = {
       },
       iterationCount: {
         label: "Iteration Count",
-        type: "select",
-        options: ["infinite", "2", "3", "1"],
+        type: "text",
       },
     },
   },

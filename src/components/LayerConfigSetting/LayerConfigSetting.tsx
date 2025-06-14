@@ -138,18 +138,25 @@ const LayerConfigSetting = () => {
 
   const handleTransformChange = (
     key: keyof typeof transformValues,
-    value: string
+    value: string,
+    forceUnit?: string
   ) => {
     const updated = { ...transformValues, [key]: value };
     setTransformValues(updated);
 
     if (!selectedLayer || editMode !== "class") return;
 
+    // Grab correct unit for each key
+    const unitX = forceUnit || unitSelections.translateX || "px";
+    const unitY = forceUnit || unitSelections.translateY || "px";
+    const unitRotate = unitSelections.rotate || "deg";
+    const unitScale = ""; // scale has no unit
+
     const transformString = `
-    translateX(${updated.translateX || "0"}px)
-    translateY(${updated.translateY || "0"}px)
-    scale(${updated.scale || "1"})
-    rotate(${updated.rotate || "0"}deg)
+    translateX(${updated.translateX || "0"}${unitX})
+    translateY(${updated.translateY || "0"}${unitY})
+    scale(${updated.scale || "1"}${unitScale})
+    rotate(${updated.rotate || "0"}${unitRotate})
   `
       .trim()
       .replace(/\s+/g, " ");
@@ -166,8 +173,6 @@ const LayerConfigSetting = () => {
       })
     );
   };
-
-
 
   return !formValues ? (
     <div className={style.sidebarContainer}>
@@ -282,15 +287,20 @@ const LayerConfigSetting = () => {
                                 value={unitSelections[fieldKey]}
                                 onChange={(e) => {
                                   const newUnit = e.target.value;
+                                  const currentValue =
+                                    transformValues[
+                                      fieldKey as keyof typeof transformValues
+                                    ];
+
                                   setUnitSelections((prev) => ({
                                     ...prev,
                                     [fieldKey]: newUnit,
                                   }));
+
                                   handleTransformChange(
                                     fieldKey as keyof typeof transformValues,
-                                    transformValues[
-                                      fieldKey as keyof typeof transformValues
-                                    ]
+                                    currentValue,
+                                    newUnit
                                   );
                                 }}
                               >
