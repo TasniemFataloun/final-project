@@ -1,62 +1,7 @@
 import { nanoid } from "@reduxjs/toolkit";
 import { Propertykeyframes } from "../redux/types/animations.type";
 
-/* export function mergeTransforms(
-  animation: {
-    property: string;
-    keyframes: Propertykeyframes[];
-  }[]
-): {
-  property: string;
-  keyframes: Propertykeyframes[];
-}[] {
-  const transformProps = [
-    "rotate",
-    "rotateX",
-    "rotateY",
-    "scale",
-    "scaleX",
-    "scaleY",
-    "translateX",
-    "translateY",
-    "skewX",
-    "skewY",
-    "perspective",
-  ];
-  const transformsByPercentage: Record<number, string[]> = {};
-  const otherProps: typeof animation = [];
-
-  for (const propObj of animation) {
-    if (!transformProps.includes(propObj.property)) {
-      otherProps.push(propObj);
-      continue;
-    }
-
-    for (const kf of propObj.keyframes) {
-      const key = kf.percentage;
-      if (!transformsByPercentage[key]) transformsByPercentage[key] = [];
-      transformsByPercentage[key].push(
-        `${propObj.property}(${kf.value}${kf.unit})`
-      );
-    }
-  }
-
-  const mergedTransform = {
-    property: "transform",
-    keyframes: Object.entries(transformsByPercentage).map(
-      ([percentageStr, parts]) => ({
-        id: `merged-transform-${percentageStr}-${nanoid()}`,
-        value: parts.join(" "),
-        unit: "",
-        percentage: Number(percentageStr),
-      })
-    ),
-  };
-
-  return [mergedTransform, ...otherProps];
-} */
-
-export const presentAnimations: Record<
+export const presetAnimations: Record<
   string,
   {
     property: string;

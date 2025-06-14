@@ -15,7 +15,7 @@ import {
   addKeyframe,
   setConfig,
   setSelectedKeyframe,
-  updateKeyframeUnit,
+  updateKeyframe,
 } from "../../redux/slices/animationSlice";
 import {
   defaultUnits,
@@ -26,10 +26,10 @@ const PropertiesMenu = () => {
   const dispatch = useAppDispatch();
   const [isPropertiesMenuOpen, setIsPropertiesMenuOpen] = useState(true);
   const { selectedLayerId, layers, currentPosition } = useAppSelector(
-    (state) => state.animation
+    (state) => state.animation.present
   );
   const selectedKeyframe = useAppSelector(
-    (state) => state.animation.selectedKeyframe
+    (state) => state.animation.present.selectedKeyframe
   );
   const selectedLayer = layers.find((el) => el.id === selectedLayerId);
 
@@ -77,16 +77,35 @@ const PropertiesMenu = () => {
       defaultUnits["default"] ||
       "";
 
-    dispatch(
-      addKeyframe({
-        layerId: selectedLayerId,
-        propertyName,
-        percentage,
-        value: newValue.trim() === "" ? "0" : newValue,
-        unit,
-      })
+    const property = selectedLayer.editedPropertiesGroup?.find(
+      (p) => p.propertyName === propertyName
     );
 
+    const existingKeyframe = property?.keyframes.find(
+      (kf) => kf.percentage === percentage
+    );
+    if (existingKeyframe) {
+      dispatch(
+        updateKeyframe({
+          layerId: selectedLayerId,
+          propertyName,
+          keyframe: {
+            ...existingKeyframe,
+            value: newValue.trim() === "" ? "0" : newValue,
+          },
+        })
+      );
+    } else {
+      dispatch(
+        addKeyframe({
+          layerId: selectedLayerId,
+          propertyName,
+          percentage,
+          value: newValue.trim() === "" ? "0" : newValue,
+          unit,
+        })
+      );
+    }
     const newKeyframeId = `${propertyName}-${percentage}`;
     const newKeyframe = {
       id: newKeyframeId,
@@ -408,11 +427,20 @@ const PropertiesMenu = () => {
                                               value={
                                                 getValueAtCurrentPosition(
                                                   fieldKey
-                                                ) === "transparent"
+                                                ) === "transparent" ||
+                                                !getValueAtCurrentPosition(
+                                                  fieldKey
+                                                )
                                                   ? "#000000"
                                                   : getValueAtCurrentPosition(
                                                       fieldKey
                                                     )
+                                              }
+                                              onChange={(e) =>
+                                                handlePropertyChange(
+                                                  fieldKey,
+                                                  e.target.value
+                                                )
                                               }
                                               onChange={(e) =>
                                                 handlePropertyChange(
@@ -533,13 +561,14 @@ const PropertiesMenu = () => {
                                               fieldKey
                                             ) {
                                               dispatch(
-                                                updateKeyframeUnit({
+                                                updateKeyframe({
                                                   layerId: selectedLayerId,
                                                   propertyName:
                                                     selectedKeyframe.property,
-                                                  percentage:
-                                                    Math.round(currentPosition),
-                                                  unit,
+                                                  keyframe: {
+                                                    ...selectedKeyframe.keyframe,
+                                                    unit,
+                                                  },
                                                 })
                                               );
                                             }

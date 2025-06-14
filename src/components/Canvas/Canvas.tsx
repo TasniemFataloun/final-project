@@ -7,25 +7,43 @@ import {
   removeLayer,
   setIsPlaying,
   setSelectedLayer,
+  updateKeyframe,
   updateLayer,
 } from "../../redux/slices/animationSlice";
 import { defaultConfig } from "../../config/PropertiesMenu.config";
-
+import { ActionCreators } from "redux-undo";
 const Canvas = () => {
   const dispatch = useAppDispatch();
   const layerRef = useRef<{ [id: string]: HTMLDivElement | null }>({});
   const { layers, selectedLayerId } = useAppSelector(
-    (state) => state.animation
+    (state) => state.animation.present
   );
   const selectedKeyframe = useAppSelector(
-    (state) => state.animation.selectedKeyframe
+    (state) => state.animation.present.selectedKeyframe
   );
   const { isPlaying, currentPosition } = useAppSelector(
-    (state) => state.animation
+    (state) => state.animation.present
   );
   const editMode = useAppSelector((state) => state.editMode.value);
 
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
+      const isRedoCtrl = e.ctrlKey && e.key === "y"; // Windows Ctrl+Y
+      const isRedoMac = e.metaKey && e.key === "z" && e.shiftKey; // Mac ⌘+Shift+Z
+
+      if (isUndo) {
+        dispatch(ActionCreators.undo());
+      } else if (isRedoCtrl || isRedoMac) {
+        dispatch(ActionCreators.redo());
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [dispatch]);
 
   const [dragInfo, setDragInfo] = useState<{
     type: "drag" | "resize" | "rotate" | null;
@@ -272,15 +290,36 @@ const Canvas = () => {
       const initHeight = styleInfo.height as number;
 
       const addKayframes = (propertyName: string, value: any) => {
-        dispatch(
-          addKeyframe({
-            layerId: selectedLayer.id,
-            percentage: currentPosition,
-            propertyName,
-            value: `${value}`,
-          })
+        const property = selectedLayer.editedPropertiesGroup?.find(
+          (p) => p.propertyName === propertyName
         );
+
+        const existingKeyframe = property?.keyframes.find(
+          (kf) => kf.percentage === currentPosition
+        );
+        if (existingKeyframe) {
+          dispatch(
+            updateKeyframe({
+              layerId: selectedLayer.id,
+              propertyName,
+              keyframe: {
+                ...existingKeyframe,
+                value: `${value}`,
+              },
+            })
+          );
+        } else {
+          dispatch(
+            addKeyframe({
+              layerId: selectedLayer.id,
+              propertyName,
+              percentage: currentPosition,
+              value: `${value}`,
+            })
+          );
+        }
       };
+
       if (
         type === "rotate" &&
         centerX !== undefined &&

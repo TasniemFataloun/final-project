@@ -12,10 +12,10 @@ const LayerConfigSetting = () => {
   const dispatch = useAppDispatch();
   const editMode = useAppSelector((state) => state.editMode.value);
   const selectedLayerId = useAppSelector(
-    (state) => state.animation.selectedLayerId
+    (state) => state.animation.present.selectedLayerId
   );
   const selectedLayer = useAppSelector((state) =>
-    state.animation.layers.find((layer) => layer.id === selectedLayerId)
+    state.animation.present.layers.find((layer) => layer.id === selectedLayerId)
   );
   const [unitSelections, setUnitSelections] = useState<Record<string, string>>(
     {}
@@ -167,22 +167,19 @@ const LayerConfigSetting = () => {
     );
   };
 
-  useEffect(() => {
-    console.log("Edit mode changed to:", editMode);
-  }, [editMode]);
+
 
   return !formValues ? (
     <div className={style.sidebarContainer}>
       Select a Layer to see the setting
     </div>
   ) : (
-    <div className={` ${style.openContainer}`} style={{overflowY: "auto"}}>
+    <div className={` ${style.openContainer}`} style={{ overflowY: "auto" }}>
       <div className={style.turnBack}>
         <button
           onClick={() => {
             dispatch(setLayerConfigSettings({ layerId: "", style: {} }));
             dispatch(setEditMode("timeline"));
-            console.log(editMode);
           }}
           className={style.backButton}
         >
@@ -349,7 +346,7 @@ const LayerConfigSetting = () => {
                                       value={
                                         formValues[fieldKey] === "transparent"
                                           ? "#000000"
-                                          : numericValue
+                                          : numericValue || "#000000"
                                       }
                                       onChange={(e) =>
                                         handleChange(

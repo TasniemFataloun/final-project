@@ -163,22 +163,14 @@ const animationSlice = createSlice({
         defaultUnits["default"] ||
         "";
 
-      const existingKeyframe = prop.keyframes.find(
-        (kf) => kf.percentage === roundedPercentage
-      );
-
-      if (existingKeyframe) {
-        existingKeyframe.value = value;
-        if (unit !== undefined) existingKeyframe.unit = unit;
-      } else {
-        prop.keyframes.push({
-          id: `${propertyName}-${roundedPercentage}-${nanoid()}`,
-          value,
-          unit,
-          percentage: roundedPercentage,
-        });
-      }
+      prop.keyframes.push({
+        id: `${propertyName}-${roundedPercentage}-${nanoid()}`,
+        value,
+        unit,
+        percentage: roundedPercentage,
+      });
     },
+
     addKeyframesToLayer: (
       state,
       action: PayloadAction<{
@@ -207,47 +199,21 @@ const animationSlice = createSlice({
       prop.keyframes = keyframes;
     },
 
-    updateKeyframeUnit: (
-      state,
-      action: PayloadAction<{
-        layerId: string;
-        propertyName: string;
-        percentage: number;
-        unit: string;
-      }>
-    ) => {
-      const { layerId, propertyName, percentage, unit } = action.payload;
-      const layer = state.layers.find((l) => l.id === layerId);
-      if (!layer || !layer.editedPropertiesGroup) return;
-
-      const prop = layer.editedPropertiesGroup.find(
-        (p) => p.propertyName === propertyName
-      );
-      if (!prop) return;
-
-      const keyframe = prop.keyframes.find(
-        (kf) => kf.percentage === percentage
-      );
-      if (keyframe) {
-        keyframe.unit = unit;
-      }
-    },
-
     updateKeyframe: (
       state,
       action: PayloadAction<{
         layerId: string;
-        property: string;
+        propertyName: string;
         keyframe: Propertykeyframes;
       }>
     ) => {
-      const { layerId, property, keyframe } = action.payload;
+      const { layerId, propertyName, keyframe } = action.payload;
       const layer = state.layers.find((l) => l.id === layerId);
 
       if (!layer || !layer.editedPropertiesGroup) return;
 
       layer.editedPropertiesGroup = layer.editedPropertiesGroup.map((prop) => {
-        if (prop.propertyName !== property) return prop;
+        if (prop.propertyName !== propertyName) return prop;
 
         const updatedKeyframes = prop.keyframes.map((kf) =>
           kf.id === keyframe.id ? keyframe : kf
@@ -456,7 +422,7 @@ export const {
   addLayer,
   addKeyframe,
   addKeyframesToLayer,
-  updateKeyframeUnit,
+
   renameLayer,
   updateKeyframe,
   copyKeyframe,
@@ -480,7 +446,6 @@ export type AnimationActionType =
   | typeof addLayer
   | typeof addKeyframe
   | typeof addKeyframesToLayer
-  | typeof updateKeyframeUnit
   | typeof renameLayer
   | typeof updateKeyframe
   | typeof copyKeyframe

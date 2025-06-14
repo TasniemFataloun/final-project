@@ -19,7 +19,7 @@ import { Propertykeyframes } from "../../../redux/types/animations.type";
 const TimelineKeyframes = () => {
   const dispatch = useAppDispatch();
   const { layers, selectedLayerId, isPlaying, currentPosition } =
-    useAppSelector((state) => state.animation);
+    useAppSelector((state) => state.animation.present);
   const { expandedLayers, endTimeRef } = useAppSelector(
     (state) => state.timeline
   );
@@ -27,15 +27,15 @@ const TimelineKeyframes = () => {
 
   const [draggedKeyframe, setDraggedKeyframe] = useState<{
     layerId: string;
-    property: string;
+    propertyName: string;
     newKeyframe: Propertykeyframes;
   } | null>(null);
 
   const { copyKeyframe: copiedKeyframe } = useAppSelector(
-    (state) => state.animation
+    (state) => state.animation.present
   );
   const selectedKeyframe = useAppSelector(
-    (state) => state.animation.selectedKeyframe
+    (state) => state.animation.present.selectedKeyframe
   );
 
   const layerId = layers.find((layer) => layer.id === selectedLayerId)?.id;
@@ -52,7 +52,7 @@ const TimelineKeyframes = () => {
 
     const target = e.target as HTMLElement;
 
-    // clicking on a keyframe -> do not clear selection
+    // If clicking on a keyframe, do not clear selection
     if (target.closest(`.${style.keyframe}`)) return;
 
     const rect = timelineRef.current.getBoundingClientRect();
@@ -340,7 +340,7 @@ const TimelineKeyframes = () => {
                           setIsDragging(true);
                           setDraggedKeyframe({
                             layerId: layer.id,
-                            property: prop.propertyName,
+                            propertyName: prop.propertyName,
                             newKeyframe: kf,
                           });
                         }}

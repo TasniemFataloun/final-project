@@ -12,13 +12,12 @@ type GenerateCssProps = {
 };
 
 const GenerateCss = ({ onClose }: GenerateCssProps) => {
-  const { layers } = useAppSelector((state) => state.animation);
+  const { layers } = useAppSelector((state) => state.animation.present);
 
   const generateCSS = () => {
     const containerCSS = `
 .animatedElementContainer {
   display: flex;
-  position: relative;
 }
   `.trim();
 

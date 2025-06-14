@@ -20,7 +20,7 @@ const TimelineControl = () => {
   //redux
   const dispatch = useAppDispatch();
   const { currentPosition, selectedLayerId, layers, isPlaying } =
-    useAppSelector((state) => state.animation);
+    useAppSelector((state) => state.animation.present);
 
   /* restart and jump to end */
   const restart = () => {

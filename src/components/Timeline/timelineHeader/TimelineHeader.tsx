@@ -5,9 +5,11 @@ import React, { useMemo } from "react";
 import { defaultLayerConfig } from "../../../config/elementsProperties.config";
 
 const TimelineHeader = () => {
-  const { currentPosition } = useAppSelector((state) => state.animation);
+  const { currentPosition } = useAppSelector(
+    (state) => state.animation.present
+  );
   const { layers, selectedLayerId } = useAppSelector(
-    (state) => state.animation
+    (state) => state.animation.present
   );
   const selectedLayer = layers.find((l) => l.id == selectedLayerId)?.config;
 

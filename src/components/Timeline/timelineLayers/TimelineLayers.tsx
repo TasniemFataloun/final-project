@@ -38,11 +38,11 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
   const editMode = useAppSelector((state) => state.editMode.value);
 
   const { layers, selectedLayerId } = useAppSelector(
-    (state) => state.animation
+    (state) => state.animation.present
   );
   const { expandedLayers } = useAppSelector((state) => state.timeline);
   const selectedKeyframe = useAppSelector(
-    (state) => state.animation.selectedKeyframe
+    (state) => state.animation.present.selectedKeyframe
   );
 
   const moveLayer = (fromIndex: number, toIndex: number) => {

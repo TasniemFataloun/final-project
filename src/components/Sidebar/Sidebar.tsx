@@ -1,6 +1,9 @@
 import style from "./Sidebar.module.css";
 import store, { useAppDispatch, useAppSelector } from "../../redux/store";
-import { addLayer } from "../../redux/slices/animationSlice";
+import {
+  addKeyframesToLayer,
+  addLayer,
+} from "../../redux/slices/animationSlice";
 import {
   Square,
   Circle,
@@ -12,8 +15,6 @@ import {
 } from "lucide-react";
 import { ElementType, Layer } from "../../redux/types/animations.type";
 import HtmlCssCode from "../HtmlCssCode/HtmlCssCode";
-import { presentAnimations } from "../../config/presentAnimations";
-import { addKeyframesToLayer } from "../../redux/slices/animationSlice"; // import action
 import { useEffect, useRef, useState } from "react";
 import * as cssParser from "css";
 import { getDefaultPropertiesGroup } from "../../helpers/GetDefaultPropertiesGroup";
@@ -22,6 +23,7 @@ import {
   clearLocalStorage,
   saveStateToLocalStorage,
 } from "../../utils/Localstorage";
+import { presetAnimations } from "../../config/presetAnimations.config";
 
 const parseHtmlToLayers = (
   html: string,
@@ -79,7 +81,7 @@ const parseCss = (css: string, selector: string): Record<string, string> => {
 };
 
 const Sidebar = () => {
-  const { layers } = useAppSelector((state) => state.animation);
+  const { layers } = useAppSelector((state) => state.animation.present);
   const dispatch = useAppDispatch();
   const [showCodeComponent, setShowCodeComponent] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -167,14 +169,14 @@ const Sidebar = () => {
 
   // Handle animation selection
   const selectedLayerId = useAppSelector(
-    (state) => state.animation.selectedLayerId
+    (state) => state.animation.present.selectedLayerId
   );
 
   const handleAnimationSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedAnimation = e.target.value;
     if (!selectedAnimation || !selectedLayerId) return;
 
-    const animation = presentAnimations[selectedAnimation];
+    const animation = presetAnimations[selectedAnimation];
     if (!animation) return;
 
     animation.forEach(({ property, keyframes }) => {
@@ -211,7 +213,7 @@ const Sidebar = () => {
                 : "Open properties panel"
             }
           >
-            <PanelRightClose size={14}/>
+            <PanelRightClose size={14} />
           </button>
           {isPropertiesMenuOpen ? (
             <>
@@ -288,8 +290,8 @@ const Sidebar = () => {
                   />
                 )}
               </div>
-              <div className={style.presentAnimations} data-tour="preset-animations">
-                <label htmlFor="presentAnimations">
+              <div data-tour="preset-animations">
+                <label htmlFor="presetAnimations">
                   <h2>Preset Animations</h2>
                 </label>
                 <select

@@ -10,8 +10,6 @@ type HeaderProps = {
 };
 
 const Header = ({ onToggleGenerateCss, onStartTour }: HeaderProps) => {
-  const layers = useAppSelector((state) => state.animation.layers);
-
   return (
     <header className={style.header}>
       <div className={style.headerContent}>

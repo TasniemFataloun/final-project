@@ -128,6 +128,7 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const baseClassCss = `
 ${className} {
   position: relative;
+
 ${propsClassName}
 ${animationCss}
 }
