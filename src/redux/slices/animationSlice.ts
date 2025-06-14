@@ -179,6 +179,33 @@ const animationSlice = createSlice({
         });
       }
     },
+    addKeyframesToLayer: (
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        property: string;
+        keyframes: Propertykeyframes[];
+      }>
+    ) => {
+      const { layerId, property, keyframes } = action.payload;
+      const layer = state.layers.find((l) => l.id === layerId);
+      if (!layer || !layer.editedPropertiesGroup) return;
+
+      let prop = layer.editedPropertiesGroup.find(
+        (p) => p.propertyName === property
+      );
+
+      if (!prop) {
+        prop = {
+          propertyName: property,
+          keyframes: [],
+        };
+        layer.editedPropertiesGroup.push(prop);
+      }
+
+      // Replace keyframes for the property
+      prop.keyframes = keyframes;
+    },
 
     updateKeyframeUnit: (
       state,
@@ -428,6 +455,7 @@ const animationSlice = createSlice({
 export const {
   addLayer,
   addKeyframe,
+  addKeyframesToLayer,
   updateKeyframeUnit,
   renameLayer,
   updateKeyframe,
@@ -451,6 +479,7 @@ export const {
 export type AnimationActionType =
   | typeof addLayer
   | typeof addKeyframe
+  | typeof addKeyframesToLayer
   | typeof updateKeyframeUnit
   | typeof renameLayer
   | typeof updateKeyframe

@@ -52,7 +52,7 @@ const TimelineKeyframes = () => {
 
     const target = e.target as HTMLElement;
 
-    // If clicking on a keyframe, do not clear selection
+    // clicking on a keyframe -> do not clear selection
     if (target.closest(`.${style.keyframe}`)) return;
 
     const rect = timelineRef.current.getBoundingClientRect();
@@ -280,18 +280,13 @@ const TimelineKeyframes = () => {
       ref={timelineRef}
     >
       {/* Playhead */}
-
       {layers.length > 0 && (
         <div
-          className={style.playHeadContainer}
-          style={{ minHeight: `${layers.length * 40}px` }}
-        >
-          <div
-            className={style.playHead}
-            style={{ left: `${currentPosition}%` }}
-          />
-        </div>
+          className={style.playHead}
+          style={{ left: `${currentPosition}%` }}
+        />
       )}
+
       {/* Keyframes */}
 
       {[...layers]

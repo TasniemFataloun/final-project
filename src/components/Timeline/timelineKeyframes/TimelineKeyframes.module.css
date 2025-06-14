@@ -6,6 +6,7 @@
   flex: 1;
   height: 100%; /* ✅ match parent height */
   cursor: pointer;
+  overflow: auto;
 }
 
 .row {
@@ -48,21 +49,21 @@
 .playHead {
   position: absolute;
   width: 2px;
-  /* Remove height: 100% */
+  height: 100%;
   background-color: var(--playhead);
   top: 0;
   transform: translateX(-50%);
-  /* Add bottom position to match the visible area */
   bottom: 0;
 }
+
 .playHeadContainer {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   pointer-events: none;
-  /* This will make sure the playhead stays above all layers */
   z-index: 10;
+  display: flex;
 }
 
 .playHead::before {

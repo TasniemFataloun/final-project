@@ -1,4 +1,4 @@
-import style from "./LayerConfigSetting.module.css";
+import style from "../PropertiesMenu/PropertiesMenu.module.css";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { styleConfig } from "../../types/animationType";
 import { setLayerConfigSettings } from "../../redux/slices/animationSlice";
@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { getAllowedUnits } from "../../config/defaultUnits.config";
 import { Pipette } from "lucide-react";
 import { propertiesSchema } from "../../config/PropertiesMenu.config";
+import { setEditMode } from "../../redux/slices/editModeSlice";
 
 const LayerConfigSetting = () => {
   const dispatch = useAppDispatch();
@@ -151,7 +152,7 @@ const LayerConfigSetting = () => {
     rotate(${updated.rotate || "0"}deg)
   `
       .trim()
-      .replace(/\s+/g, " "); // clean up spaces
+      .replace(/\s+/g, " ");
 
     const newStyle: styleConfig = {
       ...selectedLayer.style,
@@ -166,15 +167,31 @@ const LayerConfigSetting = () => {
     );
   };
 
-  if (!formValues)
-    return (
-      <div className={style.container}>Select a Layer to see the setting</div>
-    );
+  useEffect(() => {
+    console.log("Edit mode changed to:", editMode);
+  }, [editMode]);
 
-  return (
-    <div className={style.container}>
-      <div className={style.turnBack}></div>
+  return !formValues ? (
+    <div className={style.sidebarContainer}>
+      Select a Layer to see the setting
+    </div>
+  ) : (
+    <div className={` ${style.openContainer}`} style={{overflowY: "auto"}}>
+      <div className={style.turnBack}>
+        <button
+          onClick={() => {
+            dispatch(setLayerConfigSettings({ layerId: "", style: {} }));
+            dispatch(setEditMode("timeline"));
+            console.log(editMode);
+          }}
+          className={style.backButton}
+        >
+          ← Back to Properties
+        </button>
+      </div>
+      {!formValues && <p>Select a Layer to see the setting</p>}
       <h2>Edit {selectedLayer?.name || "Layer"} Properties</h2>
+
       {selectedLayer?.type === "code" ? (
         Object.entries(formValues).map(([key, value]) => {
           const isColor = key.toLowerCase().includes("color");
@@ -227,65 +244,67 @@ const LayerConfigSetting = () => {
                       ([fieldKey, fieldProps]) => (
                         <div key={fieldKey} className={style.propertyGroup}>
                           <label>{fieldProps.label}</label>
-                          <input
-                            type="number"
-                            step={
-                              fieldProps.type === "number" &&
-                              "step" in fieldProps
-                                ? (fieldProps.step as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            min={
-                              fieldProps.type === "number" &&
-                              "min" in fieldProps
-                                ? (fieldProps.min as
-                                    | string
-                                    | number
-                                    | undefined)
-                                : undefined
-                            }
-                            value={
-                              transformValues[
-                                fieldKey as keyof typeof transformValues
-                              ]
-                            }
-                            onChange={(e) =>
-                              handleTransformChange(
-                                fieldKey as keyof typeof transformValues,
-                                e.target.value
-                              )
-                            }
-                            className={style.input}
-                            data-property-input="true"
-                          />
-
-                          {getAllowedUnits(fieldKey).length > 0 && (
-                            <select
-                              value={unitSelections[fieldKey]}
-                              onChange={(e) => {
-                                const newUnit = e.target.value;
-                                setUnitSelections((prev) => ({
-                                  ...prev,
-                                  [fieldKey]: newUnit,
-                                }));
+                          <div className={style.propertyAndUnitContainer}>
+                            <input
+                              type="number"
+                              step={
+                                fieldProps.type === "number" &&
+                                "step" in fieldProps
+                                  ? (fieldProps.step as
+                                      | string
+                                      | number
+                                      | undefined)
+                                  : undefined
+                              }
+                              min={
+                                fieldProps.type === "number" &&
+                                "min" in fieldProps
+                                  ? (fieldProps.min as
+                                      | string
+                                      | number
+                                      | undefined)
+                                  : undefined
+                              }
+                              value={
+                                transformValues[
+                                  fieldKey as keyof typeof transformValues
+                                ]
+                              }
+                              onChange={(e) =>
                                 handleTransformChange(
                                   fieldKey as keyof typeof transformValues,
-                                  transformValues[
-                                    fieldKey as keyof typeof transformValues
-                                  ]
-                                );
-                              }}
-                            >
-                              {getAllowedUnits(fieldKey).map((unit) => (
-                                <option key={unit} value={unit}>
-                                  {unit}
-                                </option>
-                              ))}
-                            </select>
-                          )}
+                                  e.target.value
+                                )
+                              }
+                              className={style.input}
+                              data-property-input="true"
+                            />
+
+                            {getAllowedUnits(fieldKey).length > 0 && (
+                              <select
+                                value={unitSelections[fieldKey]}
+                                onChange={(e) => {
+                                  const newUnit = e.target.value;
+                                  setUnitSelections((prev) => ({
+                                    ...prev,
+                                    [fieldKey]: newUnit,
+                                  }));
+                                  handleTransformChange(
+                                    fieldKey as keyof typeof transformValues,
+                                    transformValues[
+                                      fieldKey as keyof typeof transformValues
+                                    ]
+                                  );
+                                }}
+                              >
+                                {getAllowedUnits(fieldKey).map((unit) => (
+                                  <option key={unit} value={unit}>
+                                    {unit}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
                         </div>
                       )
                     )}
@@ -300,38 +319,91 @@ const LayerConfigSetting = () => {
                           <label className={style.label}>
                             {fieldProps.label}
                           </label>
-
-                          {fieldProps.type === "select" ? (
-                            <select
-                              //value={unit}
-                              onChange={(e) =>
-                                handleChange(
-                                  fieldKey as keyof styleConfig,
-                                  e.target.value
-                                )
-                              }
-                              className={style.input}
-                              data-property-input="true"
-                            >
-                              {"options" in fieldProps &&
-                                (fieldProps.options as string[]).map(
-                                  (opt: string) => (
-                                    <option key={opt} value={opt}>
-                                      {opt}
-                                    </option>
+                          <div className={style.propertyAndUnitContainer}>
+                            {fieldProps.type === "select" ? (
+                              <select
+                                onChange={(e) =>
+                                  handleChange(
+                                    fieldKey as keyof styleConfig,
+                                    e.target.value
                                   )
-                                )}
-                            </select>
-                          ) : (
-                            <>
-                              {fieldProps.type === "color" ? (
-                                <div className={style.colorInputWrapper}>
+                                }
+                                className={style.input}
+                                data-property-input="true"
+                              >
+                                {"options" in fieldProps &&
+                                  (fieldProps.options as string[]).map(
+                                    (opt: string) => (
+                                      <option key={opt} value={opt}>
+                                        {opt}
+                                      </option>
+                                    )
+                                  )}
+                              </select>
+                            ) : (
+                              <>
+                                {fieldProps.type === "color" ? (
+                                  <div className={style.colorInputWrapper}>
+                                    <input
+                                      type="color"
+                                      value={
+                                        formValues[fieldKey] === "transparent"
+                                          ? "#000000"
+                                          : numericValue
+                                      }
+                                      onChange={(e) =>
+                                        handleChange(
+                                          fieldKey as keyof styleConfig,
+                                          e.target.value
+                                        )
+                                      }
+                                      className={`${style.colorInput}`}
+                                      data-property-input="true"
+                                    />
+                                    <button
+                                      className={style.transparentButton}
+                                      onClick={() =>
+                                        handleChange(
+                                          fieldKey as keyof styleConfig,
+                                          "transparent"
+                                        )
+                                      }
+                                      title="Set to transparent"
+                                    >
+                                      Transparent
+                                    </button>
+                                    <Pipette size={15} />
+                                  </div>
+                                ) : (
                                   <input
-                                    type="color"
-                                    value={
-                                      formValues[fieldKey] === "transparent"
-                                        ? "#000000"
-                                        : numericValue
+                                    type={fieldProps.type}
+                                    value={numericValue}
+                                    step={
+                                      fieldProps.type === "number" &&
+                                      "step" in fieldProps
+                                        ? (fieldProps.step as
+                                            | string
+                                            | number
+                                            | undefined)
+                                        : undefined
+                                    }
+                                    min={
+                                      fieldProps.type === "number" &&
+                                      "min" in fieldProps
+                                        ? (fieldProps.min as
+                                            | string
+                                            | number
+                                            | undefined)
+                                        : undefined
+                                    }
+                                    max={
+                                      fieldProps.type === "number" &&
+                                      "max" in fieldProps
+                                        ? (fieldProps.max as
+                                            | string
+                                            | number
+                                            | undefined)
+                                        : undefined
                                     }
                                     onChange={(e) =>
                                       handleChange(
@@ -339,93 +411,36 @@ const LayerConfigSetting = () => {
                                         e.target.value
                                       )
                                     }
-                                    className={`${style.colorInput}`}
+                                    className={`${style.input}`}
                                     data-property-input="true"
                                   />
-                                  {/** transparent button */}
-                                  <button
-                                    className={style.transparentButton}
-                                    onClick={() =>
+                                )}
+                                {getAllowedUnits(fieldKey).length > 0 && (
+                                  <select
+                                    value={unitSelections[fieldKey]}
+                                    onChange={(e) => {
+                                      const newUnit = e.target.value;
+                                      setUnitSelections((prev) => ({
+                                        ...prev,
+                                        [fieldKey]: newUnit,
+                                      }));
                                       handleChange(
                                         fieldKey as keyof styleConfig,
-
-                                        "transparent"
-                                      )
-                                    }
-                                    title="Set to transparent"
+                                        numericValue,
+                                        newUnit
+                                      );
+                                    }}
                                   >
-                                    Transparent
-                                  </button>
-
-                                  <Pipette size={15} />
-                                </div>
-                              ) : (
-                                <input
-                                  type={fieldProps.type}
-                                  value={numericValue}
-                                  step={
-                                    fieldProps.type === "number" &&
-                                    "step" in fieldProps
-                                      ? (fieldProps.step as
-                                          | string
-                                          | number
-                                          | undefined)
-                                      : undefined
-                                  }
-                                  min={
-                                    fieldProps.type === "number" &&
-                                    "min" in fieldProps
-                                      ? (fieldProps.min as
-                                          | string
-                                          | number
-                                          | undefined)
-                                      : undefined
-                                  }
-                                  max={
-                                    fieldProps.type === "number" &&
-                                    "max" in fieldProps
-                                      ? (fieldProps.max as
-                                          | string
-                                          | number
-                                          | undefined)
-                                      : undefined
-                                  }
-                                  onChange={(e) =>
-                                    handleChange(
-                                      fieldKey as keyof styleConfig,
-                                      e.target.value
-                                    )
-                                  }
-                                  className={`${style.input}`}
-                                  data-property-input="true"
-                                />
-                              )}
-                              {getAllowedUnits(fieldKey).length > 0 && (
-                                <select
-                                  value={unitSelections[fieldKey]}
-                                  onChange={(e) => {
-                                    const newUnit = e.target.value;
-                                    setUnitSelections((prev) => ({
-                                      ...prev,
-                                      [fieldKey]: newUnit,
-                                    }));
-                                    // Immediately update with the new unit
-                                    handleChange(
-                                      fieldKey as keyof styleConfig,
-                                      numericValue,
-                                      newUnit
-                                    );
-                                  }}
-                                >
-                                  {getAllowedUnits(fieldKey).map((unit) => (
-                                    <option key={unit} value={unit}>
-                                      {unit}
-                                    </option>
-                                  ))}
-                                </select>
-                              )}
-                            </>
-                          )}
+                                    {getAllowedUnits(fieldKey).map((unit) => (
+                                      <option key={unit} value={unit}>
+                                        {unit}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </div>
                       );
                     })}

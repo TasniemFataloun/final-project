@@ -2,7 +2,6 @@
   padding: 1rem 3rem;
   background-color: #ff69b4;
   border-radius: 4rem;
-  color: var(--bg);
   text-align: center;
   cursor: pointer;
 }

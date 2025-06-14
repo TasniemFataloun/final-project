@@ -66,10 +66,6 @@ const PropertiesMenu = () => {
     }
   }, [selectedKeyframe]);
 
-  const handleTogglePropertiesMenu = () => {
-    setIsPropertiesMenuOpen((prev) => !prev);
-  };
-
   // Handle changes in the properties panel
   const handlePropertyChange = (propertyName: string, newValue: any) => {
     if (!selectedLayerId || !selectedLayer) return;
@@ -191,210 +187,192 @@ const PropertiesMenu = () => {
   return (
     <aside
       data-tour="properties-panel-sidebar"
-      className={` ${style.container} ${
+      className={` ${style.sidebarContainer} ${
         isPropertiesMenuOpen ? style.openContainer : style.closeContainer
       }`}
     >
-      <div className={style.iconh2}>
+      <div className={style.containerScroll}>
         <button
-          onClick={handleTogglePropertiesMenu}
+          onClick={() => setIsPropertiesMenuOpen((prev) => !prev)}
           className={style.iconClosePanel}
+          aria-expanded={isPropertiesMenuOpen}
+          aria-label={
+            isPropertiesMenuOpen
+              ? "Close properties panel"
+              : "Open properties panel"
+          }
         >
-          <PanelRightClose color="var(--white)" />
+          <PanelRightClose size={14} />
         </button>
-        {isPropertiesMenuOpen ? (
-          <h2>{`Properties ${
-            selectedLayer?.name ? ` ${selectedLayer.name}` : ""
-          }`}</h2>
-        ) : (
-          ""
-        )}
-      </div>
 
-      {isPropertiesMenuOpen && (
-        <>
-          {Object.entries(ConfigSchema).map(([sectionKey, sectionData]) => {
-            const isOpen = openSections.includes(sectionKey);
+        <div className={style.iconh2}>
+          {isPropertiesMenuOpen && (
+            <h2>{`Properties ${
+              selectedLayer?.name ? ` ${selectedLayer.name}` : ""
+            }`}</h2>
+          )}
+        </div>
 
-            const toggleSection = () => {
-              setOpenSections((prev) =>
-                isOpen
-                  ? prev.filter((key) => key !== sectionKey)
-                  : [...prev, sectionKey]
-              );
-            };
+        {/* Scrollable content area */}
+        {isPropertiesMenuOpen && (
+          <>
+            {Object.entries(ConfigSchema).map(([sectionKey, sectionData]) => {
+              const isOpen = openSections.includes(sectionKey);
 
-            return (
-              <div
-                key={sectionKey}
-                className={style.section}
-                data-tour="properties-panel-config"
-              >
-                <div className={style.chevronH3} onClick={toggleSection}>
-                  {isOpen ? (
-                    <ChevronDown size={14} />
-                  ) : (
-                    <ChevronRight size={14} />
-                  )}
-                  <h3>{sectionData.title}</h3>
-                </div>
+              const toggleSection = () => {
+                setOpenSections((prev) =>
+                  isOpen
+                    ? prev.filter((key) => key !== sectionKey)
+                    : [...prev, sectionKey]
+                );
+              };
 
-                {isOpen && (
-                  <div className={style.optionsContainer}>
-                    {Object.entries(sectionData.fields).map(
-                      ([fieldKey, fieldProps]) => {
-                        const configValue = selectedLayer?.config?.[fieldKey];
-                        return (
-                          <div className={style.option} key={fieldKey}>
-                            <label className={style.label}>
-                              {fieldProps.label}
-                            </label>
-
-                            {fieldProps.type === "select" ? (
-                              <select
-                                value={configValue ?? ""}
-                                onChange={(e) =>
-                                  handleConfigChange(
-                                    fieldKey,
-                                    e.target.value,
-                                    sectionKey
-                                  )
-                                }
-                                className={style.input}
-                              >
-                                {"options" in fieldProps &&
-                                  (fieldProps.options as string[]).map(
-                                    (opt: string) => (
-                                      <option key={opt} value={opt}>
-                                        {opt}
-                                      </option>
-                                    )
-                                  )}
-                              </select>
-                            ) : (
-                              <input
-                                type={fieldProps.type}
-                                value={configValue ?? ""}
-                                step={
-                                  fieldProps.type === "number" &&
-                                  "step" in fieldProps
-                                    ? (fieldProps.step as
-                                        | string
-                                        | number
-                                        | undefined)
-                                    : undefined
-                                }
-                                min={
-                                  fieldProps.type === "number" &&
-                                  "min" in fieldProps
-                                    ? (fieldProps.min as
-                                        | string
-                                        | number
-                                        | undefined)
-                                    : undefined
-                                }
-                                max={
-                                  fieldProps.type === "number" &&
-                                  "max" in fieldProps
-                                    ? (fieldProps.max as
-                                        | string
-                                        | number
-                                        | undefined)
-                                    : undefined
-                                }
-                                onChange={(e) =>
-                                  handleConfigChange(
-                                    fieldKey,
-                                    e.target.value,
-                                    sectionKey
-                                  )
-                                }
-                                className={style.input}
-                              />
-                            )}
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {Object.entries(propertiesSchema).map(([sectionKey, sectionData]) => {
-            const isOpen = openSections.includes(sectionKey);
-
-            const toggleSection = () => {
-              setOpenSections((prev) =>
-                isOpen
-                  ? prev.filter((key) => key !== sectionKey)
-                  : [...prev, sectionKey]
-              );
-            };
-
-            const selectedKeyframeProperty = selectedKeyframe?.property;
-
-            return (
-              <div
-                key={sectionKey}
-                className={style.section}
-                data-tour="properties-panel-properties"
-              >
+              return (
                 <div
-                  className={style.chevronH3}
-                  onClick={toggleSection}
-                  style={{ cursor: "pointer" }}
+                  key={sectionKey}
+                  className={style.section}
+                  data-tour="properties-panel-config"
                 >
-                  {isOpen ? (
-                    <ChevronDown size={14} />
-                  ) : (
-                    <ChevronRight size={14} />
-                  )}
-                  <h3>{sectionData.title}</h3>
-                </div>
+                  <div className={style.chevronH3} onClick={toggleSection}>
+                    {isOpen ? (
+                      <ChevronDown size={14} />
+                    ) : (
+                      <ChevronRight size={14} />
+                    )}
+                    <h3>{sectionData.title}</h3>
+                  </div>
 
-                {isOpen && (
-                  <div className={style.optionsContainer}>
-                    {Object.entries(sectionData.fields).map(
-                      ([fieldKey, fieldProps]) => {
-                        return (
-                          <div className={style.option} key={fieldKey}>
-                            <label className={style.label}>
-                              {fieldProps.label}
-                            </label>
+                  {isOpen && (
+                    <div className={style.optionsContainer}>
+                      {Object.entries(sectionData.fields).map(
+                        ([fieldKey, fieldProps]) => {
+                          const configValue = selectedLayer?.config?.[fieldKey];
+                          return (
+                            <div className={style.option} key={fieldKey}>
+                              <label className={style.label}>
+                                {fieldProps.label}
+                              </label>
 
-                            {fieldProps.type === "select" ? (
-                              <select
-                                value={
-                                  getValueAtCurrentPosition(fieldKey) ?? ""
-                                }
-                                onChange={(e) =>
-                                  handlePropertyChange(fieldKey, e.target.value)
-                                }
-                                className={style.input}
-                                data-property-input="true"
-                              >
-                                {"options" in fieldProps &&
-                                  (fieldProps.options as string[]).map(
-                                    (opt: string) => (
-                                      <option key={opt} value={opt}>
-                                        {opt}
-                                      </option>
+                              {fieldProps.type === "select" ? (
+                                <select
+                                  value={configValue ?? ""}
+                                  onChange={(e) =>
+                                    handleConfigChange(
+                                      fieldKey,
+                                      e.target.value,
+                                      sectionKey
                                     )
-                                  )}
-                              </select>
-                            ) : (
-                              <>
-                                {fieldProps.type === "color" ? (
-                                  <div className={style.colorInputWrapper}>
-                                    <input
-                                      type="color"
+                                  }
+                                  className={style.input}
+                                >
+                                  {"options" in fieldProps &&
+                                    (fieldProps.options as string[]).map(
+                                      (opt: string) => (
+                                        <option key={opt} value={opt}>
+                                          {opt}
+                                        </option>
+                                      )
+                                    )}
+                                </select>
+                              ) : (
+                                <input
+                                  type={fieldProps.type}
+                                  value={configValue ?? ""}
+                                  step={
+                                    fieldProps.type === "number" &&
+                                    "step" in fieldProps
+                                      ? (fieldProps.step as
+                                          | string
+                                          | number
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  min={
+                                    fieldProps.type === "number" &&
+                                    "min" in fieldProps
+                                      ? (fieldProps.min as
+                                          | string
+                                          | number
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  max={
+                                    fieldProps.type === "number" &&
+                                    "max" in fieldProps
+                                      ? (fieldProps.max as
+                                          | string
+                                          | number
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  onChange={(e) =>
+                                    handleConfigChange(
+                                      fieldKey,
+                                      e.target.value,
+                                      sectionKey
+                                    )
+                                  }
+                                  className={style.input}
+                                />
+                              )}
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {Object.entries(propertiesSchema).map(
+              ([sectionKey, sectionData]) => {
+                const isOpen = openSections.includes(sectionKey);
+
+                const toggleSection = () => {
+                  setOpenSections((prev) =>
+                    isOpen
+                      ? prev.filter((key) => key !== sectionKey)
+                      : [...prev, sectionKey]
+                  );
+                };
+
+                const selectedKeyframeProperty = selectedKeyframe?.property;
+
+                return (
+                  <div
+                    key={sectionKey}
+                    className={style.section}
+                    data-tour="properties-panel-properties"
+                  >
+                    <div
+                      className={style.chevronH3}
+                      onClick={toggleSection}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {isOpen ? (
+                        <ChevronDown size={14} />
+                      ) : (
+                        <ChevronRight size={14} />
+                      )}
+                      <h3>{sectionData.title}</h3>
+                    </div>
+
+                    {isOpen && (
+                      <div className={style.optionsContainer}>
+                        {Object.entries(sectionData.fields).map(
+                          ([fieldKey, fieldProps]) => {
+                            return (
+                              <div className={style.option} key={fieldKey}>
+                                <label className={style.label}>
+                                  {fieldProps.label}
+                                </label>
+                                <div className={style.propertyAndUnitContainer}>
+                                  {fieldProps.type === "select" ? (
+                                    <select
                                       value={
-                                        getValueAtCurrentPosition(fieldKey) ===
-                                        "transparent"
-                                          ? "#000000"
-                                          : getValueAtCurrentPosition(fieldKey)
+                                        getValueAtCurrentPosition(fieldKey) ??
+                                        ""
                                       }
                                       onChange={(e) =>
                                         handlePropertyChange(
@@ -402,136 +380,197 @@ const PropertiesMenu = () => {
                                           e.target.value
                                         )
                                       }
-                                      className={`${style.colorInput} ${
-                                        (selectedLayer?.editedPropertiesGroup
-                                          ?.length ?? 0) > 0 &&
-                                        selectedKeyframeProperty === fieldKey
-                                          ? style.selectedKeyframeProperty
-                                          : ""
-                                      }`}
+                                      className={style.input}
                                       data-property-input="true"
-                                    />
-
-                                    {/* Transparent button */}
-                                    <button
-                                      onClick={() =>
-                                        handlePropertyChange(
-                                          fieldKey,
-                                          "transparent"
-                                        )
-                                      }
-                                      className={style.transparentButton}
-                                      title="Transparent"
                                     >
-                                      <div
-                                        className={style.transparentSwatch}
-                                      />
-                                    </button>
+                                      {"options" in fieldProps &&
+                                        (fieldProps.options as string[]).map(
+                                          (opt: string) => (
+                                            <option key={opt} value={opt}>
+                                              {opt}
+                                            </option>
+                                          )
+                                        )}
+                                    </select>
+                                  ) : (
+                                    <>
+                                      {fieldProps.type === "color" ? (
+                                        <div
+                                          className={style.colorInputWrapper}
+                                        >
+                                          <div
+                                            className={
+                                              style.colorAndTransparentWrapper
+                                            }
+                                          >
+                                            <input
+                                              type="color"
+                                              value={
+                                                getValueAtCurrentPosition(
+                                                  fieldKey
+                                                ) === "transparent"
+                                                  ? "#000000"
+                                                  : getValueAtCurrentPosition(
+                                                      fieldKey
+                                                    )
+                                              }
+                                              onChange={(e) =>
+                                                handlePropertyChange(
+                                                  fieldKey,
+                                                  e.target.value
+                                                )
+                                              }
+                                              className={`${style.colorInput} ${
+                                                (selectedLayer
+                                                  ?.editedPropertiesGroup
+                                                  ?.length ?? 0) > 0 &&
+                                                selectedKeyframeProperty ===
+                                                  fieldKey
+                                                  ? style.selectedKeyframeProperty
+                                                  : ""
+                                              }`}
+                                              data-property-input="true"
+                                            />
 
-                                    <Pipette size={15} />
-                                  </div>
-                                ) : (
-                                  <input
-                                    type={fieldProps.type}
-                                    value={
-                                      getValueAtCurrentPosition(fieldKey) ?? ""
-                                    }
-                                    step={
-                                      fieldProps.type === "number" &&
-                                      "step" in fieldProps
-                                        ? (fieldProps.step as
-                                            | string
-                                            | number
-                                            | undefined)
-                                        : undefined
-                                    }
-                                    min={
-                                      fieldProps.type === "number" &&
-                                      "min" in fieldProps
-                                        ? (fieldProps.min as
-                                            | string
-                                            | number
-                                            | undefined)
-                                        : undefined
-                                    }
-                                    max={
-                                      fieldProps.type === "number" &&
-                                      "max" in fieldProps
-                                        ? (fieldProps.max as
-                                            | string
-                                            | number
-                                            | undefined)
-                                        : undefined
-                                    }
-                                    onChange={(e) =>
-                                      handlePropertyChange(
-                                        fieldKey,
-                                        e.target.value
-                                      )
-                                    }
-                                    className={`${style.input} ${
-                                      (selectedLayer?.editedPropertiesGroup
-                                        ?.length ?? 0) > 0 &&
-                                      selectedKeyframeProperty === fieldKey
-                                        ? style.selectedKeyframeProperty
-                                        : ""
-                                    }`}
-                                    data-property-input="true"
-                                  />
-                                )}
-                                {getAllowedUnits(fieldKey).length > 0 && (
-                                  <select
-                                    value={
-                                      selectedKeyframe?.property === fieldKey
-                                        ? selectedKeyframe?.keyframe?.unit
-                                        : unitSelections[fieldKey] || ""
-                                    }
-                                    onChange={(e) => {
-                                      const unit = e.target.value;
-                                      setUnitSelections((prev) => ({
-                                        ...prev,
-                                        [fieldKey]: unit,
-                                      }));
+                                            {/* Transparent button */}
+                                            <button
+                                              onClick={() =>
+                                                handlePropertyChange(
+                                                  fieldKey,
+                                                  "transparent"
+                                                )
+                                              }
+                                              className={
+                                                style.transparentButton
+                                              }
+                                              title="Transparent"
+                                            >
+                                              Transparent
+                                              <div
+                                                className={
+                                                  style.transparentSwatch
+                                                }
+                                              />
+                                            </button>
+                                          </div>
+                                          <Pipette
+                                            size={15}
+                                            className={style.pipetteIcon}
+                                          />
+                                        </div>
+                                      ) : (
+                                        <input
+                                          type={fieldProps.type}
+                                          value={
+                                            getValueAtCurrentPosition(
+                                              fieldKey
+                                            ) ?? ""
+                                          }
+                                          step={
+                                            fieldProps.type === "number" &&
+                                            "step" in fieldProps
+                                              ? (fieldProps.step as
+                                                  | string
+                                                  | number
+                                                  | undefined)
+                                              : undefined
+                                          }
+                                          min={
+                                            fieldProps.type === "number" &&
+                                            "min" in fieldProps
+                                              ? (fieldProps.min as
+                                                  | string
+                                                  | number
+                                                  | undefined)
+                                              : undefined
+                                          }
+                                          max={
+                                            fieldProps.type === "number" &&
+                                            "max" in fieldProps
+                                              ? (fieldProps.max as
+                                                  | string
+                                                  | number
+                                                  | undefined)
+                                              : undefined
+                                          }
+                                          onChange={(e) =>
+                                            handlePropertyChange(
+                                              fieldKey,
+                                              e.target.value
+                                            )
+                                          }
+                                          className={`${style.input} ${
+                                            (selectedLayer
+                                              ?.editedPropertiesGroup?.length ??
+                                              0) > 0 &&
+                                            selectedKeyframeProperty ===
+                                              fieldKey
+                                              ? style.selectedKeyframeProperty
+                                              : ""
+                                          }`}
+                                          data-property-input="true"
+                                        />
+                                      )}
+                                      {getAllowedUnits(fieldKey).length > 0 && (
+                                        <select
+                                          value={
+                                            selectedKeyframe?.property ===
+                                            fieldKey
+                                              ? selectedKeyframe?.keyframe?.unit
+                                              : unitSelections[fieldKey] || ""
+                                          }
+                                          onChange={(e) => {
+                                            const unit = e.target.value;
+                                            setUnitSelections((prev) => ({
+                                              ...prev,
+                                              [fieldKey]: unit,
+                                            }));
 
-                                      if (!selectedLayerId) return;
+                                            if (!selectedLayerId) return;
 
-                                      if (
-                                        selectedKeyframe?.property === fieldKey
-                                      ) {
-                                        dispatch(
-                                          updateKeyframeUnit({
-                                            layerId: selectedLayerId,
-                                            propertyName:
-                                              selectedKeyframe.property,
-                                            percentage:
-                                              Math.round(currentPosition),
-                                            unit,
-                                          })
-                                        );
-                                      }
-                                    }}
-                                    className={style.unitSelect}
-                                  >
-                                    {getAllowedUnits(fieldKey).map((unit) => (
-                                      <option key={unit} value={unit}>
-                                        {unit}
-                                      </option>
-                                    ))}
-                                  </select>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        );
-                      }
+                                            if (
+                                              selectedKeyframe?.property ===
+                                              fieldKey
+                                            ) {
+                                              dispatch(
+                                                updateKeyframeUnit({
+                                                  layerId: selectedLayerId,
+                                                  propertyName:
+                                                    selectedKeyframe.property,
+                                                  percentage:
+                                                    Math.round(currentPosition),
+                                                  unit,
+                                                })
+                                              );
+                                            }
+                                          }}
+                                          className={style.unitSelect}
+                                        >
+                                          {getAllowedUnits(fieldKey).map(
+                                            (unit) => (
+                                              <option key={unit} value={unit}>
+                                                {unit}
+                                              </option>
+                                            )
+                                          )}
+                                        </select>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </>
-      )}
+                );
+              }
+            )}
+          </>
+        )}
+      </div>
     </aside>
   );
 };

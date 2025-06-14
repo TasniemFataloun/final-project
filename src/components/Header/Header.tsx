@@ -21,7 +21,7 @@ const Header = ({ onToggleGenerateCss, onStartTour }: HeaderProps) => {
         </div>
 
         <div className={style.cssAndToggleContainer}>
-          {layers.length > 0 && <ExportCss onClick={onToggleGenerateCss} />}
+          <ExportCss onClick={onToggleGenerateCss} />
           <Info onClick={onStartTour} className={style.tourButton} />
           <ToggleSwitch />
         </div>

@@ -21,6 +21,8 @@ function AppContent() {
   const handleOpenLayerSettings = () => setShowLayerSettings((prev) => !prev);
   const handleToggleGenerateCss = () => setShowGenerateCss((prev) => !prev);
 
+  const editMode = useAppSelector((state) => state.editMode.value);
+
   return (
     <div className="appContainer">
       {/*  {showSplash && <SplashScreen />}
@@ -40,7 +42,7 @@ function AppContent() {
           <div className="canvasPropertiesTimeline">
             <Sidebar />
             <Canvas data-tour="canvas" />
-            {showLayerSettings ? (
+            {editMode === "class" ? (
               <LayerConfigSetting data-tour="layer-settings" />
             ) : (
               <PropertiesMenu />
@@ -73,8 +75,19 @@ const tourSteps = [
     content: "You can also add your own shapes using HTML and CSS",
   },
   {
+    selector: '[data-tour="preset-animations"]',
+    content: "There are some preset animations you can use",
+  },
+  {
+    selector: '[data-tour="storage-buttons"]',
+    content:
+      "You can save your animation so on reload it will be restored. You can also reset the canvas to start fresh",
+  },
+
+  {
     selector: '[data-tour="canvas"]',
-    content: "Here is the main canvas where the animation happens",
+    content:
+      "Here is the main animation preview. You can drag and drop the shapes, rotate , resize  and position them as you like. By pressing Shift, you can resize shapes proportionally and rotate them in 15° increments. You can delete a shape by pressing on Backspace button",
   },
   {
     selector: '[data-tour="properties-panel-config"]',
@@ -84,7 +97,7 @@ const tourSteps = [
   {
     selector: '[data-tour="properties-panel-properties"]',
     content:
-      "This is the properties panel where you can edit styles and properties of the selected layer",
+      "Here you can edit the properties of the selected layer. By editint the values, you can create keyframes in the timeline editor on the position of the playhead",
   },
   {
     selector: '[data-tour="timeline"]',
@@ -134,17 +147,12 @@ const tourSteps = [
   {
     selector: '[data-tour="timeline-layer-row"]',
     content:
-      "This is a layer row where you can manage individual layers. You can rename, delete, or hide the layer. You can also drag the layers to reorder them",
+      "This is a layer row where you can manage individual layers. You can rename, duplicate, delete, hide or lock the layer. You can also drag the layers to reorder them",
   },
   {
     selector: '[data-tour="timeline-keyframes"]',
     content:
-      "Here you can view, manage, and add keyframes for the selected layer. You can add keyframes by placing the playhead and edit a property in the properties menu",
-  },
-  {
-    selector: '[data-tour="keyframe"]',
-    content:
-      "You can move a keyframe by dragging it, delete it with Backspace, or edit by aligning the playhead with the keyframe. You can alo copy a keyframe by selecting it and pressing Ctrl+C, keep it selected, then paste it with Ctrl+V",
+      "Here you can view, manage, and add keyframes for the selected layer. You can add keyframes by placing the playhead  somewhere in the timeline and edit a property in the properties menu. You can move a keyframe by dragging it, delete it with Backspace, or edit by aligning the playhead with the keyframe. You can alo copy a keyframe by selecting it and pressing Ctrl+C, keep it selected, then paste it with Ctrl+V",
   },
   {
     selector: '[data-tour="generate-css"]',

@@ -27,17 +27,8 @@ const hexToRgba = (hex: string) => {
 
   return { r, g, b, a };
 };
-const rgbToHex = (r: number, g: number, b: number): string => {
-  const toHex = (value: number) => value.toString(16).padStart(2, "0");
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-};
 
 const interpolateColor = (from: string, to: string, t: number): string => {
-  //transparent color
-  if (from === "transparent" && to === "transparent") {
-    return "transparent";
-  }
-
   const fromRgba = hexToRgba(from);
   const toRgba = hexToRgba(to);
 
@@ -45,10 +36,6 @@ const interpolateColor = (from: string, to: string, t: number): string => {
   const g = Math.round(interpolate(fromRgba.g, toRgba.g, t));
   const b = Math.round(interpolate(fromRgba.b, toRgba.b, t));
   const a = interpolate(fromRgba.a, toRgba.a, t);
-
-  if (a === 0) {
-    return "transparent";
-  }
 
   return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
 };
@@ -77,7 +64,9 @@ const getDefaultValue = (propertyName: string, layer: any): string => {
   if (
     propertyName.includes("translate") ||
     propertyName === "scale" ||
-    propertyName === "rotate"
+    propertyName === "rotate" ||
+    propertyName === "borderColor" ||
+    propertyName === "borderStyle"
   ) {
     const matrix = new DOMMatrix(layer.style.transform || "none");
 
@@ -92,6 +81,11 @@ const getDefaultValue = (propertyName: string, layer: any): string => {
         const angle = (Math.atan2(matrix.b, matrix.a) * 180) / Math.PI;
         return `${angle}deg`;
       }
+      case "borderColor":
+        const val = layer.style[propertyName];
+        return val && val.trim() ? val : "transparent";
+      case "borderStyle":
+        return layer.style[propertyName] || "dashed";
     }
   }
 

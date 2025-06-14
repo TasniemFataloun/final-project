@@ -7,6 +7,7 @@ import {
   removeLayer,
   removeSelectedKeyframe,
   renameLayer,
+  setIsPlaying,
   setSelectedLayer,
   updateLayer,
   updateLayerOrder,
@@ -145,8 +146,10 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                   <CopyPlus size={14} />
                 </button>
 
-                <Settings2
-                  size={14}
+                <button
+                  className={`${style.layerButtons} ${
+                    editMode === "timeline" ? "active" : ""
+                  }`}
                   onClick={() => {
                     onOpenLayerSettings();
                     dispatch(
@@ -155,12 +158,20 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                       )
                     );
                   }}
-                  className={editMode === "timeline" ? "active" : ""}
-                />
+                  title="Setting"
+                >
+                  <Settings2 size={14} />
+                </button>
 
                 <button
                   className={style.deleteButton}
-                  onClick={() => dispatch(removeLayer(layer.id))}
+                  onClick={() => {
+                    //stop the animation if playing
+                    dispatch(setIsPlaying(false));
+                    dispatch(setSelectedLayer(null));
+
+                    dispatch(removeLayer(layer.id));
+                  }}
                 >
                   <Trash2 size={14} />
                 </button>

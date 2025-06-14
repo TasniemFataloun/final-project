@@ -24,12 +24,12 @@
   border-bottom: 1px solid var(--border);
 }
 
-.layerNameInput{
+.layerNameInput {
   border: none;
   background: transparent;
   width: 100%;
-  cursor:text ;
-  color: var(--bg);
+  cursor: text;
+  color: var(--white);
 }
 .layerNameInput:focus {
   outline: none;
@@ -60,7 +60,6 @@
 
 .deleteButton:hover {
   background: var(--highlight-color);
-  color: var(--white);
 }
 
 .layerName {
@@ -69,7 +68,6 @@
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  color: var(--white);
 }
 
 .row:hover {
@@ -79,7 +77,6 @@
 .selectedLayer {
   background-color: var(--selectedLayer) !important;
   width: 100%;
-  color: var(--bg);
 }
 
 .selectedLayer .layerButtons {
@@ -87,6 +84,14 @@
 }
 .selectedLayer .deleteButton {
   color: var(--bg);
+}
+
+.selectedLayer .layerButtons:hover {
+  color: var(--white);
+}
+
+.selectedLayer .layerNameInput {
+  color: var(--timeline-bg);
 }
 
 .LayerProperties {

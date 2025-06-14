@@ -18,6 +18,7 @@ const GenerateCss = ({ onClose }: GenerateCssProps) => {
     const containerCSS = `
 .animatedElementContainer {
   display: flex;
+  position: relative;
 }
   `.trim();
 
