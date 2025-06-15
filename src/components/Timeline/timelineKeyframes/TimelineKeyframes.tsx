@@ -244,6 +244,7 @@ const TimelineKeyframes = () => {
 
       if (
         e.code === "Backspace" &&
+        !isTyping &&
         selectedKeyframe?.layerId &&
         selectedKeyframe?.property &&
         selectedKeyframe?.keyframe
@@ -354,7 +355,6 @@ const TimelineKeyframes = () => {
                             })
                           );
                           dispatch(setSelectedLayer(layer.id));
-                          dispatch(setCurrentPosition(kf.percentage));
                         }}
                       >
                         <Diamond

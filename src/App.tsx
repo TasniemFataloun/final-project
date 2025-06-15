@@ -123,7 +123,7 @@ function AppContent() {
               setIsOpen(true);
             }}
           />
-          {alertOpen && <Alert message="Copied CSS Code" />}
+          {alertOpen && <Alert message="Copied Code" />}
           <main className="main">
             <div className="canvasPropertiesTimeline">
               <Sidebar />

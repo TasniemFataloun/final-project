@@ -1,12 +1,11 @@
 .keyframesContainer {
   position: relative;
-  padding-right: 1rem;
+  margin-right: 1rem;
   width: 30rem;
   margin-left: 0.2rem;
   flex: 1;
-  height: 100%; /* ✅ match parent height */
+  height: 100%;
   cursor: pointer;
-  overflow: auto;
 }
 
 .row {
@@ -26,10 +25,9 @@
 
 .keyframe {
   position: absolute;
-  transform: translate(-50%, -50%);
-  top: 50%;
   cursor: grab;
   stroke: none;
+  transform: translate(-50%, -50%);
 }
 
 .collapsedRow {

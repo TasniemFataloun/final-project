@@ -1,3 +1,25 @@
+type TransformKey = "translateX" | "translateY" | "scale" | "rotate";
+
+function parseDefaultTransform(layer: any): Record<TransformKey, string> {
+  const raw = layer.style.transform || "none";
+  const m = new DOMMatrixReadOnly(raw);
+
+  // Extract translate
+  const translateX = `${m.m41}px`;
+  const translateY = `${m.m42}px`;
+
+  // Uniform scale
+  const scaleX = Math.sqrt(m.a * m.a + m.b * m.b);
+  const scaleY = Math.sqrt(m.c * m.c + m.d * m.d);
+  const scale = ((scaleX + scaleY) / 2).toFixed(2);
+
+  // Rotation in degrees
+  const angle = (Math.atan2(m.b, m.a) * 180) / Math.PI;
+  const rotate = `${angle}deg`;
+
+  return { translateX, translateY, scale, rotate };
+}
+
 const interpolate = (from: number, to: number, t: number) => {
   return from + (to - from) * t;
 };
@@ -76,7 +98,7 @@ const getDefaultValue = (propertyName: string, layer: any): string => {
       case "translateY":
         return `${matrix.m42}px`;
       case "scale":
-        return matrix.a.toString();
+        return ((matrix.a + matrix.d) / 2).toFixed(2);
       case "rotate": {
         const angle = (Math.atan2(matrix.b, matrix.a) * 180) / Math.PI;
         return `${angle}deg`;
@@ -242,25 +264,32 @@ export const animateLayer = (
     continue;
   }
 
-  const transformProps = ["translateX", "translateY", "scale", "rotate"];
-  const validTransforms: string[] = [];
+  const defaults = parseDefaultTransform(layer);
+  const transformProps: TransformKey[] = [
+    "translateX",
+    "translateY",
+    "scale",
+    "rotate",
+  ];
 
-  for (const tf of transformProps) {
-    const val = style[tf];
-    if (val && isValidTransformFunction(tf, val)) {
-      validTransforms.push(`${tf}(${val})`);
-      delete style[tf];
-    } else if (val) {
-      console.warn(`Invalid transform function: ${tf}(${val})`);
+  const transforms = transformProps.flatMap((tf) => {
+    const v = (style[tf] ?? defaults[tf]) as string;
+    if (isValidTransformFunction(tf, v)) {
+      return `${tf}(${v})`;
+    } else {
+      console.warn(`Skipping invalid transform: ${tf}(${v})`);
+      return [];
     }
-  }
+  });
 
-  if (validTransforms.length) {
-    element.style.transform = validTransforms.join(" ");
-  }
+  transformProps.forEach((tf) => {
+    delete (style as any)[tf];
+  });
+
+  element.style.transform = transforms.join(" ");
 
   for (const [key, value] of Object.entries(style)) {
-    if (!transformProps.includes(key) && value !== undefined) {
+    if (!transformProps.includes(key as TransformKey) && value !== undefined) {
       if (key in element.style) {
         if (isValidCSSValue(key, value)) {
           (element.style as any)[key] = value;

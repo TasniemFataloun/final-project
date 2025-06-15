@@ -122,6 +122,25 @@ const Sidebar = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
+  useEffect(() => {
+    const handleSaveShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        const state = store.getState().animation.present;
+        saveStateToLocalStorage(state);
+        setSavedState(state);
+        setHasUnsavedChanges(false);
+        console.log("Animation state saved via shortcut!");
+      }
+    };
+
+    window.addEventListener("keydown", handleSaveShortcut);
+
+    return () => {
+      window.removeEventListener("keydown", handleSaveShortcut);
+    };
+  }, [setSavedState, setHasUnsavedChanges]);
+
   const saveChanges = () => {
     const state = store.getState().animation.present;
     saveStateToLocalStorage(state);

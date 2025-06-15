@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import {
   addKeyframe,
+  removeSelectedKeyframe,
   setConfig,
   setSelectedKeyframe,
   updateKeyframe,
@@ -82,27 +83,45 @@ const PropertiesMenu = () => {
       (kf) => kf.percentage === percentage
     );
     if (existingKeyframe) {
-      dispatch(
-        updateKeyframe({
-          layerId: selectedLayerId,
-          propertyName,
-          keyframe: {
-            ...existingKeyframe,
-            value: newValue.trim() === "" ? "0" : newValue,
-          },
-        })
-      );
+      if (newValue.trim() === "") {
+        // Option 1: Remove the keyframe entirely if input is empty
+        dispatch(removeSelectedKeyframe());
+
+        // Optionally clear selected keyframe:
+        dispatch(
+          setSelectedKeyframe({
+            layerId: "",
+            property: "",
+            keyframe: { id: "", percentage: 0, value: "", unit: "" },
+          })
+        );
+      } else {
+        // Update keyframe value normally
+        dispatch(
+          updateKeyframe({
+            layerId: selectedLayerId,
+            propertyName,
+            keyframe: {
+              ...existingKeyframe,
+              value: newValue,
+            },
+          })
+        );
+      }
     } else {
-      dispatch(
-        addKeyframe({
-          layerId: selectedLayerId,
-          propertyName,
-          percentage,
-          value: newValue.trim() === "" ? "0" : newValue,
-          unit,
-        })
-      );
+      if (newValue.trim() !== "") {
+        dispatch(
+          addKeyframe({
+            layerId: selectedLayerId,
+            propertyName,
+            percentage,
+            value: newValue,
+            unit,
+          })
+        );
+      }
     }
+
     const newKeyframeId = `${propertyName}-${percentage}`;
     const newKeyframe = {
       id: newKeyframeId,

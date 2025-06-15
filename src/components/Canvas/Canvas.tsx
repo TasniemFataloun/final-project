@@ -394,45 +394,75 @@ const Canvas = () => {
           );
         }
       } else if (type === "resize") {
-        let newWidth = initWidth;
-        let newHeight = initHeight;
+        let newW = initWidth;
+        let newH = initHeight;
+        let offX = 0;
+        let offY = 0;
+
         const theta = (baseRotation * Math.PI) / 180;
         const localDX = dx * Math.cos(theta) + dy * Math.sin(theta);
         const localDY = -dx * Math.sin(theta) + dy * Math.cos(theta);
 
-        if (corner?.includes("Right")) newWidth = initWidth + localDX;
-        if (corner?.includes("Left")) newWidth = initWidth - localDX;
-        if (corner?.includes("Bottom")) newHeight = initHeight + localDY;
-        if (corner?.includes("Top")) newHeight = initHeight - localDY;
+        // Right / Bottom
+        if (corner?.includes("Right")) newW = initWidth + localDX;
+        if (corner?.includes("Bottom")) newH = initHeight + localDY;
 
+        // Left: shrink width & mark offset inward
+        if (corner?.includes("Left")) {
+          newW = initWidth - localDX;
+          offX += localDX;
+        }
+        // Top: shrink height & mark offset inward
+        if (corner?.includes("Top")) {
+          newH = initHeight - localDY;
+          offY += localDY;
+        }
+
+        // clamp
+        newW = Math.max(newW, 1);
+        newH = Math.max(newH, 1);
+
+        // shift for aspect‐ratio if needed
         if (shiftPressed) {
-          // Maintain aspect ratio
-          const aspectRatio = initWidth / initHeight;
-
-          // Decide whether to scale width or height based on greater delta
+          const ratio = initWidth / initHeight;
           if (Math.abs(dx) > Math.abs(dy)) {
-            newHeight = newWidth / aspectRatio;
+            newH = newW / ratio;
+            // when Top is active, adjust offY by the extra shrink
+            if (corner?.includes("Top")) offY += initHeight - newH;
           } else {
-            newWidth = newHeight * aspectRatio;
+            newW = newH * ratio;
+            if (corner?.includes("Left")) offX += initWidth - newW;
           }
         }
 
-        newStyle.width = Math.round(newWidth);
-        newStyle.height = Math.round(newHeight);
-        if (editMode === "timeline") {
-          addKayframes("width", newStyle.width);
-          addKayframes("height", newStyle.height);
-        } else {
-          const updatedStyle = {
-            ...selectedLayer.style,
-            width: `${newStyle.width}px`,
-            height: `${newStyle.height}px`,
-          };
+        // rotate offsets back into canvas coords
+        const deltaX = offX * Math.cos(theta) - offY * Math.sin(theta);
+        const deltaY = offX * Math.sin(theta) + offY * Math.cos(theta);
 
-          // Always update the layer's style
+        // new translate
+        const tx = baseTranslateX + deltaX;
+        const ty = baseTranslateY + deltaY;
+
+        // update style
+        const updatedStyle = {
+          ...selectedLayer.style,
+          width: `${Math.round(newW)}px`,
+          height: `${Math.round(newH)}px`,
+          transform: `translate(${Math.round(tx)}px, ${Math.round(ty)}px)
+                rotate(${baseRotation}deg) scale(${scale})`,
+        };
+
+        if (editMode === "timeline") {
+          addKayframes("width", Math.round(newW));
+          addKayframes("height", Math.round(newH));
+          if (corner?.includes("Left"))
+            addKayframes("translateX", Math.round(tx));
+          if (corner?.includes("Top"))
+            addKayframes("translateY", Math.round(ty));
+        } else {
           dispatch(
             updateLayer({
-              id: dragInfo.layerId,
+              id: layerId!,
               updates: { style: updatedStyle },
             })
           );

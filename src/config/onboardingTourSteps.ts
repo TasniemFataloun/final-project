@@ -5,7 +5,7 @@ export const tourSteps = [
   },
   {
     selector: '[data-tour="shapes-htmlcss"]',
-    content: "You can also add your own shapes using HTML and CSS",
+    content: "You can also add your own shapes using HTML and CSS. You can only use id selectors. Before and after pseudo-elements are not supported",
   },
   {
     selector: '[data-tour="preset-animations"]',
@@ -14,7 +14,7 @@ export const tourSteps = [
   {
     selector: '[data-tour="storage-buttons"]',
     content:
-      "You can save your animation so on reload it will be restored. You can also reset the canvas to start fresh",
+      "You can save your animation by clicking Cmd/Ctrl Z or click ont the save animation button so on reload it will be restored. You can also reset the canvas to start fresh",
   },
 
   {

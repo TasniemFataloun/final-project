@@ -18,9 +18,11 @@ export const store = configureStore({
           "animationSlice/pasteKeyframe",
           "animationSlice/duplicateLayer",
           "animationSlice/updateLayerOrder",
+          "animationSlice/updateKeyframe",
+          "animationSlice/duplicateLayer",
+          "animationSlice/pasteKeyframe",
           "animationSlice/removeSelectedKeyframe",
           "animationSlice/setCurrentPosition",
-          "animationSlice/setEndTimeRef",
           "animationSlice/setIsPlaying",
           "animationSlice/setSelectedLayer",
           "animationSlice/setSelectedKeyframe",
@@ -30,6 +32,7 @@ export const store = configureStore({
           "animationSlice/setEditMode",
           "animationSlice/setLayerConfig",
           "animationSlice/addKeyframesToLayer",
+          "animationSlice/updateLayer",
         ];
         return allowedActions.includes(action.type);
       },

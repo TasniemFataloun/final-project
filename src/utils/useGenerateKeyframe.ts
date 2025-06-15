@@ -1,5 +1,20 @@
 import { Layer } from "../redux/types/animations.type";
 
+const parseLayerTransform = (layer: Layer) => {
+  const raw = layer.style.transform || "none";
+  const el = document.createElement("div");
+  el.style.transform = raw;
+  document.body.appendChild(el);
+  const cs = getComputedStyle(el).transform;
+  document.body.removeChild(el);
+
+  const m = new DOMMatrixReadOnly(cs === "none" ? "matrix(1,0,0,1,0,0)" : cs);
+  return {
+    x: `${m.m41}px`,
+    y: `${m.m42}px`,
+  };
+};
+
 export const camelToKebab = (str: string) =>
   str
     .replace(/\s+/g, "-")
@@ -48,17 +63,13 @@ export const UseGenerateKeyframes = (layer: Layer) => {
       }
     });
   });
-
-  let lastX = "0px";
-  let lastY = "0px";
+  const { x: defaultX, y: defaultY } = parseLayerTransform(layer);
 
   Object.entries(transformMap).forEach(([pctStr, transforms]) => {
     const pct = Number(pctStr);
-    const x = transforms.translateX ?? lastX;
-    const y = transforms.translateY ?? lastY;
-
-    lastX = x;
-    lastY = y;
+    console.log(transforms);
+    const x = transforms.translateX ?? defaultX;
+    const y = transforms.translateY ?? defaultY;
 
     const transformLine = `    transform: translate(${x}, ${y});`;
 

@@ -159,7 +159,7 @@
   width: 50%;
 }
 .sidebarButtons:hover {
-  background: var(--highlight-color);
+  background-color:  var(--primary-button);
   transform: translateY(-0.5px);
 }
 
@@ -222,7 +222,8 @@
 
   .sidebar {
     padding: 1rem 1.5rem;
-    max-width: 14rem;
+        max-width: 14rem;
+
   }
 
   .closeContainer {
