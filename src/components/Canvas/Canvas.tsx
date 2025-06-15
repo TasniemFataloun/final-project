@@ -285,7 +285,6 @@ const Canvas = () => {
       const selectedLayer = layers.find((l) => l.id === layerId);
       if (!selectedLayer) return;
 
-      let newStyle: Partial<React.CSSProperties> = {};
       const initWidth = styleInfo.width as number;
       const initHeight = styleInfo.height as number;
 
