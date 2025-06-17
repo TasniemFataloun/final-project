@@ -20,7 +20,7 @@ export const tourSteps = [
   {
     selector: '[data-tour="canvas"]',
     content:
-      "Here is the main animation preview. You can drag and drop the shapes, rotate , resize  and position them as you like. By pressing Shift, you can resize shapes proportionally and rotate them in 15° increments. You can delete a shape by pressing on Backspace button",
+      "Here is the main animation preview. You can drag and drop the shapes, rotate , resize  and position them as you like. By pressing Shift, you can resize shapes proportionally and rotate them in 15° increments. You can delete a shape by pressing on Backspace",
   },
   {
     selector: '[data-tour="properties-panel-config"]',
