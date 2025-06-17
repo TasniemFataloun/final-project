@@ -147,6 +147,7 @@ const TimelineLayers: React.FC<TimelineLayersProps> = ({
                 </button>
 
                 <button
+                  data-tour="layer-settings"
                   className={`${style.layerButtons} ${
                     editMode === "timeline" ? "active" : ""
                   }`}

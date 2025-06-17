@@ -5,7 +5,8 @@ export const tourSteps = [
   },
   {
     selector: '[data-tour="shapes-htmlcss"]',
-    content: "You can also add your own shapes using HTML and CSS. You can only use id selectors. Before and after pseudo-elements are not supported",
+    content:
+      "You can also add your own shapes using HTML and CSS. You can only use id selectors. Before and after pseudo-elements are not supported",
   },
   {
     selector: '[data-tour="preset-animations"]',
@@ -81,6 +82,11 @@ export const tourSteps = [
     selector: '[data-tour="timeline-layer-row"]',
     content:
       "This is a layer row where you can manage individual layers. You can rename, duplicate, delete, hide or lock the layer. You can also drag the layers to reorder them",
+  },
+  {
+    selector: '[data-tour="layer-settings"]',
+    content:
+      "This is the layer settings panel. Here you can configure the default properties of the selected layer",
   },
   {
     selector: '[data-tour="timeline-keyframes"]',
