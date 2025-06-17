@@ -30,7 +30,7 @@ export const tourSteps = [
   {
     selector: '[data-tour="properties-panel-properties"]',
     content:
-      "Here you can edit the properties of the selected layer. By editint the values, you can create keyframes in the timeline editor on the position of the playhead",
+      "Here you can edit the properties of the selected layer. By editintg the values, you can create keyframes in the timeline editor on the position of the playhead",
   },
   {
     selector: '[data-tour="timeline"]',
