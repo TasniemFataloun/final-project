@@ -103,7 +103,7 @@ export const UseGenerateKeyframes = (layer: Layer) => {
     }
   });
 
-  Object.entries(keyframeSteps).forEach(([pctStr, step]) => {
+  Object.entries(keyframeSteps).forEach(([_pctStr, step]) => {
     const border = step.borderProps || {};
     const width = border.width || layer.style?.borderWidth || "0px";
     const color = border.color || layer.style?.borderColor || "#000000";
