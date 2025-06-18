@@ -20,10 +20,10 @@ export const propertiesUnits: Record<string, string[]> = {
   borderRadius: ["px", "rem", "%"],
   borderWidth: ["px", "rem"],
   opacity: [],
-  transform: ["px", "rem", "deg", "rad"],
+  transform: ["px", "rem", "deg"],
   translateX: ["px", "rem"],
   translateY: ["px", "rem"],
-  rotate: ["deg", "rad"],
+  rotate: ["deg"],
   scale: [],
 };
 

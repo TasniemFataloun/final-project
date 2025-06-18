@@ -17,6 +17,7 @@ function parseDefaultTransform(layer: any): Record<TransformKey, string> {
   const angle = (Math.atan2(m.b, m.a) * 180) / Math.PI;
   const rotate = `${angle}deg`;
 
+
   return { translateX, translateY, scale, rotate };
 }
 
@@ -166,7 +167,7 @@ const applyInterpolatedStyle = (
       style[propertyName] = `${interpolated}`;
     } else {
       style[propertyName] = `${interpolated}px`;
-    }
+    } 
   }
 };
 

@@ -38,6 +38,13 @@ export const UseGenerateKeyframes = (layer: Layer) => {
   const baseStyles: string[] = [];
   const keyframeSteps: Record<number, KeyframeStep> = {};
 
+  const defaultTransform = {
+    translateX: parseLayerTransform(layer).x || "0px",
+    translateY: parseLayerTransform(layer).y || "0px",
+    rotate: "0deg",
+    scale: "1",
+  };
+
   const transformMap: Record<number, Record<string, string>> = {};
 
   layer.editedPropertiesGroup.forEach((group) => {
@@ -49,46 +56,61 @@ export const UseGenerateKeyframes = (layer: Layer) => {
       }`;
 
       if (!keyframeSteps[percentage]) {
-        keyframeSteps[percentage] = { styles: [] };
+        keyframeSteps[percentage] = {
+          styles: [],
+          borderProps: {},
+        };
       }
 
-      if (prop === "translateX" || prop === "translateY") {
+      if (["translateX", "translateY", "rotate", "scale"].includes(prop)) {
         if (!transformMap[percentage]) transformMap[percentage] = {};
         transformMap[percentage][prop] = val;
+      } else if (["borderWidth", "borderStyle", "borderColor"].includes(prop)) {
+        if (prop === "borderWidth") {
+          keyframeSteps[percentage].borderProps!.width = val;
+        } else if (prop === "borderColor") {
+          keyframeSteps[percentage].borderProps!.color = val;
+        } else if (prop === "borderStyle") {
+          keyframeSteps[percentage].borderProps!.style = val;
+        }
       } else {
-        keyframeSteps[percentage].styles.push(`    ${prop}: ${val};`);
+        keyframeSteps[percentage].styles.push(
+          `    ${camelToKebab(prop)}: ${val};`
+        );
         if (percentage === 0) {
-          baseStyles.push(`  ${prop}: ${val};`);
+          baseStyles.push(`  ${camelToKebab(prop)}: ${val};`);
         }
       }
     });
   });
-  const { x: defaultX, y: defaultY } = parseLayerTransform(layer);
 
   Object.entries(transformMap).forEach(([pctStr, transforms]) => {
     const pct = Number(pctStr);
-    console.log(transforms);
-    const x = transforms.translateX ?? defaultX;
-    const y = transforms.translateY ?? defaultY;
+    const tx = transforms.translateX || defaultTransform.translateX;
+    const ty = transforms.translateY || defaultTransform.translateY;
+    const rot = transforms.rotate || defaultTransform.rotate;
+    const scale = transforms.scale || defaultTransform.scale;
 
-    const transformLine = `    transform: translate(${x}, ${y});`;
+    const transformLine = `    transform: translateX(${tx}) translateY(${ty}) rotate(${rot}) scale(${scale});`;
 
     if (!keyframeSteps[pct]) keyframeSteps[pct] = { styles: [] };
-
-    const alreadyHasTransform = keyframeSteps[pct].styles.some((line) =>
-      line.trim().startsWith("transform:")
-    );
-    if (!alreadyHasTransform) {
-      keyframeSteps[pct].styles.push(transformLine);
-    }
+    keyframeSteps[pct].styles.push(transformLine);
 
     if (pct === 0) {
-      const baseAlreadyHasTransform = baseStyles.some((line) =>
-        line.trim().startsWith("transform:")
+      baseStyles.push(
+        `  transform: translateX(${tx}) translateY(${ty}) rotate(${rot}) scale(${scale});`
       );
-      if (!baseAlreadyHasTransform) {
-        baseStyles.push(`  transform: translate(${x}, ${y});`);
-      }
+    }
+  });
+
+  Object.entries(keyframeSteps).forEach(([pctStr, step]) => {
+    const border = step.borderProps || {};
+    const width = border.width || layer.style?.borderWidth || "0px";
+    const color = border.color || layer.style?.borderColor || "#000000";
+    const style = border.style || layer.style?.borderStyle || "solid";
+
+    if (border.width || border.color || border.style) {
+      step.styles.push(`    border: ${width} ${style} ${color};`);
     }
   });
 
